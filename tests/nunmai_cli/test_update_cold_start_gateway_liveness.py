@@ -20,6 +20,9 @@ from nunmai_cli import update_cmd
 
 def _run_cold_start(monkeypatch, capsys, *, surviving_pids):
     monkeypatch.setattr(cli_main, "_is_windows", lambda: True)
+    # A live Desktop control plane on the developer's machine would make the
+    # cold-start defer to Desktop and never spawn; pin the ownership check.
+    monkeypatch.setattr(update_cmd, "_desktop_owns_gateway_lifecycle", lambda: False)
 
     # The pre-spawn re-check (``all_profiles=True``) must find nothing
     # running so the cold-start path proceeds and actually spawns.

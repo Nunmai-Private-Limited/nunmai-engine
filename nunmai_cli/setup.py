@@ -3257,8 +3257,8 @@ def _run_setup_wizard_impl(args):
                 [
                     (
                         "Quick Setup",
-                        lambda: __import__("nunmai_cli.brain_cmd", fromlist=["cmd_brain"]).cmd_brain(
-                            __import__("types").SimpleNamespace(providers=None, skip_connect=False)
+                        lambda: _run_first_time_quick_setup(
+                            config, nunmai_home, is_existing
                         ),
                     )
                 ]
@@ -3352,40 +3352,38 @@ def _run_setup_wizard_impl(args):
 
 
 def _run_first_time_quick_setup(config: dict, nunmai_home, is_existing: bool):
-    """Streamlined first-time setup via Nous Portal: OAuth, model, terminal & messaging.
+    """Streamlined first-time setup: connect an AI brain, terminal & messaging.
 
-    Routes straight to the Nous Portal provider — runs the device-code OAuth
-    login, picks a Nous model, then configures the terminal backend and (optionally)
-    a messaging platform. Applies sensible defaults for everything else (agent
-    settings, tools); the user can customize later via ``nunmai setup <section>``
-    or switch providers with ``nunmai model``.
+    Runs the ``nunmai brain`` wizard (Claude / ChatGPT / Kimi / Gemini /
+    OpenRouter → primary + fallback chain), then configures the terminal
+    backend and (optionally) a messaging platform. Applies sensible defaults
+    for everything else (agent settings, tools); the user can customize later
+    via ``nunmai setup <section>`` or switch providers with ``nunmai model``.
     """
+    from types import SimpleNamespace
+
     from nunmai_cli.config import load_config
 
-    # Step 1: Nous Portal — OAuth login + model selection.
-    # _model_flow_nous() handles both the logged-out path (device-code OAuth,
-    # which selects a model internally) and the already-logged-in path (curated
-    # Nous model picker). Provider is set to "nous" by the login/model save.
-    print()
-    print_header("Nous Portal")
-    print_info("One subscription, 300+ models, plus the Tool Gateway:")
-    print_info("  web search, image generation, TTS, browser automation.")
-    print_info("Sign up: https://portal.nousresearch.com/manage-subscription")
-    print()
+    # Step 1: connect the AI brain (primary + fallbacks). The wizard persists
+    # provider/model/fallback chain itself via its own load/save cycle.
     try:
-        from nunmai_cli.main import _model_flow_nous
-        _model_flow_nous(config)
+        from nunmai_cli.brain_cmd import cmd_brain
+        cmd_brain(SimpleNamespace(providers=None, skip_connect=False))
     except (KeyboardInterrupt, EOFError):
         print()
-        print_info("Nous Portal setup cancelled.")
+        print_info("AI account setup cancelled.")
+    except SystemExit as exc:
+        if exc.code:
+            print_warning(str(exc.code))
+        print_info("You can connect an AI account later with: nunmai brain")
     except Exception as exc:
-        logger.debug("_model_flow_nous error during quick setup: %s", exc)
-        print_warning(f"Nous Portal setup encountered an error: {exc}")
-        print_info("You can try again later with: nunmai model")
+        logger.debug("brain wizard error during quick setup: %s", exc)
+        print_warning(f"AI account setup encountered an error: {exc}")
+        print_info("You can try again later with: nunmai brain")
 
-    # Re-sync the wizard's config dict from disk — _model_flow_nous (and the
-    # underlying login/model save) write via their own load/save cycle, and the
-    # wizard's later save_config(config) must not clobber those values (#4172).
+    # Re-sync the wizard's config dict from disk — the brain wizard writes via
+    # its own load/save cycle, and the wizard's later save_config(config) must
+    # not clobber those values (#4172).
     _refreshed = load_config()
     config.clear()
     config.update(_refreshed)

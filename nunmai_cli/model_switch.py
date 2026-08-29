@@ -372,7 +372,7 @@ _NUNMAI_MODEL_WARNING = (
 # Negative examples it must NOT match:
 #   nunmai-brain:qwen3-14b-ctx16k, qwen3:14b, claude-opus-4-6
 _NOUS_NUNMAI_NON_AGENTIC_RE = re.compile(
-    r"(?:^|[/:])nunmai[-_ ]?[34](?:[-_.:]|$)",
+    r"(?:^|[/:])hermes[-_ ]?[34](?:[-_.:]|$)",  # rebrand-keep: Nous model IDs
     re.IGNORECASE,
 )
 

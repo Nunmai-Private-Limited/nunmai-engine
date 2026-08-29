@@ -48,6 +48,25 @@ def _fake_module(name: str) -> types.ModuleType:
     return mod
 
 
+@pytest.fixture(autouse=True)
+def _restore_sys_modules():
+    """The purge evicts REAL ``nunmai_cli.*`` / ``gateway`` / ``tools`` /
+    ``agent`` entries from ``sys.modules``.  Other test modules bound those
+    module objects at collection time (``import nunmai_cli.gateway as gw``)
+    and monkeypatch attributes on them; if the cache entry is gone, the code
+    under test re-imports a *new* module object and the patches never land
+    (test-order pollution).  Put the originals back after every test."""
+    snapshot = {
+        name: mod
+        for name, mod in list(sys.modules.items())
+        if name.split(".", 1)[0] in update_cmd._STALE_PURGE_PREFIXES
+    }
+    yield
+    for name, mod in snapshot.items():
+        if sys.modules.get(name) is not mod:
+            sys.modules[name] = mod
+
+
 def test_purge_evicts_nunmai_prefixed_modules():
     victims = [
         "nunmai_cli.cli_output",

@@ -31,6 +31,7 @@ PROTECT = [
     r"hermes-agent\.nousresearch\.com",
     r"hermes-agent\.org",
     r"hermes[-_ ]?[34](?:[-_.][\w]+)*",                         # model ids: hermes-4-405b, Hermes 3, hermes_4
+    r"hermes\[-_ \]\?\[34\]",                                # the regex SOURCE that matches those ids (model_switch.py)
     r"deephermes[\w.\-]*",                                      # DeepHermes model family
     r"[\w.+\-]+@[\w.\-]*hermes[\w.\-]*",                        # e-mail addresses
 ]

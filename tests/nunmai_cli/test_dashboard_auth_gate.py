@@ -91,6 +91,11 @@ def _stub_uvicorn_run(monkeypatch):
     returns immediately (rather than blocking on the event loop). Returns the dict
     that will capture the keyword args.
     """
+    # start_server probes a REAL bind of host:port before handing the socket
+    # to uvicorn (#93608) and exits 75 on conflict.  These tests never serve,
+    # and a developer machine may well have a live dashboard on 9119 — skip
+    # the probe so the auth-gate assertions don't depend on host state.
+    monkeypatch.setattr(web_server, "_port_bind_conflict", lambda host, port: False)
     import asyncio
     import contextlib
     import uvicorn

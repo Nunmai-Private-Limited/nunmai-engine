@@ -11560,16 +11560,79 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
 
     def _handle_brain_command(self):
         """/brain — connect AI accounts (primary + fallbacks), then switch the live session."""
-        from types import SimpleNamespace
-        from nunmai_cli.brain_cmd import cmd_brain
+        # The wizard reads from the terminal with plain input().  Slash commands
+        # run on the process_loop daemon thread while prompt_toolkit still owns
+        # stdin (raw mode + its own reader), so a bare input() there blocks
+        # forever and every later message queues behind it — the chat looks
+        # frozen.  Hand the terminal over properly: run the wizard on the app
+        # loop inside run_in_terminal (cooked mode, renderer paused), via the
+        # /dev/tty subprocess wrapper, and wait for it from this thread.
+        import inspect
+        import threading
+
+        outcome: dict = {}
+
+        def _wizard() -> None:
+            try:
+                self._run_brain_wizard()
+            except SystemExit as exc:
+                outcome["error"] = str(exc.code) if exc.code else ""
+            except (KeyboardInterrupt, EOFError):
+                outcome["error"] = "Cancelled."
+            except Exception as exc:  # pragma: no cover - defensive
+                outcome["error"] = f"Setup failed: {exc}"
+
+        app = getattr(self, "_app", None)
         try:
-            cmd_brain(SimpleNamespace(providers=None, skip_connect=False))
-        except SystemExit as exc:
-            if exc.code:
-                _cprint(f"  ✗ {exc.code}")
-            return
-        except KeyboardInterrupt:
-            _cprint("  Cancelled.")
+            app_loop = app.loop if app else None
+        except Exception:
+            app_loop = None
+        in_main_thread = threading.current_thread() is threading.main_thread()
+
+        if app and app_loop is not None and not in_main_thread:
+            done = threading.Event()
+
+            def _schedule() -> None:
+                from prompt_toolkit.application import run_in_terminal
+
+                was_visible = self._status_bar_visible
+                self._status_bar_visible = False
+                self._invalidate()
+
+                def _finish(*_a) -> None:
+                    self._status_bar_visible = was_visible
+                    self._invalidate()
+                    done.set()
+
+                try:
+                    res = run_in_terminal(_wizard)
+                except Exception:
+                    _wizard()
+                    _finish()
+                    return
+                if inspect.isawaitable(res):
+                    app_loop.create_task(res).add_done_callback(_finish)
+                else:
+                    _finish()
+
+            try:
+                app_loop.call_soon_threadsafe(_schedule)
+            except Exception:
+                _wizard()
+            else:
+                done.wait()
+        elif app and in_main_thread:
+            from prompt_toolkit.application import run_in_terminal
+            try:
+                run_in_terminal(_wizard)
+            except Exception:
+                _wizard()
+        else:
+            _wizard()
+
+        if "error" in outcome:
+            if outcome["error"]:
+                _cprint(f"  ✗ {outcome['error']}")
             return
         try:
             from nunmai_cli.config import load_config

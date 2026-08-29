@@ -213,6 +213,14 @@ class TestGetServicePidsScoping:
         monkeypatch.setattr(
             gw, "_locate_launchd_gateway_service", lambda label: located[label]
         )
+        # The all_profiles branch also does a bare ``launchctl list`` scan;
+        # on a developer Mac with a live gateway that leaks real PIDs into
+        # the mocked set.  Make the scan return nothing.
+        monkeypatch.setattr(
+            gw.subprocess,
+            "run",
+            lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout="", stderr=""),
+        )
 
     def test_all_profiles_returns_every_gateway_service_pid(self, monkeypatch):
         """The update sweep's exclude-set must protect ALL freshly-restarted
@@ -642,13 +650,17 @@ class TestWaitForLaunchdServicePid:
 
 
 class TestIncompleteWarningMentionsLaunchctl:
-    def test_launchd_labels_get_launchctl_hint(self, capsys):
+    # The generic (non-macOS) hint block is what these pin; a macOS host
+    # prints the launchd-deregistration recovery block instead.
+    def test_launchd_labels_get_launchctl_hint(self, capsys, monkeypatch):
+        monkeypatch.setattr(gw, "is_macos", lambda: False)
         _warn_incomplete_gateway_fleet_restart(["ai.nunmai.gateway-merit-ops"])
         out = capsys.readouterr().out
         assert "Update incomplete" in out
         assert "launchctl kickstart -k" in out
 
-    def test_systemd_units_keep_systemctl_hint(self, capsys):
+    def test_systemd_units_keep_systemctl_hint(self, capsys, monkeypatch):
+        monkeypatch.setattr(gw, "is_macos", lambda: False)
         _warn_incomplete_gateway_fleet_restart(["nunmai-gateway-coder"])
         out = capsys.readouterr().out
         assert "systemctl" in out
