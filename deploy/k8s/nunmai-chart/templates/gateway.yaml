@@ -32,6 +32,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "/seed/seed.sh"]
+          resources:            # ResourceQuota requires limits on every container
+            requests: { cpu: 50m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 128Mi }
           volumeMounts:
             - { name: data, mountPath: /opt/data }
             - { name: seed, mountPath: /seed }
