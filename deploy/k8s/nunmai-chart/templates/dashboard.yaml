@@ -1,0 +1,86 @@
+{{- if .Values.dashboard.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nunmai.name" . }}-dashboard
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy: { type: Recreate }   # shares the RWO data volume with the gateway
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      nunmai.in/component: dashboard
+  template:
+    metadata:
+      labels:
+        {{- include "nunmai.labels" . | nindent 8 }}
+        nunmai.in/component: dashboard
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: { fsGroup: {{ .Values.gid }} }
+      containers:
+        - name: dashboard
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: {{- toYaml .Values.dashboard.args | nindent 12 }}
+          env:
+            - { name: NUNMAI_UID, value: {{ .Values.uid | quote }} }
+            - { name: NUNMAI_GID, value: {{ .Values.gid | quote }} }
+          {{- if or .Values.secrets.existingSecret .Values.secrets.env }}
+          envFrom:
+            - secretRef:
+                name: {{ include "nunmai.secretName" . }}
+          {{- end }}
+          ports: [{ name: http, containerPort: {{ .Values.dashboard.port }} }]
+          resources: {{- toYaml .Values.dashboard.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /opt/data }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "nunmai.name" . }}-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nunmai.name" . }}-dashboard
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    nunmai.in/component: dashboard
+  ports: [{ name: http, port: 80, targetPort: http }]
+{{- if .Values.dashboard.host }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "nunmai.name" . }}-dashboard
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.dashboard.ingress.tls }}
+    cert-manager.io/cluster-issuer: letsencrypt
+    {{- end }}
+    {{- with .Values.dashboard.ingress.annotations }}{{ toYaml . | nindent 4 }}{{ end }}
+spec:
+  ingressClassName: {{ .Values.dashboard.ingress.className }}
+  {{- if .Values.dashboard.ingress.tls }}
+  tls:
+    - hosts: [{{ .Values.dashboard.host | quote }}]
+      secretName: {{ include "nunmai.name" . }}-dashboard-tls
+  {{- end }}
+  rules:
+    - host: {{ .Values.dashboard.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "nunmai.name" . }}-dashboard
+                port: { name: http }
+{{- end }}
+{{- end }}

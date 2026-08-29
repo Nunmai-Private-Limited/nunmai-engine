@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nunmai-engine
+description: One Nunmai Engine (gateway + optional dashboard) per customer namespace
+type: application
+version: 0.1.0
+appVersion: "0.20.6"

@@ -1,0 +1,65 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "nunmai.name" . }}-gateway
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "nunmai.name" . }}-gateway
+  replicas: 1                      # messaging sessions are single-instance
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      nunmai.in/component: gateway
+  template:
+    metadata:
+      labels:
+        {{- include "nunmai.labels" . | nindent 8 }}
+        nunmai.in/component: gateway
+      annotations:
+        checksum/seed: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: {{ .Values.gid }}
+      initContainers:
+        - name: seed
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "/seed/seed.sh"]
+          volumeMounts:
+            - { name: data, mountPath: /opt/data }
+            - { name: seed, mountPath: /seed }
+      containers:
+        - name: gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: {{- toYaml .Values.gateway.args | nindent 12 }}
+          env:
+            - { name: NUNMAI_UID, value: {{ .Values.uid | quote }} }
+            - { name: NUNMAI_GID, value: {{ .Values.gid | quote }} }
+            {{- range $k, $v := .Values.gateway.extraEnv }}
+            - { name: {{ $k }}, value: {{ $v | quote }} }
+            {{- end }}
+          {{- if or .Values.secrets.existingSecret .Values.secrets.env }}
+          envFrom:
+            - secretRef:
+                name: {{ include "nunmai.secretName" . }}
+          {{- end }}
+          resources: {{- toYaml .Values.gateway.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /opt/data }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "nunmai.name" . }}-data
+        - name: seed
+          configMap:
+            name: {{ include "nunmai.name" . }}-seed
+            defaultMode: 0755
+{{- end }}

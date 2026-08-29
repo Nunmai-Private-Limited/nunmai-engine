@@ -1,0 +1,66 @@
+# One release == one customer. Install into its own namespace:
+#   helm upgrade --install acme deploy/k8s/nunmai-chart -n cust-acme --create-namespace -f deploy/k8s/customers/acme.yaml
+customer: demo
+
+image:
+  repository: ghcr.io/nunmai-private-limited/nunmai-engine
+  tag: "0.20.6"
+  pullPolicy: IfNotPresent
+imagePullSecrets: []          # e.g. [{name: ghcr-pull}] for a private image
+
+# API keys / messaging tokens. Either inline (rendered into a Secret) or an
+# existing Secret name. Keys become environment variables in the gateway.
+secrets:
+  existingSecret: ""
+  env: {}
+  #  ANTHROPIC_API_KEY: sk-ant-...
+  #  OPENROUTER_API_KEY: sk-or-...
+  #  TELEGRAM_BOT_TOKEN: ...
+
+# Seeded into /opt/data on first start only (the engine owns the files after
+# that; re-seed by deleting the file on the volume). Customisation lives here.
+config:
+  configYaml: |
+    model:
+      provider: openrouter
+      default: anthropic/claude-sonnet-4.5
+  soulMd: ""                  # persona / branding (SOUL.md); empty = engine default
+  extraFiles: {}              # filename -> content, e.g. "skills/acme-faq/SKILL.md": |...
+
+gateway:
+  enabled: true
+  args: ["gateway", "run"]
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits:   { cpu: "1",  memory: 1536Mi }
+  extraEnv: {}
+  nodeSelector: {}
+
+dashboard:
+  enabled: false              # web dashboard for the customer (behind ingress)
+  host: ""                    # e.g. acme.app.nunmai.in
+  port: 9119
+  args: ["dashboard", "--host", "0.0.0.0", "--no-open"]
+  resources:
+    requests: { cpu: 50m,  memory: 256Mi }
+    limits:   { cpu: 500m, memory: 768Mi }
+  ingress:
+    className: traefik
+    tls: true                 # requires cert-manager ClusterIssuer "letsencrypt"
+    annotations: {}
+
+persistence:
+  size: 10Gi
+  storageClass: ""            # "" = cluster default (k3s local-path)
+
+uid: 10000
+gid: 10000
+
+quota:                        # per-namespace fair share
+  enabled: true
+  cpu: "2"
+  memory: 3Gi
+  pods: "10"
+
+networkPolicy:
+  enabled: true               # deny traffic from other namespaces

@@ -1,0 +1,14 @@
+# Example customer. Copy to <name>.yaml, fill secrets (or use --set / an existing Secret).
+customer: demo
+secrets:
+  env:
+    OPENROUTER_API_KEY: "replace-me"
+config:
+  configYaml: |
+    model:
+      provider: openrouter
+      default: anthropic/claude-sonnet-4.5
+  soulMd: |
+    You are Demo Co's assistant. Be concise and friendly.
+dashboard:
+  enabled: false
