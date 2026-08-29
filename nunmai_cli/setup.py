@@ -187,7 +187,7 @@ def is_interactive_stdin() -> bool:
 def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     """Print guidance for headless/non-interactive setup flows."""
     print()
-    print(color("✦ Nunmai Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
+    print(color("◆ Nunmai Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
     print()
     if reason:
         print_info(reason)
@@ -2892,7 +2892,7 @@ def _run_portal_one_shot(config: dict) -> None:
             Colors.MAGENTA,
         )
     )
-    print(color("│     ✦ Nunmai Setup — Nous Portal (one-shot)             │", Colors.MAGENTA))
+    print(color("│     ◆ Nunmai Setup — Nous Portal (one-shot)             │", Colors.MAGENTA))
     print(
         color(
             "└─────────────────────────────────────────────────────────┘",
@@ -3138,7 +3138,7 @@ def _run_setup_wizard_impl(args):
                         Colors.MAGENTA,
                     )
                 )
-                print(color(f"│     ✦ Nunmai Setup — {label:<34s} │", Colors.MAGENTA))
+                print(color(f"│     ◆ Nunmai Setup — {label:<34s} │", Colors.MAGENTA))
                 print(
                     color(
                         "└─────────────────────────────────────────────────────────┘",
@@ -3176,7 +3176,7 @@ def _run_setup_wizard_impl(args):
     )
     print(
         color(
-            "│             ✦ Nunmai Engine Setup Wizard                │", Colors.MAGENTA
+            "│             ◆ Nunmai Engine Setup Wizard                │", Colors.MAGENTA
         )
     )
     print(

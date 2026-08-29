@@ -60,7 +60,7 @@ def _connect(brain: Dict[str, str]) -> bool:
     """Run the connection step for one brain. Returns True on success."""
     pid, how, label = brain["id"], brain["how"], brain["label"]
     print()
-    print(f"  ✦ {label}")
+    print(f"  ◆ {label}")
     if how == "oauth":
         print(f"    Opening browser sign-in for {label}…")
         rc = subprocess.call(_nunmai_argv() + ["auth", "add", pid])
@@ -136,7 +136,7 @@ def cmd_brain(args: Any) -> None:
         if not sys.stdin.isatty():
             raise SystemExit("nunmai brain needs a terminal (or pass --providers a,b,c).")
         print()
-        print("  ✦ Nunmai Engine — connect your AI brain")
+        print("  ◆ Nunmai Engine — connect your AI brain")
         print("  Which AI accounts do you have? You can pick several; the first is primary,")
         print("  the others take over automatically when it is busy or out of quota.")
         print()

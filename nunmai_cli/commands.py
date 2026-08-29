@@ -299,6 +299,8 @@ COMMAND_REGISTRY: list[CommandDef] = [
                desktop="advanced"),
     CommandDef("skin", "Show or change the display skin/theme", "Configuration",
                cli_only=True, args_hint="[name]", argument_mode="options"),
+    CommandDef("brain", "Connect your AI accounts (Claude, ChatGPT, Kimi, Gemini, OpenRouter)", "Configuration",
+               cli_only=True, busy_policy="reject"),
     CommandDef("indicator", "Pick the TUI busy-indicator style", "Configuration",
                cli_only=True, args_hint=f"[{'|'.join(INDICATOR_STYLES)}]",
                subcommands=INDICATOR_STYLES, desktop="terminal"),

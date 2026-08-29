@@ -446,7 +446,7 @@ def _trajectory_row(buckets: list[_ChartBucket], width: int, reveal: float) -> R
             if 0 <= x < width and cells[x] == " ":
                 cells[x] = "·"
         if 0 <= p < width:
-            cells[p] = "✦"
+            cells[p] = "◆"
         last = p
     return [["trajectory ", STYLE_LABEL, 0.55], ["".join(cells), STYLE_SKILL, 0.48]]
 
@@ -517,7 +517,7 @@ def render_graph(payload: dict[str, Any], *, cols: int = 80, rows: int = 16, rev
             row.append([marker, STYLE_LABEL, 0.95])
         elif bucket.total:
             head_hex = cat_hex if bucket.skills else None
-            row.append(["✦" if bucket.skills else "◆", STYLE_SKILL if bucket.skills else STYLE_MEMORY, ink, head_hex])
+            row.append(["◆" if bucket.skills else "◆", STYLE_SKILL if bucket.skills else STYLE_MEMORY, ink, head_hex])
         if skill_len:
             # Bar colored by the day's dominant category — a learning heatmap.
             row.append(["━" * skill_len, STYLE_SKILL, ink, cat_hex])

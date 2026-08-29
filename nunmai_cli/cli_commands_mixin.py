@@ -2305,11 +2305,11 @@ class CLICommandsMixin:
                     try:
                         from nunmai_cli.skin_engine import get_active_skin
                         _skin = get_active_skin()
-                        label = _skin.get_branding("response_label", "✦ Nunmai")
+                        label = _skin.get_branding("response_label", "◆ Nunmai")
                         _resp_color = _maybe_remap_for_light_mode(_skin.get_color("response_border", "#0B6B4F"))
                         _resp_text = _maybe_remap_for_light_mode(_skin.get_color("banner_text", "#EFE9D7"))
                     except Exception:
-                        label = "✦ Nunmai"
+                        label = "◆ Nunmai"
                         _resp_color = "#0B6B4F"
                         _resp_text = "#EFE9D7"
 
@@ -3848,7 +3848,7 @@ class CLICommandsMixin:
             ("cancel", "Cancel", "keep the current session"),
         ]
         raw = self._prompt_text_input_modal(
-            title="✦  Update Nunmai Engine",
+            title="◆  Update Nunmai Engine",
             detail="This will exit the current session and run `nunmai update`.",
             choices=choices,
         )
@@ -3861,7 +3861,7 @@ class CLICommandsMixin:
             return False
 
         print()
-        print("  ✦ Launching update...")
+        print("  ◆ Launching update...")
         print()
 
         # Store the relaunch args so run() can exec them from the main thread

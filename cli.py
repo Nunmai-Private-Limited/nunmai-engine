@@ -4750,8 +4750,8 @@ def _build_compact_banner() -> str:
     dim_color = _skin.get_color("banner_dim", "#2E9C7C") if _skin else "#2E9C7C"
 
     if skin_name == "default":
-        line1 = "✦ NUNMAI ENGINE - AI Engine by Nunmai Research"
-        tiny_line = "✦ NUNMAI ENGINE"
+        line1 = "◆ NUNMAI ENGINE - AI Engine by Nunmai Research"
+        tiny_line = "◆ NUNMAI ENGINE"
     else:
         agent_name = _skin.get_branding("agent_name", "Nunmai Engine") if _skin else "Nunmai Engine"
         line1 = f"{agent_name} - AI Agent Framework"
@@ -7188,7 +7188,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             yolo_active = self._is_session_yolo_active()
             goal_segment = self._status_bar_goal_segment(snapshot)
             if width < 52:
-                text = f"{battery_prefix}✦ {snapshot['model_short']} · {duration_label}"
+                text = f"{battery_prefix}◆ {snapshot['model_short']} · {duration_label}"
                 if goal_segment:
                     text += f" · {goal_segment}"
                 if focus_label:
@@ -7197,7 +7197,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     text += " · ⚠ YOLO"
                 return self._right_align_status_title(text, session_title, width)
             if width < 76:
-                parts = [f"✦ {snapshot['model_short']}", percent_label]
+                parts = [f"◆ {snapshot['model_short']}", percent_label]
                 if battery_label:
                     parts.insert(0, battery_label)
                 compressions = snapshot.get("compressions", 0)
@@ -7229,7 +7229,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 context_label = "ctx --"
 
             compressions = snapshot.get("compressions", 0)
-            parts = [f"✦ {snapshot['model_short']}", context_label, percent_label]
+            parts = [f"◆ {snapshot['model_short']}", context_label, percent_label]
             if battery_label:
                 parts.insert(0, battery_label)
             if compressions:
@@ -7258,7 +7258,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 parts.append("⚠ YOLO")
             return self._right_align_status_title(" │ ".join(parts), session_title, width)
         except Exception:
-            return f"✦ {self.model if getattr(self, 'model', None) else 'Nunmai'}"
+            return f"◆ {self.model if getattr(self, 'model', None) else 'Nunmai'}"
 
     def _get_status_bar_fragments(self):
         if not self._status_bar_visible or getattr(self, '_model_picker_state', None) or getattr(self, '_command_palette_state', None):
@@ -7281,7 +7281,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
 
             if width < 52:
                 frags = [
-                    ("class:status-bar", " ✦ "),
+                    ("class:status-bar", " ◆ "),
                     ("class:status-bar-strong", snapshot["model_short"]),
                     ("class:status-bar-dim", " · "),
                     ("class:status-bar-dim", duration_label),
@@ -7305,7 +7305,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     bg_proc_count = snapshot.get("active_background_processes", 0)
                     bg_subagent_count = snapshot.get("active_background_subagents", 0)
                     frags = [
-                        ("class:status-bar", " ✦ "),
+                        ("class:status-bar", " ◆ "),
                         ("class:status-bar-strong", snapshot["model_short"]),
                         ("class:status-bar-dim", " · "),
                         (self._status_bar_context_style(percent), percent_label),
@@ -7350,7 +7350,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     bg_proc_count = snapshot.get("active_background_processes", 0)
                     bg_subagent_count = snapshot.get("active_background_subagents", 0)
                     frags = [
-                        ("class:status-bar", " ✦ "),
+                        ("class:status-bar", " ◆ "),
                         ("class:status-bar-strong", snapshot["model_short"]),
                         ("class:status-bar-dim", " │ "),
                         ("class:status-bar-dim", context_label),
@@ -7420,7 +7420,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     frags.append(("class:status-bar-strong", stash_indicator))
 
             # Battery is the first status-bar element when enabled: prepend it
-            # ahead of the leading ✦ marker in whichever width tier ran above.
+            # ahead of the leading ◆ marker in whichever width tier ran above.
             if battery_label:
                 frags[0:0] = [
                     ("class:status-bar", " "),
@@ -8063,10 +8063,10 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             try:
                 from nunmai_cli.skin_engine import get_active_skin
                 _skin = get_active_skin()
-                label = _skin.get_branding("response_label", "✦ Nunmai")
+                label = _skin.get_branding("response_label", "◆ Nunmai")
                 _text_hex = _skin.get_color("banner_text", "#EFE9D7")
             except Exception:
-                label = "✦ Nunmai"
+                label = "◆ Nunmai"
                 _text_hex = "#EFE9D7"
             # Build a true-color ANSI escape for the response text color
             # so streamed content matches the Rich Panel appearance.
@@ -11558,6 +11558,27 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 return
             self._close_model_picker()
 
+    def _handle_brain_command(self):
+        """/brain — connect AI accounts (primary + fallbacks), then switch the live session."""
+        from types import SimpleNamespace
+        from nunmai_cli.brain_cmd import cmd_brain
+        try:
+            cmd_brain(SimpleNamespace(providers=None, skip_connect=False))
+        except SystemExit as exc:
+            if exc.code:
+                _cprint(f"  ✗ {exc.code}")
+            return
+        except KeyboardInterrupt:
+            _cprint("  Cancelled.")
+            return
+        try:
+            from nunmai_cli.config import load_config
+            m = load_config().get("model") or {}
+            if m.get("default") and m.get("provider"):
+                self._handle_model_switch(f"/model {m['default']} --provider {m['provider']} --session")
+        except Exception as exc:
+            _cprint(f"  Restart nunmai to start using the new brain ({exc}).")
+
     def _handle_model_switch(self, cmd_original: str):
         """Handle /model command — switch model.
 
@@ -12249,7 +12270,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                         _tip_color = get_active_skin().get_color("banner_dim", "#2E9C7C")
                     except Exception:
                         _tip_color = "#2E9C7C"
-                    cc.print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
+                    cc.print(f"[dim {_tip_color}]◆ Tip: {_tip}[/]")
                 except Exception:
                     pass
             else:
@@ -12264,7 +12285,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                         _tip_color = get_active_skin().get_color("banner_dim", "#2E9C7C")
                     except Exception:
                         _tip_color = "#2E9C7C"
-                    self._console_print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
+                    self._console_print(f"[dim {_tip_color}]◆ Tip: {_tip}[/]")
                 except Exception:
                     pass
         elif canonical == "history":
@@ -12665,6 +12686,8 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             self._handle_subgoal_command(cmd_original)
         elif canonical == "skin":
             self._handle_skin_command(cmd_original)
+        elif canonical == "brain":
+            self._handle_brain_command()
         elif canonical == "voice":
             self._handle_voice_command(cmd_original)
         elif canonical == "wake":
@@ -15541,7 +15564,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 self._wake_suspended = True  # watchdog resumes the listener
                 return
 
-        _cprint(f"\n{_ACCENT}✦ Wake word detected — listening...{_RST}")
+        _cprint(f"\n{_ACCENT}◆ Wake word detected — listening...{_RST}")
         if getattr(self, "_app", None):
             try:
                 self._app.invalidate()
@@ -16667,7 +16690,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                         if not _streaming_box_opened:
                             _streaming_box_opened = True
                             w = self._scrollback_box_width(getattr(self.console, "width", 80))
-                            label = " ✦ Nunmai "
+                            label = " ◆ Nunmai "
                             if self.show_timestamps:
                                 label = f"{label}{datetime.now().strftime(getattr(self, 'timestamp_format', '%H:%M'))} "
                             fill = w - 2 - NunmaiCLI._status_bar_display_width(label)
@@ -17099,11 +17122,11 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 try:
                     from nunmai_cli.skin_engine import get_active_skin
                     _skin = get_active_skin()
-                    label = _skin.get_branding("response_label", "✦ Nunmai")
+                    label = _skin.get_branding("response_label", "◆ Nunmai")
                     _resp_color = _maybe_remap_for_light_mode(_skin.get_color("response_border", "#0B6B4F"))
                     _resp_text = _maybe_remap_for_light_mode(_skin.get_color("banner_text", "#EFE9D7"))
                 except Exception:
-                    label = "✦ Nunmai"
+                    label = "◆ Nunmai"
                     _resp_color = _maybe_remap_for_light_mode("#0B6B4F")
                     _resp_text = _maybe_remap_for_light_mode("#EFE9D7")
 
@@ -17467,9 +17490,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         else:
             try:
                 from nunmai_cli.skin_engine import get_active_goodbye
-                goodbye = get_active_goodbye("Goodbye! ✦")
+                goodbye = get_active_goodbye("Goodbye! ◆")
             except Exception:
-                goodbye = "Goodbye! ✦"
+                goodbye = "Goodbye! ◆"
             print(goodbye)
 
     def _get_tui_prompt_symbols(self) -> tuple[str, str]:
@@ -17558,7 +17581,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         if self._command_running:
             return _state_fragment("class:prompt-working", self._command_spinner_frame())
         if self._agent_running:
-            return _state_fragment("class:prompt-working", "✦")
+            return _state_fragment("class:prompt-working", "◆")
         if self._voice_mode:
             return _state_fragment("class:voice-prompt", "🎤")
         return [("class:prompt", symbol)]
@@ -17837,7 +17860,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 _tip_color = _welcome_skin.get_color("banner_dim", "#2E9C7C")
             except Exception:
                 _tip_color = "#2E9C7C"
-            self._console_print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
+            self._console_print(f"[dim {_tip_color}]◆ Tip: {_tip}[/]")
         except Exception:
             pass  # Tips are non-critical — never break startup
 

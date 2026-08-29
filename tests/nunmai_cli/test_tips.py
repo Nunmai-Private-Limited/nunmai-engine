@@ -44,7 +44,7 @@ class TestTipIntegrationInCLI:
         """Verify the Rich markup format doesn't break."""
         tip = get_random_tip()
         color = "#2E9C7C"
-        markup = f"[dim {color}]✦ Tip: {tip}[/]"
+        markup = f"[dim {color}]◆ Tip: {tip}[/]"
         # Should not contain nested/broken Rich tags
         assert markup.count("[/]") == 1
         assert "[dim #2E9C7C]" in markup

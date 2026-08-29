@@ -265,7 +265,7 @@ gateway:
     title_rejected:        "\n⚠️ رُفض العنوان: {error}"
     title_error_untitled:  "\n⚠️ {error} — بدأت الجلسة دون عنوان."
     title_empty_untitled:  "\n⚠️ العنوان فارغ بعد التنظيف — بدأت الجلسة دون عنوان."
-    tip:                   "\n✦ نصيحة: {tip}"
+    tip:                   "\n◆ نصيحة: {tip}"
 
   restart:
     in_progress:           "⏳ إعادة تشغيل البوابة قيد التنفيذ بالفعل..."
@@ -376,7 +376,7 @@ gateway:
     not_git_repo:            "✗ ليس مستودع git — لا يمكن التحديث."
     nunmai_cmd_not_found:    "✗ تعذّر تحديد موقع أمر `nunmai`. Nunmai يعمل، لكن أمر التحديث لم يجد الملف التنفيذي على PATH أو عبر مُفسّر Python الحالي. جرّب تشغيل `nunmai update` يدويًا في طرفيتك."
     start_failed:            "✗ فشل بدء التحديث: {error}"
-    starting:                "✦ جارٍ بدء تحديث Nunmai… سأبثّ التقدّم هنا."
+    starting:                "◆ جارٍ بدء تحديث Nunmai… سأبثّ التقدّم هنا."
 
   usage:
     rate_limits:              "⏱️ **حدود المعدّل:** {state}"

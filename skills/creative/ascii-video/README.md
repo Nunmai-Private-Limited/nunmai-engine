@@ -61,7 +61,7 @@ Each sorted dark-to-bright, each a different visual texture. Validated against t
 | Block elements | ` ░▒▓█▄▀▐▌` | Chunky, digital |
 | Braille | ` ⠁⠂⠃...⠿` | Fine-grained pointillism |
 | Dots | ` ⋅∘∙●◉◎` | Smooth, organic |
-| Stars | ` ·✧✦✩✨★✶` | Sparkle, celestial |
+| Stars | ` ·✧◆✩✨★✶` | Sparkle, celestial |
 | Half-fills | ` ◔◑◕◐◒◓◖◗◙` | Directional fill progression |
 | Crosshatch | ` ▣▤▥▦▧▨▩` | Hatched density ramp |
 | Math | ` ·∘∙•°±×÷≈≠≡∞∫∑Ω` | Scientific, abstract |
@@ -72,7 +72,7 @@ Each sorted dark-to-bright, each a different visual texture. Validated against t
 | Alchemical | ` ☉☽♀♂♃♄♅♆♇` | Esoteric |
 | Arrows | ` ←↑→↓↔↕↖↗↘↙` | Directional, kinetic |
 | Music | ` ♪♫♬♩♭♮♯○●` | Musical |
-| Project-specific | ` .·~=≈∞⚡☿✦★⊕◊◆▲▼●■` | Themed per project |
+| Project-specific | ` .·~=≈∞⚡☿◆★⊕◊◆▲▼●■` | Themed per project |
 
 Custom palettes are built per project to match the content.
 
@@ -283,8 +283,8 @@ Auto-detects CPU count, RAM, platform, ffmpeg. Adapts worker count, resolution, 
 
 ## Projects built with this
 
-✦ 85-second highlight reel. 15 scenes (14×5s + 15s crescendo finale), randomized order, directional parameter arcs, layer hierarchy composition. Showcases the full effect vocabulary: fBM, voronoi fragmentation, reaction-diffusion, cellular automata, dual counter-rotating spirals, wave collision, domain warping, tunnel descent, kaleidoscope symmetry, boid flocking, fire simulation, glitch corruption, and a 7-layer crescendo buildup.
+◆ 85-second highlight reel. 15 scenes (14×5s + 15s crescendo finale), randomized order, directional parameter arcs, layer hierarchy composition. Showcases the full effect vocabulary: fBM, voronoi fragmentation, reaction-diffusion, cellular automata, dual counter-rotating spirals, wave collision, domain warping, tunnel descent, kaleidoscope symmetry, boid flocking, fire simulation, glitch corruption, and a 7-layer crescendo buildup.
 
-✦ Audio-reactive music visualizer. 3.5 min, 8 sections with distinct effects, beat-triggered particles and glitch, cycling palettes.
+◆ Audio-reactive music visualizer. 3.5 min, 8 sections with distinct effects, beat-triggered particles and glitch, cycling palettes.
 
-✦ TTS narrated testimonial video. 23 quotes, per-quote ElevenLabs voices, background music at 15% wide stereo, per-clip re-rendering for iterative editing.
+◆ TTS narrated testimonial video. 23 quotes, per-quote ElevenLabs voices, background music at 15% wide stereo, per-clip re-rendering for iterative editing.

@@ -155,7 +155,7 @@ def _frame_renderable(payload, *, cols, rows, reveal, color):
     parts: list[Any] = []
 
     title = Text()
-    title.append("✦ Journey ", style=f"bold {_TITLE_COLOR}" if color else None)
+    title.append("◆ Journey ", style=f"bold {_TITLE_COLOR}" if color else None)
     title.append("· learned skills & memories over time", style="grey62" if color else None)
     parts.append(title)
 

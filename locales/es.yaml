@@ -242,7 +242,7 @@ gateway:
     title_rejected:        "\n⚠️ Título rechazado: {error}"
     title_error_untitled:  "\n⚠️ {error} — sesión iniciada sin título."
     title_empty_untitled:  "\n⚠️ El título queda vacío tras la limpieza — sesión iniciada sin título."
-    tip:                   "\n✦ Consejo: {tip}"
+    tip:                   "\n◆ Consejo: {tip}"
 
   restart:
     in_progress:           "⏳ El reinicio del gateway ya está en curso..."
@@ -371,7 +371,7 @@ gateway:
     not_git_repo:            "✗ No es un repositorio git — no se puede actualizar."
     nunmai_cmd_not_found:    "✗ No se pudo localizar el comando `nunmai`. Nunmai está en ejecución, pero el comando de actualización no encontró el ejecutable en PATH ni a través del intérprete de Python actual. Intenta ejecutar `nunmai update` manualmente en tu terminal."
     start_failed:            "✗ No se pudo iniciar la actualización: {error}"
-    starting:                "✦ Iniciando la actualización de Nunmai… Transmitiré el progreso aquí."
+    starting:                "◆ Iniciando la actualización de Nunmai… Transmitiré el progreso aquí."
 
   usage:
     rate_limits:              "⏱️ **Límites de tasa:** {state}"

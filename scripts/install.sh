@@ -232,7 +232,7 @@ print_banner() {
     echo ""
     echo -e "${MAGENTA}${BOLD}"
     echo "┌─────────────────────────────────────────────────────────┐"
-    echo "│             ✦ Nunmai Engine Installer                    │"
+    echo "│             ◆ Nunmai Engine Installer                    │"
     echo "├─────────────────────────────────────────────────────────┤"
     echo "│  Lightweight AI engine by Nunmai Research.                │"
     echo "└─────────────────────────────────────────────────────────┘"

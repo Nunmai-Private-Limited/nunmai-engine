@@ -456,7 +456,7 @@ export function Journey({ gw, onClose, t }: JourneyProps) {
       <Box flexDirection="column" marginBottom={1}>
         <Text wrap="truncate-end">
           <Text bold color={t.color.primary}>
-            ✦ Journey
+            ◆ Journey
           </Text>
           <Text color={t.color.muted}> learned skills &amp; memories over time</Text>
         </Text>
@@ -558,7 +558,7 @@ function Shell({ children, t }: { children: React.ReactNode; t: Theme }) {
   return (
     <Box flexDirection="column" paddingX={1} paddingY={1}>
       <Text bold color={t.color.primary}>
-        ✦ Journey
+        ◆ Journey
       </Text>
       {children}
       <Text color={t.color.muted}>Esc/q close</Text>

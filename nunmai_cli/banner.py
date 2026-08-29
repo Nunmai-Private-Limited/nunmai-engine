@@ -75,12 +75,12 @@ NUNMAI_AGENT_LOGO = """[bold #6BE7C8]███╗   ██╗██╗   ██�
 [#0B6B4F]╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝    ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝[/]"""
 
 _NUNMAI_CAPABILITIES = (
-    ("✦", "Chat & reasoning", "any AI you connect: Claude, ChatGPT, Kimi, Gemini, OpenRouter"),
-    ("✦", "Files & code", "read, edit, search and run code in your projects"),
-    ("✦", "Web & browser", "research, browse and automate websites"),
-    ("✦", "Automations", "schedule jobs with /cron; remembers across sessions"),
-    ("✦", "Messaging", "WhatsApp, Slack, Telegram, Discord and email gateways"),
-    ("✦", "Skills", "built-in playbooks (/skills) — and it learns new ones from you"),
+    ("◆", "Chat & reasoning", "any AI you connect: Claude, ChatGPT, Kimi, Gemini, OpenRouter"),
+    ("◆", "Files & code", "read, edit, search and run code in your projects"),
+    ("◆", "Web & browser", "research, browse and automate websites"),
+    ("◆", "Automations", "schedule jobs with /cron; remembers across sessions"),
+    ("◆", "Messaging", "WhatsApp, Slack, Telegram, Discord and email gateways"),
+    ("◆", "Skills", "built-in playbooks (/skills) — and it learns new ones from you"),
 )
 
 NUNMAI_CADUCEUS = """[#EFE9D7]         ▄▄██████████▄▄         [/]
@@ -757,7 +757,33 @@ def _format_update_notice(behind: int) -> str:
 _AUTO_UPDATE_SKIP_CMDS = {"update", "doctor", "uninstall", "gateway", "serve", "dashboard", "desktop", "gui", "acp", "status", "version"}
 
 
+_STALE_IDENTITY = (
+    ("You are Nunmai Agent, an intelligent AI assistant created by Nous Research", "You are Nunmai Engine, an intelligent AI assistant created by Nunmai Research"),
+    ("created by Nous Research", "created by Nunmai Research"),
+)
+
+
+def migrate_soul_identity() -> None:
+    """Fix the default identity sentence in ~/.nunmai/SOUL.md written by older builds.
+
+    Only the stock sentence is touched; user customisations are left alone.
+    """
+    try:
+        soul = get_nunmai_home() / "SOUL.md"
+        if not soul.exists():
+            return
+        text = soul.read_text(encoding="utf-8")
+        new = text
+        for old_s, new_s in _STALE_IDENTITY:
+            new = new.replace(old_s, new_s)
+        if new != text:
+            soul.write_text(new, encoding="utf-8")
+    except Exception:
+        pass
+
+
 def maybe_auto_update(argv: list) -> None:
+    migrate_soul_identity()
     """Install an available update before the session starts (``updates.auto``).
 
     Uses the cached result of the previous background check (no network on

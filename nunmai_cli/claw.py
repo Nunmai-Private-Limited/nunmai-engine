@@ -354,7 +354,7 @@ def _cmd_migrate(args):
     )
     print(
         color(
-            "│          ✦ Nunmai — OpenClaw Migration                 │",
+            "│          ◆ Nunmai — OpenClaw Migration                 │",
             Colors.MAGENTA,
         )
     )
@@ -580,7 +580,7 @@ def _cmd_cleanup(args):
     )
     print(
         color(
-            "│          ✦ Nunmai — OpenClaw Cleanup                   │",
+            "│          ◆ Nunmai — OpenClaw Cleanup                   │",
             Colors.MAGENTA,
         )
     )

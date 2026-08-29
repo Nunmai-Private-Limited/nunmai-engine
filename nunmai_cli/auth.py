@@ -2399,17 +2399,21 @@ def resolve_provider(
 
     # AWS Bedrock — detect via boto3 credential chain (IAM roles, SSO, env vars).
     # This runs after API-key providers so explicit keys always win.
-    try:
-        from agent.bedrock_adapter import has_aws_credentials
-        if has_aws_credentials():
-            return "bedrock"
-    except ImportError:
-        pass  # boto3 not installed — skip Bedrock auto-detection
+    # Nunmai: ambient AWS credentials on a developer machine must not hijack
+    # an unconfigured install (that produced a wall of Bedrock 403s on first
+    # message). Bedrock is used only when explicitly chosen (provider:
+    # bedrock) or when NUNMAI_AUTO_BEDROCK=1 opts back into auto-detection.
+    if os.getenv("NUNMAI_AUTO_BEDROCK") == "1":
+        try:
+            from agent.bedrock_adapter import has_aws_credentials
+            if has_aws_credentials():
+                return "bedrock"
+        except ImportError:
+            pass  # boto3 not installed — skip Bedrock auto-detection
 
     raise AuthError(
-        "No inference provider configured. Run 'nunmai model' to choose a "
-        "provider and model, or set an API key (OPENROUTER_API_KEY, "
-        "OPENAI_API_KEY, etc.) in ~/.nunmai/.env.",
+        "No AI connected yet. Run /brain here (or 'nunmai brain' in a terminal) "
+        "to sign in with Claude, ChatGPT, Kimi, Gemini or OpenRouter.",
         code="no_provider_configured",
     )
 

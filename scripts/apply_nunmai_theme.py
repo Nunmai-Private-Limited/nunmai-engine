@@ -5,7 +5,7 @@ Run after scripts/rebrand_to_nunmai.py. Idempotent.
 
 - Block-letter logo: "NUNMAI ENGINE" (ANSI Shadow font) replaces the Nunmai art.
 - Hero mark: the Nunmai logo (nunmai.in/favicon.svg) replaces the caduceus.
-- Symbol: ⚕ (caduceus) -> ✦ everywhere.
+- Symbol: ⚕ (caduceus) -> ◆ everywhere (◆ renders in every monospace font).
 - Palette: Nunmai gold -> Nunmai mint / deep green (brand colours from nunmai.in).
 """
 from __future__ import annotations
@@ -135,10 +135,10 @@ def main() -> int:
     # 3) Tagline in classic banner
     p = ROOT / "cli.py"
     s = p.read_text(encoding="utf-8")
-    n = s.replace('line1 = "⚕ NOUS NUNMAI - AI Agent Framework"', 'line1 = "✦ NUNMAI ENGINE - AI Engine by Nunmai Research"')
-    n = n.replace('line1 = "✦ NOUS NUNMAI - AI Agent Framework"', 'line1 = "✦ NUNMAI ENGINE - AI Engine by Nunmai Research"')
-    n = n.replace('tiny_line = "⚕ NOUS NUNMAI"', 'tiny_line = "✦ NUNMAI ENGINE"')
-    n = n.replace('tiny_line = "✦ NOUS NUNMAI"', 'tiny_line = "✦ NUNMAI ENGINE"')
+    n = s.replace('line1 = "⚕ NOUS NUNMAI - AI Agent Framework"', 'line1 = "◆ NUNMAI ENGINE - AI Engine by Nunmai Research"')
+    n = n.replace('line1 = "✦ NOUS NUNMAI - AI Agent Framework"', 'line1 = "◆ NUNMAI ENGINE - AI Engine by Nunmai Research"')
+    n = n.replace('tiny_line = "⚕ NOUS NUNMAI"', 'tiny_line = "◆ NUNMAI ENGINE"')
+    n = n.replace('tiny_line = "✦ NOUS NUNMAI"', 'tiny_line = "◆ NUNMAI ENGINE"')
     write(p, s, n)
 
     p = ROOT / "nunmai_cli/skin_engine.py"
@@ -161,13 +161,13 @@ def main() -> int:
             if b"\x00" in data[:8000]:
                 continue
             in_scope = rel.startswith(PALETTE_SCOPE)
-            if "⚕".encode() not in data and not (in_scope and COLOR_RE.search(data.decode("utf-8", "ignore"))):
+            if "⚕".encode() not in data and "✦".encode() not in data and not (in_scope and COLOR_RE.search(data.decode("utf-8", "ignore"))):
                 continue
             try:
                 s = data.decode("utf-8")
             except UnicodeDecodeError:
                 continue
-            n = s.replace("⚕", "✦")
+            n = s.replace("⚕", "◆").replace("\u2726", "◆")
             if in_scope:
                 n = COLOR_RE.sub(lambda m: COLOR_MAP[m.group(0).upper()], n)
                 n = n.replace("255;215;0m", "107;231;200m")  # _GOLD true-color -> mint

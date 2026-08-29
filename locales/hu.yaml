@@ -242,7 +242,7 @@ gateway:
     title_rejected:        "\n⚠️ Cím elutasítva: {error}"
     title_error_untitled:  "\n⚠️ {error} — a munkamenet cím nélkül indult."
     title_empty_untitled:  "\n⚠️ Tisztítás után a cím üres — a munkamenet cím nélkül indult."
-    tip:                   "\n✦ Tipp: {tip}"
+    tip:                   "\n◆ Tipp: {tip}"
 
   restart:
     in_progress:           "⏳ Az átjáró újraindítása már folyamatban van..."
@@ -374,7 +374,7 @@ Future messages in this room will use that transcript until `/reset` or another 
     not_git_repo:            "✗ Nem git-tárhely — frissítés nem lehetséges."
     nunmai_cmd_not_found:    "✗ Nem sikerült megtalálni a `nunmai` parancsot. A Nunmai fut, de a frissítőparancs nem találta a futtatható fájlt a PATH-on vagy a jelenlegi Python interpreteren keresztül. Próbáld futtatni a `nunmai update` parancsot manuálisan a terminálban."
     start_failed:            "✗ Nem sikerült elindítani a frissítést: {error}"
-    starting:                "✦ Nunmai frissítés indítása… A folyamatot itt fogom közvetíteni."
+    starting:                "◆ Nunmai frissítés indítása… A folyamatot itt fogom közvetíteni."
 
   usage:
     rate_limits:              "⏱️ **Sebességkorlátok:** {state}"

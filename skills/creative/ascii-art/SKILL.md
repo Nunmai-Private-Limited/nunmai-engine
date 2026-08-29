@@ -301,7 +301,7 @@ When tools above don't have what's needed, generate ASCII art directly using the
 
 **Block Elements:** `░ ▒ ▓ █ ▄ ▀ ▌ ▐ ▖ ▗ ▘ ▝ ▚ ▞`
 
-**Geometric & Symbols:** `◆ ◇ ◈ ● ○ ◉ ■ □ ▲ △ ▼ ▽ ★ ☆ ✦ ✧ ◀ ▶ ◁ ▷ ⬡ ⬢ ⌂`
+**Geometric & Symbols:** `◆ ◇ ◈ ● ○ ◉ ■ □ ▲ △ ▼ ▽ ★ ☆ ◆ ✧ ◀ ▶ ◁ ▷ ⬡ ⬢ ⌂`
 
 ### Rules
 
