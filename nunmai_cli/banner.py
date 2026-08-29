@@ -74,22 +74,31 @@ NUNMAI_AGENT_LOGO = """[bold #6BE7C8]███╗   ██╗██╗   ██�
 [#0B6B4F]██║ ╚████║╚██████╔╝██║ ╚████║██║ ╚═╝ ██║██║  ██║██║    ███████╗██║ ╚████║╚██████╔╝██║██║ ╚████║███████╗[/]
 [#0B6B4F]╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝    ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝[/]"""
 
-NUNMAI_CADUCEUS = """[#EFE9D7 on #052819]         ▄▄██████████▄▄         [/]
-[#EFE9D7 on #052819]       ▄████████████████▄       [/]
-[#EFE9D7 on #052819]     ▄███████▀▀▀▀▀▀███████▄     [/]
-[#EFE9D7 on #052819]    ▄██████▀        ▀██████▄    [/]
-[#EFE9D7 on #052819]    ██████            ██████    [/]
-[#EFE9D7 on #052819]    █████              █████    [/]
-[#EFE9D7 on #052819]    █████              █████    [/]
-[#EFE9D7 on #052819]    ██████            ██████    [/]
-[#EFE9D7 on #052819]    ▀█████▄          ▄█████     [/]
-[#EFE9D7 on #052819]     ▀█████▄   ▄▄   ██████▀     [/]
-[#EFE9D7 on #052819]      ▀███▀  ▄████▄  ▀███▀      [/]
-[#EFE9D7 on #052819]        ▀  ▄████████▄  ▀        [/]
-[#EFE9D7 on #052819]          ████████████          [/]
-[#EFE9D7 on #052819]           ▀████████▀           [/]
-[#EFE9D7 on #052819]             ▀████▀             [/]
-[#EFE9D7 on #052819]               ▀▀               [/]"""
+_NUNMAI_CAPABILITIES = (
+    ("✦", "Chat & reasoning", "any AI you connect: Claude, ChatGPT, Kimi, Gemini, OpenRouter"),
+    ("✦", "Files & code", "read, edit, search and run code in your projects"),
+    ("✦", "Web & browser", "research, browse and automate websites"),
+    ("✦", "Automations", "schedule jobs with /cron; remembers across sessions"),
+    ("✦", "Messaging", "WhatsApp, Slack, Telegram, Discord and email gateways"),
+    ("✦", "Skills", "built-in playbooks (/skills) — and it learns new ones from you"),
+)
+
+NUNMAI_CADUCEUS = """[#EFE9D7]         ▄▄██████████▄▄         [/]
+[#EFE9D7]       ▄████████████████▄       [/]
+[#EFE9D7]     ▄███████▀▀▀▀▀▀███████▄     [/]
+[#EFE9D7]    ▄██████▀        ▀██████▄    [/]
+[#EFE9D7]    ██████            ██████    [/]
+[#EFE9D7]    █████              █████    [/]
+[#EFE9D7]    █████              █████    [/]
+[#EFE9D7]    ██████            ██████    [/]
+[#EFE9D7]    ▀█████▄          ▄█████     [/]
+[#EFE9D7]     ▀█████▄   ▄▄   ██████▀     [/]
+[#EFE9D7]      ▀███▀  ▄████▄  ▀███▀      [/]
+[#EFE9D7]        ▀  ▄████████▄  ▀        [/]
+[#EFE9D7]          ████████████          [/]
+[#EFE9D7]           ▀████████▀           [/]
+[#EFE9D7]             ▀████▀             [/]
+[#EFE9D7]               ▀▀               [/]"""
 
 
 
@@ -745,6 +754,56 @@ def _format_update_notice(behind: int) -> str:
     return line
 
 
+_AUTO_UPDATE_SKIP_CMDS = {"update", "doctor", "uninstall", "gateway", "serve", "dashboard", "desktop", "gui", "acp", "status", "version"}
+
+
+def maybe_auto_update(argv: list) -> None:
+    """Install an available update before the session starts (``updates.auto``).
+
+    Uses the cached result of the previous background check (no network on
+    this path), so a launch is never slowed by the check itself. Runs
+    ``nunmai update --yes`` synchronously; the new code is used from the next
+    launch. Git installs only; managed installs (docker/nix) just get the notice.
+    """
+    import subprocess
+    import sys as _sys
+    if argv and (argv[0] in _AUTO_UPDATE_SKIP_CMDS or argv[0] in ("-h", "--help", "--version")):
+        return
+    if os.environ.get("NUNMAI_NO_AUTO_UPDATE"):
+        return
+    try:
+        from nunmai_cli.config import load_config
+        cfg = load_config()
+        if not (cfg.get("updates") or {}).get("auto", True):
+            return
+    except Exception:
+        return
+    try:
+        cache_file = get_nunmai_home() / ".update_check"
+        if not cache_file.exists():
+            return
+        cached = json.loads(cache_file.read_text(encoding="utf-8"))
+        behind = cached.get("behind")
+        if not behind or behind == 0 or cached.get("ver") != VERSION:
+            return
+        if _resolve_repo_dir() is None:
+            return
+    except Exception:
+        return
+    # Reset the cache first so a failed update does not loop on every launch.
+    try:
+        cache_file.write_text(json.dumps({"ts": time.time(), "behind": 0, "rev": cached.get("rev"), "ver": VERSION}))
+    except Exception:
+        pass
+    print("⬆ Nunmai Engine update available — installing (takes ~1 min)…", flush=True)
+    rc = subprocess.call([_sys.executable, "-m", "nunmai_cli.main", "update", "--yes"],
+                         env={**os.environ, "NUNMAI_NO_AUTO_UPDATE": "1"})
+    if rc == 0:
+        print("✓ Updated. Restart nunmai to use the new version.\n", flush=True)
+    else:
+        print("⚠ Auto-update failed — run: nunmai update\n", flush=True)
+
+
 _deferred_update_notice_started = False
 
 
@@ -1067,64 +1126,11 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
         left_lines.append(f"[dim {session_color}]Session: {session_id}[/]")
     left_content = "\n".join(left_lines)
 
-    right_lines = [f"[bold {accent}]Available Tools[/]"]
-    toolsets_dict: Dict[str, list] = {}
-
-    for tool in tools:
-        tool_name = tool["function"]["name"]
-        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "other")
-        toolsets_dict.setdefault(toolset, []).append(tool_name)
-
-    for item in unavailable_toolsets:
-        toolset_id = item.get("id", item.get("name", "unknown"))
-        display_name = _display_toolset_name(toolset_id)
-        if display_name not in toolsets_dict:
-            toolsets_dict[display_name] = []
-        for tool_name in item.get("tools", []):
-            if tool_name not in toolsets_dict[display_name]:
-                toolsets_dict[display_name].append(tool_name)
-
-    sorted_toolsets = sorted(toolsets_dict.keys())
-    display_toolsets = sorted_toolsets[:8]
-    remaining_toolsets = len(sorted_toolsets) - 8
-
-    for toolset in display_toolsets:
-        tool_names = toolsets_dict[toolset]
-        colored_names = []
-        for name in sorted(tool_names):
-            if name in disabled_tools:
-                colored_names.append(f"[red]{name}[/]")
-            elif name in lazy_tools:
-                colored_names.append(f"[yellow]{name}[/]")
-            else:
-                colored_names.append(f"[{text}]{name}[/]")
-
-        tools_str = ", ".join(colored_names)
-        if len(", ".join(sorted(tool_names))) > 45:
-            short_names = []
-            length = 0
-            for name in sorted(tool_names):
-                if length + len(name) + 2 > 42:
-                    short_names.append("...")
-                    break
-                short_names.append(name)
-                length += len(name) + 2
-            colored_names = []
-            for name in short_names:
-                if name == "...":
-                    colored_names.append("[dim]...[/]")
-                elif name in disabled_tools:
-                    colored_names.append(f"[red]{name}[/]")
-                elif name in lazy_tools:
-                    colored_names.append(f"[yellow]{name}[/]")
-                else:
-                    colored_names.append(f"[{text}]{name}[/]")
-            tools_str = ", ".join(colored_names)
-
-        right_lines.append(f"[dim {dim}]{toolset}:[/] {tools_str}")
-
-    if remaining_toolsets > 0:
-        right_lines.append(f"[dim {dim}](and {remaining_toolsets} more toolsets...)[/]")
+    # Nunmai: a short capability summary instead of dumping every tool.
+    # The full catalogue stays one command away (/tools, /skills).
+    right_lines = [f"[bold {accent}]What Nunmai Engine can do[/]"]
+    for _icon, _title, _desc in _NUNMAI_CAPABILITIES:
+        right_lines.append(f"[{accent}]{_icon}[/] [{text}]{_title}[/] [dim {dim}]— {_desc}[/]")
 
     # MCP Servers section (only if configured). Probe cheaply first: the
     # full get_mcp_status() path resolves portable plugin MCP servers,
@@ -1182,12 +1188,8 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
                     f"[red]— failed[/]"
                 )
 
-    right_lines.append("")
-    right_lines.append(f"[bold {accent}]Available Skills[/]")
-    # The skills catalog is only reachable when the `skills` toolset is enabled
-    # (it exposes skill_view / skill_manage). When it's disabled — e.g. a Blank
-    # Slate install — the agent literally cannot load any skill, so advertising
-    # the on-disk catalog here is misleading. Reflect the real state instead.
+    # Skills count only (catalogue via /skills). When the `skills` toolset is
+    # disabled the agent cannot load any skill, so report 0 honestly.
     _skills_enabled = (not _enabled_ts) or ("skills" in _enabled_ts)
     if _skills_enabled:
         if skills_by_category is None:
@@ -1196,38 +1198,6 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     else:
         skills_by_category = {}
         total_skills = 0
-
-    # Dynamically size skills display based on terminal width.
-    # Rich grid with 2 columns; right column gets roughly 60% of terminal.
-    _term_cols = shutil.get_terminal_size().columns
-    _right_col_width = max(int(_term_cols * 0.6) - 10, 30)
-
-    if not _skills_enabled:
-        right_lines.append(f"[dim {dim}]Skills toolset disabled[/]")
-    elif skills_by_category:
-        for category in sorted(skills_by_category.keys()):
-            skill_names = sorted(skills_by_category[category])
-            # Account for "category: " prefix
-            _prefix_len = len(category) + 2
-            _avail = max(_right_col_width - _prefix_len, 20)
-            # Accumulate skills until we run out of space
-            parts, length = [], 0
-            for i, name in enumerate(skill_names):
-                _sep = ", " if parts else ""
-                _needed = len(_sep) + len(name)
-                # Estimate indicator size IF we were to add this skill then stop
-                _after = len(skill_names) - (i + 1)  # remaining after adding this
-                _ind_len = len(f", +{_after} more") if _after > 0 else 0
-                if parts and length + _needed + _ind_len > _avail:
-                    remaining = len(skill_names) - len(parts)
-                    parts.append(f"+{remaining} more")
-                    break
-                parts.append(name)
-                length += _needed
-            skills_str = ", ".join(parts)
-            right_lines.append(f"[dim {dim}]{category}:[/] [{text}]{skills_str}[/]")
-    else:
-        right_lines.append(f"[dim {dim}]No skills installed[/]")
 
     right_lines.append("")
     mcp_connected = sum(1 for s in mcp_status if s["connected"]) if mcp_status else 0

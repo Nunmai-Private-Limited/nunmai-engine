@@ -69,8 +69,12 @@ DETECTED_BROWSER_EXECUTABLE=""
 # Options
 USE_VENV=true
 RUN_SETUP=true
-SKIP_BROWSER=false
-SKIP_COMPUTER_USE=false
+SKIP_BROWSER=true          # Nunmai: lightweight by default (--full enables browser/computer-use)
+SKIP_COMPUTER_USE=true
+FULL_INSTALL=false
+FULL_SETUP=false
+INSTALL_LOG="${TMPDIR:-/tmp}/nunmai-install.log"
+: > "$INSTALL_LOG" 2>/dev/null || INSTALL_LOG=/dev/null
 NO_SKILLS=false
 BRANCH="main"
 INSTALL_COMMIT=""
@@ -109,6 +113,16 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-computer-use)
             SKIP_COMPUTER_USE=true
+            shift
+            ;;
+        --full)
+            FULL_INSTALL=true
+            SKIP_BROWSER=false
+            SKIP_COMPUTER_USE=false
+            shift
+            ;;
+        --full-setup)
+            FULL_SETUP=true
             shift
             ;;
         --no-skills)
@@ -220,7 +234,7 @@ print_banner() {
     echo "┌─────────────────────────────────────────────────────────┐"
     echo "│             ✦ Nunmai Engine Installer                    │"
     echo "├─────────────────────────────────────────────────────────┤"
-    echo "│  An open source AI agent by Nunmai Research.              │"
+    echo "│  Lightweight AI engine by Nunmai Research.                │"
     echo "└─────────────────────────────────────────────────────────┘"
     echo -e "${NC}"
 }
@@ -1590,7 +1604,7 @@ run_locked_uv_sync() {
         unset UV_NO_CONFIG UV_CONFIG_FILE
         export XDG_CONFIG_HOME="$isolated_uv_config"
         export XDG_CONFIG_DIRS="$isolated_uv_config"
-        UV_PROJECT_ENVIRONMENT="$project_env" $UV_CMD sync --extra all --locked
+        UV_PROJECT_ENVIRONMENT="$project_env" $UV_CMD sync --extra all --locked >>"$INSTALL_LOG" 2>&1
     )
     sync_rc=$?
     rmdir "$isolated_uv_config" 2>/dev/null || true
@@ -1598,7 +1612,7 @@ run_locked_uv_sync() {
 }
 
 install_deps() {
-    log_info "Installing dependencies..."
+    log_info "Installing Python dependencies (1–3 min on first install; log: $INSTALL_LOG)..."
 
     # Re-pin UV_PYTHON to the venv interpreter. setup_venv already does this,
     # but the bootstrap runs install stages (`venv`, `python-deps`) as separate
@@ -1712,8 +1726,6 @@ install_deps() {
     # extras spec, NOT because they're equivalent in posture.
     if [ -f "uv.lock" ]; then
         log_info "Trying tier: hash-verified (uv.lock) ..."
-        log_info "(this resolves + downloads the curated [all] set — first run on a"
-        log_info " fresh venv can take 1-5 minutes; uv prints progress below)"
         # Stream uv's progress directly to the user instead of swallowing
         # it with `2>"$(mktemp)"`.  Two reasons:
         #   1. `--extra all --locked` against a fresh venv has to pull
@@ -2738,7 +2750,8 @@ run_setup_wizard() {
     fi
 
     echo ""
-    log_info "Starting setup wizard..."
+    SETUP_CMD=brain; [ "$FULL_SETUP" = true ] && SETUP_CMD=setup
+    log_info "Connecting your AI brain (nunmai brain)..."
     echo ""
 
     cd "$INSTALL_DIR"
@@ -2746,9 +2759,9 @@ run_setup_wizard() {
     # Run nunmai setup using the venv Python directly (no activation needed).
     # Redirect stdin from /dev/tty so interactive prompts work when piped from curl.
     if [ "$USE_VENV" = true ]; then
-        "$INSTALL_DIR/venv/bin/python" -m nunmai_cli.main setup < /dev/tty
+        "$INSTALL_DIR/venv/bin/python" -m nunmai_cli.main $SETUP_CMD < /dev/tty
     else
-        python -m nunmai_cli.main setup < /dev/tty
+        python -m nunmai_cli.main $SETUP_CMD < /dev/tty
     fi
 }
 
@@ -3491,7 +3504,7 @@ run_stage_body() {
             install_uv
             check_python
             check_git
-            check_node
+            if [ "$FULL_INSTALL" = true ]; then check_node; else log_info "Node.js: optional — installed on first use (nunmai --tui) or with --full"; fi
             check_cxx_compiler
             check_network_prerequisites
             install_system_packages
@@ -3522,11 +3535,15 @@ run_stage_body() {
             detect_os
             resolve_install_layout
             require_install_dir
-            check_node
-            install_node_deps || return
-            install_uv
-            install_browser_use_cli
-            install_computer_use_driver
+            if [ "$FULL_INSTALL" = true ]; then
+                check_node
+                install_node_deps || return
+                install_uv
+                install_browser_use_cli
+                install_computer_use_driver
+            else
+                log_info "Browser/computer-use tools skipped (lightweight install). Add later: nunmai update --full"
+            fi
             ;;
         path)
             detect_os
@@ -3634,17 +3651,23 @@ main() {
     install_uv
     check_python
     check_git
-    check_node
-    check_cxx_compiler
+    if [ "$FULL_INSTALL" = true ]; then
+        check_node
+        check_cxx_compiler
+    else
+        log_info "Node.js/browser tools: skipped for a lightweight install (add later with --full)"
+    fi
     check_network_prerequisites
     install_system_packages
 
     clone_repo
     setup_venv
     install_deps
-    install_node_deps || return
-    install_browser_use_cli
-    install_computer_use_driver
+    if [ "$FULL_INSTALL" = true ]; then
+        install_node_deps || return
+        install_browser_use_cli
+        install_computer_use_driver
+    fi
     setup_path
     copy_config_templates
     run_setup_wizard

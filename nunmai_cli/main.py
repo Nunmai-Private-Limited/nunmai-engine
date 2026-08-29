@@ -12358,7 +12358,7 @@ _BUILTIN_SUBCOMMANDS = frozenset(
         "acp", "approvals", "auth", "backup", "bundles", "checkpoints", "claw", "completion",
         "computer-use",
         "config", "console", "cron", "curator", "dashboard", "serve", "debug", "doctor",
-        "dump", "egress", "fallback", "gateway", "hooks", "import", "import-agent", "insights",
+        "brain", "dump", "egress", "fallback", "gateway", "hooks", "import", "import-agent", "insights",
         "gui", "desktop", "kanban", "login", "logout", "logs", "lsp", "mcp", "memory", "migrate", "moa",
         "journey", "memory-graph", "learning",
         "model", "monitoring", "pairing", "pause", "peer", "pets", "plugins", "portal", "profile",
@@ -13102,6 +13102,12 @@ def _advertise_agent_env() -> None:
 
 def main():
     """Main entry point for nunmai CLI."""
+    # Nunmai: install pending updates automatically (updates.auto, default on).
+    try:
+        from nunmai_cli.banner import maybe_auto_update
+        maybe_auto_update(sys.argv[1:])
+    except Exception:
+        pass
     # Cosmetic: make the process show up as 'nunmai' instead of 'python3.11'
     # in ps/top/htop.  Non-fatal — just a nicer UX.
     _set_process_title()
@@ -13187,6 +13193,20 @@ def main():
     moa_delete = moa_subparsers.add_parser("delete", aliases=["rm"], help="Delete a MoA preset")
     moa_delete.add_argument("name", help="Preset name to delete")
     moa_parser.set_defaults(func=cmd_moa)
+
+    # =========================================================================
+    # brain command — connect AI subscriptions / keys (primary + fallbacks)
+    # =========================================================================
+    from nunmai_cli.brain_cmd import cmd_brain
+
+    brain_parser = subparsers.add_parser(
+        "brain",
+        help="Connect your AI accounts (Claude, ChatGPT, Kimi, Gemini, OpenRouter) in one step",
+        description="Pick the AI subscriptions/keys you own; Nunmai wires them as primary + fallback chain.",
+    )
+    brain_parser.add_argument("--providers", help="Comma-separated provider ids in preference order (non-interactive)")
+    brain_parser.add_argument("--skip-connect", action="store_true", help=argparse.SUPPRESS)
+    brain_parser.set_defaults(func=cmd_brain)
 
     # =========================================================================
     # fallback command — manage the fallback provider chain

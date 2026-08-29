@@ -16,6 +16,7 @@ param(
     [switch]$NoVenv,
     [switch]$SkipSetup,
     [switch]$SkipComputerUse,
+    [switch]$Full,
     [string]$Branch = "main",
     # -Commit and -Tag are higher-precedence variants of -Branch for users
     # who need reproducible installs (desktop installer pinning, CI, release
@@ -462,7 +463,7 @@ function Write-Banner {
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
     Write-Host "|             * Nunmai Engine Installer                    |" -ForegroundColor Magenta
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
-    Write-Host "|  An open source AI agent by Nunmai Research.              |" -ForegroundColor Magenta
+    Write-Host "|  Lightweight AI engine by Nunmai Research.                 |" -ForegroundColor Magenta
     Write-Host "+---------------------------------------------------------+" -ForegroundColor Magenta
     Write-Host ""
 }
@@ -4746,7 +4747,7 @@ function Stage-SystemPackages   { Install-SystemPackages }
 function Stage-Repository       { Install-Repository }
 function Stage-Venv             { Resolve-UvCmd; Install-Venv }
 function Stage-Dependencies     { Resolve-UvCmd; Install-Dependencies }
-function Stage-NodeDeps         { Install-NodeDeps }
+function Stage-NodeDeps         { if ($Full) { Install-NodeDeps } else { Write-Info "Browser/computer-use tools skipped (lightweight install). Re-run with -Full to add them." } }
 function Stage-Desktop          { Install-DesktopVoiceDeps; Install-Desktop }
 function Stage-Path             { Set-PathVariable }
 function Stage-ConfigTemplates  { Copy-ConfigTemplates }

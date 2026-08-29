@@ -3433,6 +3433,9 @@ DEFAULT_CONFIG = {
 
     # ``nunmai update`` behaviour.
     "updates": {
+        # Nunmai: install available updates automatically at launch (git
+        # installs). Set false to only show the "update available" notice.
+        "auto": True,
         # Pre-update safety backup — ONE consolidated mechanism, three modes:
         #
         #   quick (default) — snapshot critical small state files (pairing

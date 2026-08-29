@@ -86,7 +86,7 @@ HERO_LINES = [
     "             ▀████▀             ",
     "               ▀▀               ",
 ]
-HERO_GRADIENT = [f"{LOGO_FG} on {LOGO_BG}"] * len(HERO_LINES)
+HERO_GRADIENT = [LOGO_FG] * len(HERO_LINES)  # glyph only, no badge background
 
 
 def rich_block(lines: list[str], grad: list[str]) -> str:
