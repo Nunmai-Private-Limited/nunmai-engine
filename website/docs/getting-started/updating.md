@@ -198,7 +198,7 @@ You no longer need to wrap `nunmai update` in `screen` or `tmux` to survive a te
 nunmai --version
 ```
 
-Compare against the latest release at the [GitHub releases page](https://github.com/NousResearch/hermes-agent/releases).
+Compare against the latest release at the [GitHub releases page](https://github.com/Nunmai-Private-Limited/nunmai-engine/releases).
 
 ### Updating from Messaging Platforms
 

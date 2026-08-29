@@ -784,7 +784,7 @@ describe('createGatewayEventHandler', () => {
     const appended: Msg[] = []
 
     const skin = {
-      colors: { banner_title: '#00FF88', banner_text: '#FFF8DC' },
+      colors: { banner_title: '#00FF88', banner_text: '#EFE9D7' },
       light_colors: { banner_title: '#8B0000', banner_text: '#22201C' }
     }
 

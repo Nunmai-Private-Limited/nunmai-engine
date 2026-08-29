@@ -2948,14 +2948,14 @@ def _prune_orphaned_branches(repo_root: str) -> None:
 # ============================================================================
 
 # Color palette (hex colors for Rich markup):
-# - Gold: #FFD700 (headers, highlights)
-# - Amber: #FFBF00 (secondary highlights)
-# - Bronze: #CD7F32 (tertiary elements)
-# - Light: #FFF8DC (text)
-# - Dim: #B8860B (muted text)
+# - Gold: #6BE7C8 (headers, highlights)
+# - Amber: #3FCFA9 (secondary highlights)
+# - Bronze: #0B6B4F (tertiary elements)
+# - Light: #EFE9D7 (text)
+# - Dim: #2E9C7C (muted text)
 
 # ANSI building blocks for conversation display
-_ACCENT_ANSI_DEFAULT = "\033[1;38;2;255;215;0m"  # True-color #FFD700 bold — fallback
+_ACCENT_ANSI_DEFAULT = "\033[1;38;2;107;231;200m"  # True-color #6BE7C8 bold — fallback
 _BOLD = "\033[1m"
 _RST = "\033[0m"
 _STREAM_PAD = ""  # No indent for streamed response text — leading whitespace pollutes
@@ -2987,7 +2987,7 @@ def _hex_to_ansi(hex_color: str, *, bold: bool = False) -> str:
 # Light/dark terminal mode detection.
 #
 # Mirrors ui-tui/src/theme.ts detectLightMode().  Used to decide whether
-# to remap "near-white" skin colors (e.g. #FFF8DC banner_text, #B8860B
+# to remap "near-white" skin colors (e.g. #EFE9D7 banner_text, #2E9C7C
 # banner_dim) to darker equivalents that are readable on a light
 # Terminal.app / iTerm2 background.
 #
@@ -3265,21 +3265,21 @@ def _detect_light_mode() -> bool:
 #
 # IMPORTANT: only remap colors that are used as STANDALONE foregrounds
 # on the terminal's background.  Don't remap colors that are paired
-# with a dark bg (e.g. status bar text on bg:#1a1a2e) — those would
+# with a dark bg (e.g. status bar text on bg:#052819) — those would
 # become invisible the OTHER direction (dark gray on dark navy).
 _LIGHT_MODE_REMAP: dict[str, str] = {
     # Original (dark-mode) -> Light-mode replacement (darker, readable)
-    "#FFF8DC": "#1A1A1A",   # cornsilk -> near-black
-    "#FFD700": "#9A6B00",   # gold -> dark goldenrod (readable on cream)
-    "#FFBF00": "#8A5A00",   # amber -> dark amber
-    "#B8860B": "#5C4500",   # dark goldenrod -> deeper brown (more contrast)
-    "#DAA520": "#6B4F00",   # goldenrod -> dark olive
+    "#EFE9D7": "#1A1A1A",   # cornsilk -> near-black
+    "#6BE7C8": "#9A6B00",   # gold -> dark goldenrod (readable on cream)
+    "#3FCFA9": "#8A5A00",   # amber -> dark amber
+    "#2E9C7C": "#5C4500",   # dark goldenrod -> deeper brown (more contrast)
+    "#D6B36C": "#6B4F00",   # goldenrod -> dark olive
     "#F1E6CF": "#1A1A1A",   # cream -> near-black
     "#c9d1d9": "#24292F",   # github-light fg
     "#EAF7FF": "#0F1B26",   # ice
     "#F5F5F5": "#1A1A1A",
     "#FFF0D4": "#1A1A1A",
-    "#CD7F32": "#8A4F1A",   # bronze -> darker bronze
+    "#0B6B4F": "#8A4F1A",   # bronze -> darker bronze
     "#FFEFB5": "#3A2A00",
     # NOTE: skipping #C0C0C0/#888888/#555555/#8B8682 — those are
     # status-bar foregrounds paired with dark navy bg, where dark
@@ -3348,7 +3348,7 @@ class _SkinAwareAnsi:
     force re-resolution after a ``/skin`` switch.
     """
 
-    def __init__(self, skin_key: str, fallback_hex: str = "#FFD700", *, bold: bool = False):
+    def __init__(self, skin_key: str, fallback_hex: str = "#6BE7C8", *, bold: bool = False):
         self._skin_key = skin_key
         self._fallback_hex = fallback_hex
         self._bold = bold
@@ -3377,11 +3377,11 @@ class _SkinAwareAnsi:
         self._cached = None
 
 
-_ACCENT = _SkinAwareAnsi("response_border", "#FFD700", bold=True)
+_ACCENT = _SkinAwareAnsi("response_border", "#6BE7C8", bold=True)
 # Use ANSI dim+italic attributes (\x1b[2;3m) instead of a hardcoded
 # hex color so dim/thinking text inherits the terminal's default
 # foreground color and stays readable in both light and dark
-# Terminal.app modes.  Hardcoded skin colors like #B8860B
+# Terminal.app modes.  Hardcoded skin colors like #2E9C7C
 # (dark goldenrod) become invisible against light cream backgrounds.
 _DIM = "\x1b[2;3m"
 
@@ -3408,9 +3408,9 @@ def _accent_hex() -> str:
     """Return the active skin accent color for legacy CLI output lines."""
     try:
         from nunmai_cli.skin_engine import get_active_skin
-        return get_active_skin().get_color("ui_accent", "#FFBF00")
+        return get_active_skin().get_color("ui_accent", "#3FCFA9")
     except Exception:
-        return "#FFBF00"
+        return "#3FCFA9"
 
 
 def _rich_text_from_ansi(text: str) -> _RichText:
@@ -4709,29 +4709,30 @@ class ChatConsole:
         yield self
 
 # ASCII Art - NUNMAI-AGENT logo (full width, single line - requires ~95 char terminal)
-NUNMAI_AGENT_LOGO = """[bold #FFD700]██╗  ██╗███████╗██████╗ ███╗   ███╗███████╗███████╗       █████╗  ██████╗ ███████╗███╗   ██╗████████╗[/]
-[bold #FFD700]██║  ██║██╔════╝██╔══██╗████╗ ████║██╔════╝██╔════╝      ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝[/]
-[#FFBF00]███████║█████╗  ██████╔╝██╔████╔██║█████╗  ███████╗█████╗███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║[/]
-[#FFBF00]██╔══██║██╔══╝  ██╔══██╗██║╚██╔╝██║██╔══╝  ╚════██║╚════╝██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║[/]
-[#CD7F32]██║  ██║███████╗██║  ██║██║ ╚═╝ ██║███████╗███████║      ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║[/]
-[#CD7F32]╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝      ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝[/]"""
+NUNMAI_AGENT_LOGO = """[bold #6BE7C8]███╗   ██╗██╗   ██╗███╗   ██╗███╗   ███╗ █████╗ ██╗    ███████╗███╗   ██╗ ██████╗ ██╗███╗   ██╗███████╗[/]
+[bold #6BE7C8]████╗  ██║██║   ██║████╗  ██║████╗ ████║██╔══██╗██║    ██╔════╝████╗  ██║██╔════╝ ██║████╗  ██║██╔════╝[/]
+[#3FCFA9]██╔██╗ ██║██║   ██║██╔██╗ ██║██╔████╔██║███████║██║    █████╗  ██╔██╗ ██║██║  ███╗██║██╔██╗ ██║█████╗  [/]
+[#3FCFA9]██║╚██╗██║██║   ██║██║╚██╗██║██║╚██╔╝██║██╔══██║██║    ██╔══╝  ██║╚██╗██║██║   ██║██║██║╚██╗██║██╔══╝  [/]
+[#0B6B4F]██║ ╚████║╚██████╔╝██║ ╚████║██║ ╚═╝ ██║██║  ██║██║    ███████╗██║ ╚████║╚██████╔╝██║██║ ╚████║███████╗[/]
+[#0B6B4F]╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝    ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝[/]"""
 
 # ASCII Art - Nunmai Caduceus (compact, fits in left panel)
-NUNMAI_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#CD7F32]⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀[/]
-[#FFBF00]⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀[/]
-[#FFBF00]⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀[/]
-[#FFD700]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⡿⠛⢁⡈⠛⢿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#FFD700]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⣿⣦⣤⣈⠁⢠⣴⣿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#FFBF00]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠻⢿⣿⣦⡉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#FFBF00]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢷⣦⣈⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⠦⠈⠙⠿⣦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣤⡈⠁⢤⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠑⢶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⢰⡆⠈⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⠈⣡⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
-[#B8860B]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]"""
+NUNMAI_CADUCEUS = """[#EFE9D7 on #052819]         ▄▄██████████▄▄         [/]
+[#EFE9D7 on #052819]       ▄████████████████▄       [/]
+[#EFE9D7 on #052819]     ▄███████▀▀▀▀▀▀███████▄     [/]
+[#EFE9D7 on #052819]    ▄██████▀        ▀██████▄    [/]
+[#EFE9D7 on #052819]    ██████            ██████    [/]
+[#EFE9D7 on #052819]    █████              █████    [/]
+[#EFE9D7 on #052819]    █████              █████    [/]
+[#EFE9D7 on #052819]    ██████            ██████    [/]
+[#EFE9D7 on #052819]    ▀█████▄          ▄█████     [/]
+[#EFE9D7 on #052819]     ▀█████▄   ▄▄   ██████▀     [/]
+[#EFE9D7 on #052819]      ▀███▀  ▄████▄  ▀███▀      [/]
+[#EFE9D7 on #052819]        ▀  ▄████████▄  ▀        [/]
+[#EFE9D7 on #052819]          ████████████          [/]
+[#EFE9D7 on #052819]           ▀████████▀           [/]
+[#EFE9D7 on #052819]             ▀████▀             [/]
+[#EFE9D7 on #052819]               ▀▀               [/]"""
 
 
 
@@ -4744,13 +4745,13 @@ def _build_compact_banner() -> str:
         _skin = None
 
     skin_name = getattr(_skin, "name", "default") if _skin else "default"
-    border_color = _skin.get_color("banner_border", "#FFD700") if _skin else "#FFD700"
-    title_color = _skin.get_color("banner_title", "#FFBF00") if _skin else "#FFBF00"
-    dim_color = _skin.get_color("banner_dim", "#B8860B") if _skin else "#B8860B"
+    border_color = _skin.get_color("banner_border", "#6BE7C8") if _skin else "#6BE7C8"
+    title_color = _skin.get_color("banner_title", "#3FCFA9") if _skin else "#3FCFA9"
+    dim_color = _skin.get_color("banner_dim", "#2E9C7C") if _skin else "#2E9C7C"
 
     if skin_name == "default":
-        line1 = "⚕ NOUS NUNMAI - AI Agent Framework"
-        tiny_line = "⚕ NOUS NUNMAI"
+        line1 = "✦ NUNMAI ENGINE - AI Engine by Nunmai Research"
+        tiny_line = "✦ NUNMAI ENGINE"
     else:
         agent_name = _skin.get_branding("agent_name", "Nunmai Engine") if _skin else "Nunmai Engine"
         line1 = f"{agent_name} - AI Agent Framework"
@@ -7187,7 +7188,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             yolo_active = self._is_session_yolo_active()
             goal_segment = self._status_bar_goal_segment(snapshot)
             if width < 52:
-                text = f"{battery_prefix}⚕ {snapshot['model_short']} · {duration_label}"
+                text = f"{battery_prefix}✦ {snapshot['model_short']} · {duration_label}"
                 if goal_segment:
                     text += f" · {goal_segment}"
                 if focus_label:
@@ -7196,7 +7197,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     text += " · ⚠ YOLO"
                 return self._right_align_status_title(text, session_title, width)
             if width < 76:
-                parts = [f"⚕ {snapshot['model_short']}", percent_label]
+                parts = [f"✦ {snapshot['model_short']}", percent_label]
                 if battery_label:
                     parts.insert(0, battery_label)
                 compressions = snapshot.get("compressions", 0)
@@ -7228,7 +7229,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 context_label = "ctx --"
 
             compressions = snapshot.get("compressions", 0)
-            parts = [f"⚕ {snapshot['model_short']}", context_label, percent_label]
+            parts = [f"✦ {snapshot['model_short']}", context_label, percent_label]
             if battery_label:
                 parts.insert(0, battery_label)
             if compressions:
@@ -7257,7 +7258,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 parts.append("⚠ YOLO")
             return self._right_align_status_title(" │ ".join(parts), session_title, width)
         except Exception:
-            return f"⚕ {self.model if getattr(self, 'model', None) else 'Nunmai'}"
+            return f"✦ {self.model if getattr(self, 'model', None) else 'Nunmai'}"
 
     def _get_status_bar_fragments(self):
         if not self._status_bar_visible or getattr(self, '_model_picker_state', None) or getattr(self, '_command_palette_state', None):
@@ -7280,7 +7281,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
 
             if width < 52:
                 frags = [
-                    ("class:status-bar", " ⚕ "),
+                    ("class:status-bar", " ✦ "),
                     ("class:status-bar-strong", snapshot["model_short"]),
                     ("class:status-bar-dim", " · "),
                     ("class:status-bar-dim", duration_label),
@@ -7304,7 +7305,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     bg_proc_count = snapshot.get("active_background_processes", 0)
                     bg_subagent_count = snapshot.get("active_background_subagents", 0)
                     frags = [
-                        ("class:status-bar", " ⚕ "),
+                        ("class:status-bar", " ✦ "),
                         ("class:status-bar-strong", snapshot["model_short"]),
                         ("class:status-bar-dim", " · "),
                         (self._status_bar_context_style(percent), percent_label),
@@ -7349,7 +7350,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     bg_proc_count = snapshot.get("active_background_processes", 0)
                     bg_subagent_count = snapshot.get("active_background_subagents", 0)
                     frags = [
-                        ("class:status-bar", " ⚕ "),
+                        ("class:status-bar", " ✦ "),
                         ("class:status-bar-strong", snapshot["model_short"]),
                         ("class:status-bar-dim", " │ "),
                         ("class:status-bar-dim", context_label),
@@ -7419,7 +7420,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     frags.append(("class:status-bar-strong", stash_indicator))
 
             # Battery is the first status-bar element when enabled: prepend it
-            # ahead of the leading ⚕ marker in whichever width tier ran above.
+            # ahead of the leading ✦ marker in whichever width tier ran above.
             if battery_label:
                 frags[0:0] = [
                     ("class:status-bar", " "),
@@ -8062,11 +8063,11 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             try:
                 from nunmai_cli.skin_engine import get_active_skin
                 _skin = get_active_skin()
-                label = _skin.get_branding("response_label", "⚕ Nunmai")
-                _text_hex = _skin.get_color("banner_text", "#FFF8DC")
+                label = _skin.get_branding("response_label", "✦ Nunmai")
+                _text_hex = _skin.get_color("banner_text", "#EFE9D7")
             except Exception:
-                label = "⚕ Nunmai"
-                _text_hex = "#FFF8DC"
+                label = "✦ Nunmai"
+                _text_hex = "#EFE9D7"
             # Build a true-color ANSI escape for the response text color
             # so streamed content matches the Rich Panel appearance.
             try:
@@ -9306,11 +9307,11 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         try:
             from nunmai_cli.skin_engine import get_active_skin
             skin = get_active_skin()
-            separator_color = skin.get_color("banner_dim", "#B8860B")
-            accent_color = skin.get_color("ui_accent", "#FFBF00")
-            label_color = skin.get_color("ui_label", "#DAA520")
+            separator_color = skin.get_color("banner_dim", "#2E9C7C")
+            accent_color = skin.get_color("ui_accent", "#3FCFA9")
+            label_color = skin.get_color("ui_label", "#D6B36C")
         except Exception:
-            separator_color, accent_color, label_color = "#B8860B", "#FFBF00", "cyan"
+            separator_color, accent_color, label_color = "#2E9C7C", "#3FCFA9", "cyan"
         toolsets_info = ""
         if self.enabled_toolsets and "all" not in self.enabled_toolsets:
             toolsets_info = f" [dim {separator_color}]·[/] [{label_color}]toolsets: {', '.join(self.enabled_toolsets)}[/]"
@@ -12245,9 +12246,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     _tip = get_random_tip()
                     try:
                         from nunmai_cli.skin_engine import get_active_skin
-                        _tip_color = get_active_skin().get_color("banner_dim", "#B8860B")
+                        _tip_color = get_active_skin().get_color("banner_dim", "#2E9C7C")
                     except Exception:
-                        _tip_color = "#B8860B"
+                        _tip_color = "#2E9C7C"
                     cc.print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
                 except Exception:
                     pass
@@ -12260,9 +12261,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     _tip = get_random_tip()
                     try:
                         from nunmai_cli.skin_engine import get_active_skin
-                        _tip_color = get_active_skin().get_color("banner_dim", "#B8860B")
+                        _tip_color = get_active_skin().get_color("banner_dim", "#2E9C7C")
                     except Exception:
-                        _tip_color = "#B8860B"
+                        _tip_color = "#2E9C7C"
                     self._console_print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
                 except Exception:
                     pass
@@ -16666,7 +16667,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                         if not _streaming_box_opened:
                             _streaming_box_opened = True
                             w = self._scrollback_box_width(getattr(self.console, "width", 80))
-                            label = " ⚕ Nunmai "
+                            label = " ✦ Nunmai "
                             if self.show_timestamps:
                                 label = f"{label}{datetime.now().strftime(getattr(self, 'timestamp_format', '%H:%M'))} "
                             fill = w - 2 - NunmaiCLI._status_bar_display_width(label)
@@ -17098,13 +17099,13 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 try:
                     from nunmai_cli.skin_engine import get_active_skin
                     _skin = get_active_skin()
-                    label = _skin.get_branding("response_label", "⚕ Nunmai")
-                    _resp_color = _maybe_remap_for_light_mode(_skin.get_color("response_border", "#CD7F32"))
-                    _resp_text = _maybe_remap_for_light_mode(_skin.get_color("banner_text", "#FFF8DC"))
+                    label = _skin.get_branding("response_label", "✦ Nunmai")
+                    _resp_color = _maybe_remap_for_light_mode(_skin.get_color("response_border", "#0B6B4F"))
+                    _resp_text = _maybe_remap_for_light_mode(_skin.get_color("banner_text", "#EFE9D7"))
                 except Exception:
-                    label = "⚕ Nunmai"
-                    _resp_color = _maybe_remap_for_light_mode("#CD7F32")
-                    _resp_text = _maybe_remap_for_light_mode("#FFF8DC")
+                    label = "✦ Nunmai"
+                    _resp_color = _maybe_remap_for_light_mode("#0B6B4F")
+                    _resp_text = _maybe_remap_for_light_mode("#EFE9D7")
 
                 is_error_response = result and (result.get("failed") or result.get("partial"))
                 already_streamed = self._stream_started and self._stream_box_opened and not is_error_response
@@ -17158,9 +17159,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     try:
                         ChatConsole().print(Panel(
                             "\n".join(_cta_lines),
-                            title="[#CD7F32 bold]⚡ Out of credits[/]",
+                            title="[#0B6B4F bold]⚡ Out of credits[/]",
                             title_align="left",
-                            border_style="#CD7F32",
+                            border_style="#0B6B4F",
                             box=rich_box.HORIZONTALS,
                             padding=(1, 4),
                             width=self._scrollback_box_width(),
@@ -17466,9 +17467,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         else:
             try:
                 from nunmai_cli.skin_engine import get_active_goodbye
-                goodbye = get_active_goodbye("Goodbye! ⚕")
+                goodbye = get_active_goodbye("Goodbye! ✦")
             except Exception:
-                goodbye = "Goodbye! ⚕"
+                goodbye = "Goodbye! ✦"
             print(goodbye)
 
     def _get_tui_prompt_symbols(self) -> tuple[str, str]:
@@ -17557,7 +17558,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         if self._command_running:
             return _state_fragment("class:prompt-working", self._command_spinner_frame())
         if self._agent_running:
-            return _state_fragment("class:prompt-working", "⚕")
+            return _state_fragment("class:prompt-working", "✦")
         if self._voice_mode:
             return _state_fragment("class:voice-prompt", "🎤")
         return [("class:prompt", symbol)]
@@ -17581,13 +17582,13 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         except Exception:
             pass
         # Light-mode remap on the style strings.  Each value is a pt
-        # style string like "bg:#1a1a2e #C0C0C0 bold" — split on space,
+        # style string like "bg:#052819 #C0C0C0 bold" — split on space,
         # rewrite any "#XXX" tokens (including "bg:#XXX") through the
         # light-mode remap, rejoin.
         #
         # CRITICAL: skip the remap entirely when a style string already
         # specifies its own bg (e.g. status-bar / completion-menu styles
-        # with `bg:#1a1a2e ...`).  Those colors were tuned for that
+        # with `bg:#052819 ...`).  Those colors were tuned for that
         # specific dark bg and remapping the FG to a dark equivalent
         # would produce dark-on-dark (invisible).  The terminal's BG
         # mode is irrelevant — what matters is the bg the style itself
@@ -17748,10 +17749,10 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             from nunmai_cli.skin_engine import get_active_skin
             _welcome_skin = get_active_skin()
             _welcome_text = _welcome_skin.get_branding("welcome", "Welcome to Nunmai Engine! Type your message or /help for commands.")
-            _welcome_color = _welcome_skin.get_color("banner_text", "#FFF8DC")
+            _welcome_color = _welcome_skin.get_color("banner_text", "#EFE9D7")
         except Exception:
             _welcome_text = "Welcome to Nunmai Engine! Type your message or /help for commands."
-            _welcome_color = "#FFF8DC"
+            _welcome_color = "#EFE9D7"
         self._console_print(f"[{_welcome_color}]{_welcome_text}[/]")
 
         # Warm the /model picker's provider-models cache off-thread during this
@@ -17817,9 +17818,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             )
             if not is_seen(self.config, OPENCLAW_RESIDUE_FLAG) and detect_openclaw_residue():
                 try:
-                    _resid_color = _welcome_skin.get_color("banner_dim", "#B8860B")
+                    _resid_color = _welcome_skin.get_color("banner_dim", "#2E9C7C")
                 except Exception:
-                    _resid_color = "#B8860B"
+                    _resid_color = "#2E9C7C"
                 self._console_print(f"[{_resid_color}]{openclaw_residue_hint_cli()}[/]")
                 try:
                     from nunmai_cli.config import get_config_path as _get_cfg_path_resid
@@ -17833,9 +17834,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             from nunmai_cli.tips import get_random_tip
             _tip = get_random_tip()
             try:
-                _tip_color = _welcome_skin.get_color("banner_dim", "#B8860B")
+                _tip_color = _welcome_skin.get_color("banner_dim", "#2E9C7C")
             except Exception:
-                _tip_color = "#B8860B"
+                _tip_color = "#2E9C7C"
             self._console_print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
         except Exception:
             pass  # Tips are non-critical — never break startup
@@ -20313,58 +20314,58 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             # Input area / prompt: empty style strings inherit the
             # terminal's default foreground/background, so the typed
             # text is readable in both light and dark Terminal.app
-            # color schemes.  (Hardcoding a near-white #FFF8DC made
+            # color schemes.  (Hardcoding a near-white #EFE9D7 made
             # input invisible on light backgrounds.)
             'input-area': '',
             'placeholder': '#888888 italic',
             'prompt': '',
             'prompt-working': '#888888 italic',
             'hint': '#888888 italic',
-            'status-bar': 'bg:#1a1a2e #C0C0C0',
-            'status-bar-strong': 'bg:#1a1a2e #FFD700 bold',
-            'status-bar-dim': 'bg:#1a1a2e #8B8682',
-            'status-bar-good': 'bg:#1a1a2e #8FBC8F bold',
-            'status-bar-warn': 'bg:#1a1a2e #FFD700 bold',
-            'status-bar-bad': 'bg:#1a1a2e #FF8C00 bold',
-            'status-bar-critical': 'bg:#1a1a2e #FF6B6B bold',
-            'status-bar-yolo': 'bg:#1a1a2e #FF4444 bold',
-            'status-bar-session-title': 'bg:#FFD700 #1a1a2e bold',
+            'status-bar': 'bg:#052819 #C0C0C0',
+            'status-bar-strong': 'bg:#052819 #6BE7C8 bold',
+            'status-bar-dim': 'bg:#052819 #8B8682',
+            'status-bar-good': 'bg:#052819 #8FBC8F bold',
+            'status-bar-warn': 'bg:#052819 #6BE7C8 bold',
+            'status-bar-bad': 'bg:#052819 #FF8C00 bold',
+            'status-bar-critical': 'bg:#052819 #FF6B6B bold',
+            'status-bar-yolo': 'bg:#052819 #FF4444 bold',
+            'status-bar-session-title': 'bg:#6BE7C8 #052819 bold',
             # Bronze horizontal rules around the input area
-            'input-rule': '#CD7F32',
+            'input-rule': '#0B6B4F',
             # Clipboard image attachment badges
             'image-badge': '#87CEEB bold',
-            'completion-menu': 'bg:#1a1a2e #FFF8DC',
-            'completion-menu.completion': 'bg:#1a1a2e #FFF8DC',
-            'completion-menu.completion.current': 'bg:#333355 #FFD700',
-            'completion-menu.meta.completion': 'bg:#1a1a2e #888888',
-            'completion-menu.meta.completion.current': 'bg:#333355 #FFBF00',
+            'completion-menu': 'bg:#052819 #EFE9D7',
+            'completion-menu.completion': 'bg:#052819 #EFE9D7',
+            'completion-menu.completion.current': 'bg:#1F4A3D #6BE7C8',
+            'completion-menu.meta.completion': 'bg:#052819 #888888',
+            'completion-menu.meta.completion.current': 'bg:#1F4A3D #3FCFA9',
             # Clarify question panel
-            'clarify-border': '#CD7F32',
-            'clarify-title': '#FFD700 bold',
-            'clarify-question': '#FFF8DC bold',
+            'clarify-border': '#0B6B4F',
+            'clarify-title': '#6BE7C8 bold',
+            'clarify-question': '#EFE9D7 bold',
             'clarify-choice': '#AAAAAA',
-            'clarify-selected': '#FFD700 bold',
-            'clarify-active-other': '#FFD700 italic',
+            'clarify-selected': '#6BE7C8 bold',
+            'clarify-active-other': '#6BE7C8 italic',
             'clarify-answer': '#98FB98',
-            'clarify-countdown': '#CD7F32',
+            'clarify-countdown': '#0B6B4F',
             # Sudo password panel
             'sudo-prompt': '#FF6B6B bold',
-            'sudo-border': '#CD7F32',
+            'sudo-border': '#0B6B4F',
             'sudo-title': '#FF6B6B bold',
-            'sudo-text': '#FFF8DC',
+            'sudo-text': '#EFE9D7',
             # Dangerous command approval panel
-            'approval-border': '#CD7F32',
+            'approval-border': '#0B6B4F',
             'approval-title': '#FF8C00 bold',
-            'approval-desc': '#FFF8DC bold',
+            'approval-desc': '#EFE9D7 bold',
             'approval-cmd': '#AAAAAA italic',
             'approval-choice': '#AAAAAA',
-            'approval-selected': '#FFD700 bold',
+            'approval-selected': '#6BE7C8 bold',
             # Voice mode
             'voice-prompt': '#87CEEB',
             'voice-recording': '#FF4444 bold',
             'voice-processing': '#FFA500 italic',
-            'voice-status': 'bg:#1a1a2e #87CEEB',
-            'voice-status-recording': 'bg:#1a1a2e #FF4444 bold',
+            'voice-status': 'bg:#052819 #87CEEB',
+            'voice-status-recording': 'bg:#052819 #FF4444 bold',
         }
         style = PTStyle.from_dict(self._build_tui_style_dict())
 

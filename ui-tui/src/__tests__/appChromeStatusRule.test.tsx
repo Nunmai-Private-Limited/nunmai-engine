@@ -117,7 +117,7 @@ describe('StatusRule session title', () => {
     expect(rendered).toContain('weekly-digest')
     expect(rendered).not.toContain('~/repo')
     // Regression for issue #82465: a raw, full-saturation accent-hue
-    // background (e.g. #FFBF00 on DARK_SEEDS) paired with statusFg (a
+    // background (e.g. #3FCFA9 on DARK_SEEDS) paired with statusFg (a
     // near-white tone never designed to sit on it) rendered at roughly a
     // 1.5-2:1 contrast ratio -- unreadable. No background fill at all;
     // the accent color goes on the text instead, matching the theme's

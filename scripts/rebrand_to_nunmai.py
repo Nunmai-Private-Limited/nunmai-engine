@@ -48,6 +48,10 @@ POST_REPLACEMENTS = [
     # Installer / updater clone URLs -> Nunmai's own repo (override org here)
     (re.compile(r"git@github\.com:NousResearch/hermes-agent\.git"), "git@github.com:Nunmai-Private-Limited/nunmai-engine.git"),
     (re.compile(r"https://github\.com/NousResearch/hermes-agent\.git"), "https://github.com/Nunmai-Private-Limited/nunmai-engine.git"),
+    # Update-check / release endpoints -> Nunmai repo (docker image + issue links stay upstream)
+    (re.compile(r"api\.github\.com/repos/nousresearch/hermes-agent"), "api.github.com/repos/Nunmai-Private-Limited/nunmai-engine"),
+    (re.compile(r'"github\.com/nousresearch/hermes-agent"'), '"github.com/nunmai-private-limited/nunmai-engine"'),
+    (re.compile(r"https://github\.com/NousResearch/hermes-agent/releases"), "https://github.com/Nunmai-Private-Limited/nunmai-engine/releases"),
     # One-line installer host
     (re.compile(r"https://nunmai\.in/install\.(sh|ps1)"), r"https://nunmai-engine.nunmai.in/install.\1"),
 ]

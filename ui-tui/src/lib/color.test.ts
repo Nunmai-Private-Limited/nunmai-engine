@@ -46,7 +46,7 @@ describe('contrast', () => {
   })
 
   it('ensureContrast lifts failing colors monotonically and leaves passing ones alone', () => {
-    const pale = '#FFF8DC'
+    const pale = '#EFE9D7'
     const fixed = ensureContrast(pale, '#ffffff', 3.9)
 
     expect(contrastRatio(fixed, '#ffffff')!).toBeGreaterThanOrEqual(3.9)

@@ -387,7 +387,7 @@ gateway:
     not_git_repo:            "✗ Not a git repository — cannot update."
     nunmai_cmd_not_found:    "✗ Could not locate the `nunmai` command. Nunmai is running, but the update command could not find the executable on PATH or via the current Python interpreter. Try running `nunmai update` manually in your terminal."
     start_failed:            "✗ Failed to start update: {error}"
-    starting:                "⚕ Starting Nunmai update… I'll stream progress here."
+    starting:                "✦ Starting Nunmai update… I'll stream progress here."
 
   usage:
     rate_limits:              "⏱️ **Rate Limits:** {state}"

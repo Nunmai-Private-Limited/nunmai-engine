@@ -237,7 +237,7 @@ class CLIAgentSetupMixin:
         from cli import _cprint, logger
 
         _cprint("")
-        _cprint("⚕ No inference provider is configured yet — let's fix that.")
+        _cprint("✦ No inference provider is configured yet — let's fix that.")
         _cprint("  You'll pick a provider (Nous Portal OAuth is the fastest; "
                 "no API key needed) and a model.")
         try:
@@ -878,13 +878,13 @@ class CLIAgentSetupMixin:
         try:
             from nunmai_cli.skin_engine import get_active_skin
             _skin = get_active_skin()
-            _history_text_c = _skin.get_color("banner_text", "#FFF8DC")
-            _session_label_c = _skin.get_color("session_label", "#DAA520")
+            _history_text_c = _skin.get_color("banner_text", "#EFE9D7")
+            _session_label_c = _skin.get_color("session_label", "#D6B36C")
             _session_border_c = _skin.get_color("session_border", "#8B8682")
             _assistant_label_c = _skin.get_color("ui_ok", "#8FBC8F")
         except Exception:
-            _history_text_c = "#FFF8DC"
-            _session_label_c = "#DAA520"
+            _history_text_c = "#EFE9D7"
+            _session_label_c = "#D6B36C"
             _session_border_c = "#8B8682"
             _assistant_label_c = "#8FBC8F"
 

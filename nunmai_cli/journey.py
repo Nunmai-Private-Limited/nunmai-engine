@@ -34,9 +34,9 @@ def _primary_hex() -> str:
         from nunmai_cli.skin_engine import get_active_skin
 
         skin = get_active_skin()
-        return skin.get_color("ui_primary", "") or skin.get_color("banner_title", "#FFD700")
+        return skin.get_color("ui_primary", "") or skin.get_color("banner_title", "#6BE7C8")
     except Exception:
-        return "#FFD700"
+        return "#6BE7C8"
 
 
 @lru_cache(maxsize=1)

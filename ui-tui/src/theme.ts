@@ -251,10 +251,10 @@ export function themeToneHex(tone: string): string {
 
 const BRAND: ThemeBrand = {
   name: 'Nunmai Engine',
-  icon: '⚕',
+  icon: '✦',
   prompt: '❯',
   welcome: 'Type your message or /help for commands.',
-  goodbye: 'Goodbye! ⚕',
+  goodbye: 'Goodbye! ✦',
   tool: '┊',
   helpHeader: '(^_^)? Commands'
 }
@@ -368,25 +368,25 @@ export function buildPalette(seeds: ThemeSeeds, isLight: boolean): ThemeColors {
 }
 
 export const DARK_SEEDS: ThemeSeeds = {
-  accent: '#FFBF00',
+  accent: '#3FCFA9',
   // The classic Nunmai navy surfaces are IDENTITY, not derivation drift —
   // keep them as explicit fill seeds (the ladder derives them for skins
   // that don't care).
-  activeRow: '#333355',
+  activeRow: '#1F4A3D',
   bg: '#101014',
-  border: '#CD7F32',
+  border: '#0B6B4F',
   error: '#ef5350',
   ok: '#4caf50',
-  primary: '#FFD700',
-  prompt: '#FFF8DC',
-  selection: '#3a3a55',
+  primary: '#6BE7C8',
+  prompt: '#EFE9D7',
+  selection: '#1B3A32',
   shellDollar: '#4dabf7',
   statusBad: '#FF8C00',
   statusCritical: '#FF6B6B',
   statusGood: '#8FBC8F',
-  statusWarn: '#FFD700',
-  surface: '#1a1a2e',
-  text: '#FFF8DC',
+  statusWarn: '#6BE7C8',
+  surface: '#052819',
+  text: '#EFE9D7',
   warn: '#ffa726'
 }
 
@@ -453,7 +453,7 @@ export const LIGHT_THEME: Theme = {
 // hierarchy, not a bug. So the floors are barely-visible rescues only:
 //   * DISPLAY 1.45 sits just above slate-pastel territory (#c9d1d9 = 1.54,
 //     passes raw, byte-identical) but just below true invisibility
-//     (default's cream #FFF8DC = 1.08, gets rescued).
+//     (default's cream #EFE9D7 = 1.08, gets rescued).
 //   * SEMANTIC 2.2 for alert colors (ok/error/warn/status) — they carry
 //     meaning and must never vanish.
 // The lift itself is xterm.js's own multiplicative algorithm
@@ -465,8 +465,8 @@ export const LIGHT_THEME: Theme = {
 // terminal window compositing over a light editor, where xterm applies NO
 // contrast lift of its own (there is no solid bg to measure against) — the
 // beloved classic look is the authored palette rendered essentially RAW:
-// vivid #FFD700 gold (~1.36:1), not a WCAG-darkened mustard. So the light
-// floor is a near-invisible rescue only (catches cream #FFF8DC at 1.08 but
+// vivid #6BE7C8 gold (~1.36:1), not a WCAG-darkened mustard. So the light
+// floor is a near-invisible rescue only (catches cream #EFE9D7 at 1.08 but
 // leaves the golds untouched). Pixel-sampled target: #F5C242 (L61 S90),
 // which the previous 1.45 floor crushed to #867000 (L26) — the reported mud.
 const DISPLAY_MIN_CONTRAST = 1.45
@@ -591,7 +591,7 @@ export interface ThemeTones {
  * "reproduces the original hand-tuned tones" test for the contract):
  *
  *   dark muted  #CC9B1F ≈ desaturate(mix(accent, bg, .19), .16)  (err 3)
- *   dark label  #DAA520 ≈ desaturate(mix(accent, bg, .13), .16)  (err 3)
+ *   dark label  #D6B36C ≈ desaturate(mix(accent, bg, .13), .16)  (err 3)
  *   dark status #C0C0C0 = grayOf(mix(text, bg, .24))             (err 0)
  *   light muted #946C08 ≈ desaturate(accent, .05)                (err 2)
  *   light label #8E6B13 ≈ desaturate(mix(accent, text, .03), .15) (err 2)
@@ -604,7 +604,7 @@ export interface ThemeTones {
  * white, 4.5) — what xterm's minimumContrastRatio showed on light hosts
  * for years — not hand-picked browns (those read as desaturated mud).
  *
- * The classic dark navy fills (#1a1a2e/#333355/#3a3a55) are IRREDUCIBLE from
+ * The classic dark navy fills (#052819/#1F4A3D/#1B3A32) are IRREDUCIBLE from
  * gold seeds — the search bottoms out at gray, err 10–17 — so they remain
  * explicit identity seeds on DARK_SEEDS rather than pretending to be math.
  */

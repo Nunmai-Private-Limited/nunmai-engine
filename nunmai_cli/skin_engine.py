@@ -26,46 +26,46 @@ All fields are optional. Missing values inherit from the ``default`` skin.
       background: "#0e0e12"               # App/base surface — the seed the TUI
                                           # status bar and the desktop GUI derive
                                           # their whole palette from (see below).
-      banner_border: "#CD7F32"            # Panel border color
-      banner_title: "#FFD700"             # Panel title text color
-      banner_accent: "#FFBF00"            # Section headers (Available Tools, etc.)
-      banner_dim: "#B8860B"               # Dim/muted text (separators, labels)
-      banner_text: "#FFF8DC"              # Body text (tool names, skill names)
-      ui_accent: "#FFBF00"               # General UI accent
-      ui_label: "#DAA520"                # UI labels (warm gold; teal clashed w/ default banner gold)
+      banner_border: "#0B6B4F"            # Panel border color
+      banner_title: "#6BE7C8"             # Panel title text color
+      banner_accent: "#3FCFA9"            # Section headers (Available Tools, etc.)
+      banner_dim: "#2E9C7C"               # Dim/muted text (separators, labels)
+      banner_text: "#EFE9D7"              # Body text (tool names, skill names)
+      ui_accent: "#3FCFA9"               # General UI accent
+      ui_label: "#D6B36C"                # UI labels (warm gold; teal clashed w/ default banner gold)
       ui_ok: "#4caf50"                   # Success indicators
       ui_error: "#ef5350"                # Error indicators
       ui_warn: "#ffa726"                 # Warning indicators
-      ui_tool: "#FFBF00"                 # Tool-call markers (● / spinner); falls back to ui_accent
+      ui_tool: "#3FCFA9"                 # Tool-call markers (● / spinner); falls back to ui_accent
       ui_thinking: "#CC9B1F"             # Reasoning/thinking text; falls back to banner_dim
       diff_added: "#dcffdc"              # Diff added-line background (TUI)
       diff_removed: "#ffdcdc"            # Diff removed-line background
       diff_added_word: "#248a3d"         # Diff added word-level foreground
       diff_removed_word: "#cf222e"       # Diff removed word-level foreground
-      syntax_string: "#FFBF00"           # Code strings; falls back to ui_accent
-      syntax_number: "#FFF8DC"           # Code numbers; falls back to ui_text
-      syntax_keyword: "#CD7F32"          # Code keywords; falls back to ui_border
+      syntax_string: "#3FCFA9"           # Code strings; falls back to ui_accent
+      syntax_number: "#EFE9D7"           # Code numbers; falls back to ui_text
+      syntax_keyword: "#0B6B4F"          # Code keywords; falls back to ui_border
       syntax_comment: "#CC9B1F"          # Code comments; falls back to banner_dim
-      prompt: "#FFF8DC"                  # Prompt text color
-      input_rule: "#CD7F32"              # Input area horizontal rule
-      response_border: "#FFD700"         # Response box border (ANSI)
-      status_bar_bg: "#1a1a2e"           # Status bar background
+      prompt: "#EFE9D7"                  # Prompt text color
+      input_rule: "#0B6B4F"              # Input area horizontal rule
+      response_border: "#6BE7C8"         # Response box border (ANSI)
+      status_bar_bg: "#052819"           # Status bar background
       status_bar_text: "#C0C0C0"         # Status bar default text
-      status_bar_strong: "#FFD700"       # Status bar highlighted text
+      status_bar_strong: "#6BE7C8"       # Status bar highlighted text
       status_bar_dim: "#8B8682"          # Status bar separators/muted text
       status_bar_good: "#8FBC8F"         # Healthy context usage
-      status_bar_warn: "#FFD700"         # Warning context usage
+      status_bar_warn: "#6BE7C8"         # Warning context usage
       status_bar_bad: "#FF8C00"          # High context usage
       status_bar_critical: "#FF6B6B"     # Critical context usage
-      session_label: "#DAA520"           # Session label color
+      session_label: "#D6B36C"           # Session label color
       session_border: "#8B8682"          # Session ID dim color
-      status_bar_bg: "#1a1a2e"          # TUI status/usage bar background
-      voice_status_bg: "#1a1a2e"        # TUI voice status background
-      selection_bg: "#333355"           # TUI mouse-selection highlight background
-      completion_menu_bg: "#1a1a2e"      # Completion menu background
-      completion_menu_current_bg: "#333355"  # Active completion row background
-      completion_menu_meta_bg: "#1a1a2e"     # Completion meta column background
-      completion_menu_meta_current_bg: "#333355"  # Active completion meta background
+      status_bar_bg: "#052819"          # TUI status/usage bar background
+      voice_status_bg: "#052819"        # TUI voice status background
+      selection_bg: "#1F4A3D"           # TUI mouse-selection highlight background
+      completion_menu_bg: "#052819"      # Completion menu background
+      completion_menu_current_bg: "#1F4A3D"  # Active completion row background
+      completion_menu_meta_bg: "#052819"     # Completion meta column background
+      completion_menu_meta_current_bg: "#1F4A3D"  # Active completion meta background
 
     # Optional paired palette for the opposite terminal polarity (mirrors the
     # desktop app's colors/darkColors pairing). If `colors` above is authored
@@ -96,8 +96,8 @@ All fields are optional. Missing values inherit from the ``default`` skin.
     branding:
       agent_name: "Nunmai Engine"          # Banner title, status display
       welcome: "Welcome message"          # Shown at CLI startup
-      goodbye: "Goodbye! ⚕"              # Shown on exit
-      response_label: " ⚕ Nunmai "       # Response box header label
+      goodbye: "Goodbye! ✦"              # Shown on exit
+      response_label: " ✦ Nunmai "       # Response box header label
       prompt_symbol: "❯"                 # Input prompt symbol (bare token; renderers add trailing space)
       help_header: "(^_^)? Commands"      # /help header text
 
@@ -118,7 +118,7 @@ USAGE
     from nunmai_cli.skin_engine import get_active_skin, list_skins, set_active_skin
 
     skin = get_active_skin()
-    print(skin.colors["banner_title"])    # "#FFD700"
+    print(skin.colors["banner_title"])    # "#6BE7C8"
     print(skin.get_branding("agent_name"))  # "Nunmai Engine"
 
     set_active_skin("ares")               # Switch to built-in ares skin
@@ -201,51 +201,51 @@ class SkinConfig:
 _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
     "default": {
         "name": "default",
-        "description": "Classic Nunmai — gold and kawaii",
+        "description": "Nunmai — mint on deep green",
         # Dark-authored. Values match the TUI's DARK_THEME so the classic CLI
         # and the TUI render the same Nunmai gold.
         "colors": {
-            "banner_border": "#CD7F32",
-            "banner_title": "#FFD700",
-            "banner_accent": "#FFBF00",
-            "banner_dim": "#B8860B",
-            "banner_text": "#FFF8DC",
-            "ui_accent": "#FFBF00",
-            "ui_label": "#DAA520",
+            "banner_border": "#0B6B4F",
+            "banner_title": "#6BE7C8",
+            "banner_accent": "#3FCFA9",
+            "banner_dim": "#2E9C7C",
+            "banner_text": "#EFE9D7",
+            "ui_accent": "#3FCFA9",
+            "ui_label": "#D6B36C",
             "ui_ok": "#4caf50",
             "ui_error": "#ef5350",
             "ui_warn": "#ffa726",
-            "prompt": "#FFF8DC",
-            "input_rule": "#CD7F32",
-            "response_border": "#FFD700",
-            "status_bar_bg": "#1a1a2e",
+            "prompt": "#EFE9D7",
+            "input_rule": "#0B6B4F",
+            "response_border": "#6BE7C8",
+            "status_bar_bg": "#052819",
             "status_bar_text": "#C0C0C0",
-            "status_bar_strong": "#FFD700",
-            "status_bar_dim": "#8A7A4A",
+            "status_bar_strong": "#6BE7C8",
+            "status_bar_dim": "#5B8A7C",
             "status_bar_good": "#8FBC8F",
-            "status_bar_warn": "#FFD700",
+            "status_bar_warn": "#6BE7C8",
             "status_bar_bad": "#FF8C00",
             "status_bar_critical": "#FF6B6B",
-            "session_label": "#DAA520",
+            "session_label": "#D6B36C",
             "session_border": "#8B8682",
-            "completion_menu_bg": "#1a1a2e",
-            "completion_menu_current_bg": "#333355",
-            "selection_bg": "#3a3a55",
+            "completion_menu_bg": "#052819",
+            "completion_menu_current_bg": "#1F4A3D",
+            "selection_bg": "#1B3A32",
             "shell_dollar": "#4dabf7",
-            "voice_status_bg": "#1a1a2e",
+            "voice_status_bg": "#052819",
         },
         # Light overlay (merged onto `colors`; dark mode renders the vivid
         # block above untouched). The goldenrod ladder: on white, the vivid
-        # #FFD700/#FFBF00 read as glare and WCAG-darkened mustard (#867000)
+        # #6BE7C8/#3FCFA9 read as glare and WCAG-darkened mustard (#867000)
         # reads as mud — the sweet spot is the statusbar's goldenrod family
-        # (#B8860B/#DAA520): hue kept, saturation tamed, mid luminance.
+        # (#2E9C7C/#D6B36C): hue kept, saturation tamed, mid luminance.
         # Hierarchy on white: ink body 8.9:1 > fade 5.2 > label 3.7 >
         # muted 3.3 > title 2.7 > headers 2.4 (accents recede last, like
         # slate's pastels — the raw-canon look, just not neon).
         "light_colors": {
             "banner_title": "#C8961E",
             "banner_accent": "#D89B04",
-            "banner_dim": "#B8860B",
+            "banner_dim": "#2E9C7C",
             "banner_text": "#5C4718",
             "ui_accent": "#D89B04",
             "ui_label": "#A97E10",
@@ -276,8 +276,8 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
         "branding": {
             "agent_name": "Nunmai Engine",
             "welcome": "Welcome to Nunmai Engine! Type your message or /help for commands.",
-            "goodbye": "Goodbye! ⚕",
-            "response_label": " ⚕ Nunmai ",
+            "goodbye": "Goodbye! ✦",
+            "response_label": " ✦ Nunmai ",
             "prompt_symbol": "❯",
             "help_header": "(^_^)? Available Commands",
         },
@@ -397,8 +397,8 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
         "branding": {
             "agent_name": "Nunmai Engine",
             "welcome": "Welcome to Nunmai Engine! Type your message or /help for commands.",
-            "goodbye": "Goodbye! ⚕",
-            "response_label": " ⚕ Nunmai ",
+            "goodbye": "Goodbye! ✦",
+            "response_label": " ✦ Nunmai ",
             "prompt_symbol": "❯",
             "help_header": "[?] Available Commands",
         },
@@ -441,8 +441,8 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
         "branding": {
             "agent_name": "Nunmai Engine",
             "welcome": "Welcome to Nunmai Engine! Type your message or /help for commands.",
-            "goodbye": "Goodbye! ⚕",
-            "response_label": " ⚕ Nunmai ",
+            "goodbye": "Goodbye! ✦",
+            "response_label": " ✦ Nunmai ",
             "prompt_symbol": "❯",
             "help_header": "(^_^)? Available Commands",
         },
@@ -487,8 +487,8 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
         "branding": {
             "agent_name": "Nunmai Engine",
             "welcome": "Welcome to Nunmai Engine! Type your message or /help for commands.",
-            "goodbye": "Goodbye! ⚕",
-            "response_label": " ⚕ Nunmai ",
+            "goodbye": "Goodbye! ✦",
+            "response_label": " ✦ Nunmai ",
             "prompt_symbol": "❯",
             "help_header": "[?] Available Commands",
         },
@@ -976,7 +976,7 @@ def get_active_help_header(fallback: str = "(^_^)? Available Commands") -> str:
 
 
 
-def get_active_goodbye(fallback: str = "Goodbye! ⚕") -> str:
+def get_active_goodbye(fallback: str = "Goodbye! ✦") -> str:
     """Get the goodbye line from the active skin."""
     try:
         return get_active_skin().get_branding("goodbye", fallback)
@@ -1001,14 +1001,14 @@ def get_prompt_toolkit_style_overrides() -> Dict[str, str]:
     # color schemes).  Skins can opt into a colored prompt by setting
     # `prompt` explicitly in their YAML.
     prompt = skin.get_color("prompt", "")
-    input_rule = skin.get_color("input_rule", "#CD7F32")
-    title = skin.get_color("banner_title", "#FFD700")
-    text = skin.get_color("banner_text", "#FFF8DC")
+    input_rule = skin.get_color("input_rule", "#0B6B4F")
+    title = skin.get_color("banner_title", "#6BE7C8")
+    text = skin.get_color("banner_text", "#EFE9D7")
     dim = skin.get_color("banner_dim", "#555555")
     label = skin.get_color("ui_label", title)
     warn = skin.get_color("ui_warn", "#FF8C00")
     error = skin.get_color("ui_error", "#FF6B6B")
-    status_bg = skin.get_color("status_bar_bg", "#1a1a2e")
+    status_bg = skin.get_color("status_bar_bg", "#052819")
     status_text = skin.get_color("status_bar_text", text)
     status_strong = skin.get_color("status_bar_strong", title)
     status_dim = skin.get_color("status_bar_dim", dim)
@@ -1017,8 +1017,8 @@ def get_prompt_toolkit_style_overrides() -> Dict[str, str]:
     status_bad = skin.get_color("status_bar_bad", skin.get_color("banner_accent", warn))
     status_critical = skin.get_color("status_bar_critical", error)
     voice_bg = skin.get_color("voice_status_bg", status_bg)
-    menu_bg = skin.get_color("completion_menu_bg", "#1a1a2e")
-    menu_current_bg = skin.get_color("completion_menu_current_bg", "#333355")
+    menu_bg = skin.get_color("completion_menu_bg", "#052819")
+    menu_current_bg = skin.get_color("completion_menu_current_bg", "#1F4A3D")
     menu_meta_bg = skin.get_color("completion_menu_meta_bg", menu_bg)
     menu_meta_current_bg = skin.get_color("completion_menu_meta_current_bg", menu_current_bg)
 
