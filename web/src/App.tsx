@@ -614,7 +614,7 @@ export default function App() {
                 <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
                   Nunmai
                   <br />
-                  Agent
+                  Engine
                 </Typography>
               </div>
 
