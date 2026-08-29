@@ -6,7 +6,7 @@
   "homepage": "https://nunmai.in",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Nunmai-Private-Limited/nunmai-engine.git",
+    "url": "git+https://github.com/Nunmai-Private-Limited/nunmai-engine.git",
     "directory": "deploy/npm-bootstrap"
   },
   "bugs": "https://github.com/Nunmai-Private-Limited/nunmai-engine/issues",
