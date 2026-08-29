@@ -23,6 +23,7 @@ secrets:
 # that; re-seed by deleting the file on the volume). Customisation lives here.
 config:
   configYaml: |
+    _config_version: 39     # current schema; without it the engine treats the file as legacy
     model:
       provider: custom
       base_url: http://litellm.nunmai-portal.svc.cluster.local:4000/v1

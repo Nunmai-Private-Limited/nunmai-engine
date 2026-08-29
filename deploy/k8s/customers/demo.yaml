@@ -4,6 +4,7 @@ secrets:
   existingSecret: nunmai-demo-secrets   # kubectl -n cust-demo create secret generic nunmai-demo-secrets --from-literal=OPENROUTER_API_KEY=<portal key>
 config:
   configYaml: |
+    _config_version: 39     # current schema; without it the engine treats the file as legacy
     model:
       provider: custom
       base_url: http://litellm.nunmai-portal.svc.cluster.local:4000/v1
