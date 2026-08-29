@@ -30,7 +30,7 @@ class TestGatewayLifecyclePattern:
         "nunmai gateway stop",
         "nunmai gateway uninstall",
         "nunmai  gateway  restart",         # double spaces
-        "Hermez Gateway Restart".lower().replace("z", "s"),  # case handled
+        "Nunmai Gateway Restart".lower(),  # case handled
         "NUNMAI GATEWAY RESTART",           # uppercase
     ])
     def test_nunmai_gateway_commands(self, text):
