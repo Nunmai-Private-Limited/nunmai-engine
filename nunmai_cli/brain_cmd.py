@@ -35,10 +35,17 @@ def _nunmai_argv() -> List[str]:
 
 def _ask(prompt: str) -> str:
     try:
-        return input(prompt).strip()
+        from nunmai_cli.cli_output import line_input  # chat-safe prompt (prompt_toolkit on a TTY)
+        return line_input(prompt).strip()
     except (EOFError, KeyboardInterrupt):
         print()
         return ""
+    except Exception:
+        try:
+            return input(prompt).strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return ""
 
 
 def _secret(prompt: str) -> str:
