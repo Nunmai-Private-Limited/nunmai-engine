@@ -3,11 +3,11 @@
 name = "nunmai-engine-installer"
 compatibility_date = "2026-08-01"
 
-[assets]
-directory = "./public"
-
-# Custom domain (Cloudflare creates the DNS record automatically when the
-# zone nunmai.in is on this account).
+# Custom domain: Cloudflare creates the DNS record + cert automatically
+# because the zone nunmai.in is on this account.
 routes = [
   { pattern = "nunmai-engine.nunmai.in", custom_domain = true }
 ]
+
+[assets]
+directory = "./public"
