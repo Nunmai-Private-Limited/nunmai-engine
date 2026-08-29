@@ -29,6 +29,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -304,6 +305,98 @@ def _provision_managed_npm(npm_range: str | None, *, quiet: bool = False) -> str
     ):
         return None
     return managed_npm
+
+
+def _parse_major_minor(version: str | None) -> tuple[int, int] | None:
+    if not version:
+        return None
+    ver = version.strip().lstrip("v")
+    if "-" in ver:  # pre-release (v27.0.0-nightly…) — never "supported"
+        return None
+    parts = ver.split(".")
+    try:
+        major = int(parts[0])
+        minor = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
+    except (ValueError, IndexError):
+        return None
+    return major, minor
+
+
+def node_satisfies_build(version: str | None) -> bool:
+    """Mirror of the installer's ``node_satisfies_build``: 22.22+, 24.11+, 26+."""
+    mm = _parse_major_minor(version)
+    if mm is None:
+        return False
+    major, minor = mm
+    return (major == 22 and minor >= 22) or (major == 24 and minor >= 11) or major >= 26
+
+
+def npm_supports_npmrc(version: str | None) -> bool:
+    """Mirror of the installer's ``npm_supports_npmrc``: npm 11.10–11.16 cannot
+    read ``min-release-age-exclude`` in the checkout's ``.npmrc``."""
+    mm = _parse_major_minor(version)
+    if mm is None:
+        return False
+    major, minor = mm
+    return not (major == 11 and 10 <= minor <= 16)
+
+
+def _probe_node_version(npm: str) -> str | None:
+    node = Path(npm).resolve().parent / ("node.exe" if sys.platform == "win32" else "node")
+    candidate = str(node) if node.is_file() else shutil.which("node")
+    if not candidate:
+        return None
+    try:
+        result = subprocess.run(
+            [candidate, "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=30,
+            env=with_nunmai_node_path(),
+            check=False,
+        )
+    except Exception:
+        return None
+    return (getattr(result, "stdout", "") or "").strip() or None
+
+
+def preflight_node_toolchain(npm: str | None, *, quiet: bool = False) -> str | None:
+    """Swap a foreign node/npm that cannot build this checkout for a managed one
+    BEFORE running npm, so users never see the EBADENGINE wall at all.
+
+    The one-line installer already does this check (``check_node``) on a
+    ``--full`` install; the lightweight default install defers Node to first
+    use, which used to mean the first ``nunmai update`` / TUI launch ran the
+    system npm, failed loudly, and only then provisioned the managed runtime.
+    Same rules as the installer. Unprobeable versions keep *npm* unchanged
+    so the reactive repair in ``maybe_repair_npm_engine`` still applies; a
+    Nunmai-managed npm is trusted as-is (bootstrap picks supported versions
+    and ``upgrade_managed_npm`` handles its npm band).
+    """
+    if not npm or managed_npm_prefix(npm) is not None:
+        return npm
+    try:
+        if not Path(npm).is_file():
+            return npm  # bare command name / stub — nothing to probe
+        node_version = _probe_node_version(npm)
+        npm_version = _probe_version(npm)
+    except Exception:  # probes are best-effort; never block the install
+        return npm
+    if node_version is None or npm_version is None:
+        return npm
+    if node_satisfies_build(node_version) and npm_supports_npmrc(npm_version):
+        return npm
+    if not quiet:
+        why = (
+            f"npm {npm_version} cannot read this checkout's .npmrc"
+            if node_satisfies_build(node_version)
+            else f"Node.js {node_version} is outside the supported range (22.22+, 24.11+, 26+)"
+        )
+        print(f"  {why} — your system toolchain is left untouched.", flush=True)
+    managed = _provision_managed_npm(_repo_npm_range(), quiet=quiet)
+    return managed or npm
 
 
 def maybe_repair_npm_engine(

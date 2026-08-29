@@ -24,6 +24,8 @@ import pytest
 from nunmai_cli import main as cli_main
 from nunmai_cli import update_cmd
 
+pytestmark = pytest.mark.real_module_purge
+
 
 @pytest.fixture(autouse=True)
 def _restore_sys_modules():

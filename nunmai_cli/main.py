@@ -6395,7 +6395,16 @@ def _run_npm_install_deterministic(
             capture_output=capture_output,
         )
 
-    from nunmai_cli.npm_engine import is_ebadengine
+    from nunmai_cli.npm_engine import is_ebadengine, preflight_node_toolchain
+
+    # Swap an incompatible system node/npm for the managed runtime up front
+    # (same rules as the installer's check_node) so the first install on a
+    # lightweight-installed machine doesn't start with an EBADENGINE wall.
+    preflighted = preflight_node_toolchain(npm, quiet=capture_output)
+    if preflighted and preflighted != npm:
+        npm = preflighted
+        from nunmai_constants import with_nunmai_node_path
+        run_env["PATH"] = with_nunmai_node_path(run_env)["PATH"]
 
     def _attempt(npm_exe: str) -> subprocess.CompletedProcess:
         lockfile = cwd / "package-lock.json"

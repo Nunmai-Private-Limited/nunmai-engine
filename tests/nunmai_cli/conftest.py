@@ -54,3 +54,80 @@ def _suppress_concurrent_nunmai_gate(request, monkeypatch):
         lambda *_a, **_k: [],
         raising=False,
     )
+
+
+@pytest.fixture(autouse=True)
+def _disable_node_toolchain_preflight(request, monkeypatch):
+    """Keep ``preflight_node_toolchain`` from probing the host's node/npm.
+
+    Before every npm install the CLI probes the resolved toolchain's versions
+    (``node --version`` / ``npm --version``) and swaps an unsupported system
+    Node for the Nunmai-managed runtime. Under test that means two extra
+    ``subprocess`` calls that scripted ``subprocess.run`` fakes never planned
+    for — and on a developer machine with a non-LTS Node, a real managed-Node
+    provisioning. Identity here; tests for the preflight itself opt out with
+    ``@pytest.mark.real_node_preflight``.
+    """
+    if request.node.get_closest_marker("real_node_preflight"):
+        return
+    try:
+        from nunmai_cli import npm_engine as _npm_engine
+    except Exception:
+        return
+    monkeypatch.setattr(
+        _npm_engine,
+        "preflight_node_toolchain",
+        lambda npm, *, quiet=False: npm,
+        raising=False,
+    )
+
+
+@pytest.fixture(autouse=True)
+def _isolate_launchd_home(request, monkeypatch, tmp_path):
+    """Keep launchd plist paths off the developer's real ``~/Library``.
+
+    ``nunmai_cli.gateway.get_launchd_plist_path`` resolves the account home
+    via ``pwd.getpwuid`` on purpose (profile mode rewrites ``HOME``), which
+    also means the test-isolated ``NUNMAI_HOME`` does not redirect it. On a
+    macOS developer machine with a real ``ai.nunmai.gateway`` LaunchAgent the
+    end-to-end ``cmd_update`` tests then found that plist, rewrote it, and
+    restarted / verified the real (production) gateway through ``launchctl``
+    (2026-08-29: three restarts of a live WhatsApp gateway during a test run).
+    Point the launchd home at a per-test temp dir so no plist exists and the
+    restart phase is a no-op. Tests that must see the real home opt out with
+    ``@pytest.mark.real_launchd_home``.
+    """
+    if request.node.get_closest_marker("real_launchd_home"):
+        return
+    try:
+        from nunmai_cli import gateway as _gateway
+    except Exception:
+        return
+    fake_home = tmp_path / "launchd-home"
+    fake_home.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(
+        _gateway, "_launchd_user_home", lambda: fake_home, raising=False
+    )
+
+
+@pytest.fixture(autouse=True)
+def _disable_stale_module_purge(request, monkeypatch):
+    """Keep ``_purge_stale_nunmai_modules`` from evicting patched modules.
+
+    The updater purges every cached ``nunmai_cli.*`` / ``gateway`` / ``tools``
+    / ``agent`` module after a pull so later lazy imports see the new code.
+    Under pytest that eviction re-imports FRESH module objects mid-test, and
+    every monkeypatch the test (or this conftest) applied to the old objects
+    silently stops applying: end-to-end ``cmd_update`` tests then ran the
+    real launchd restart against a live gateway and a real ``uv`` install
+    into the checkout's venv (2026-08-29). Purge-specific tests opt out with
+    ``@pytest.mark.real_module_purge``.
+    """
+    if request.node.get_closest_marker("real_module_purge"):
+        return
+    for modname in ("nunmai_cli.update_cmd", "nunmai_cli.main"):
+        try:
+            mod = __import__(modname, fromlist=["_purge_stale_nunmai_modules"])
+        except Exception:
+            continue
+        monkeypatch.setattr(mod, "_purge_stale_nunmai_modules", lambda: None, raising=False)

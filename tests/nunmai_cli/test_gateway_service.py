@@ -1685,6 +1685,7 @@ class TestProfileArg:
             "--external-supervisor",
         ]
 
+    @pytest.mark.real_launchd_home
     def test_launchd_plist_path_uses_real_user_home_not_profile_home(self, tmp_path, monkeypatch):
         profile_dir = tmp_path / ".nunmai" / "profiles" / "orcha"
         profile_dir.mkdir(parents=True)
