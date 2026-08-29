@@ -156,16 +156,17 @@ def test_credentials_ready_never_prints(monkeypatch, capsys):
 # ---------------------------------------------------------------------------
 
 
-def test_offer_first_run_setup_routes_into_shared_picker(monkeypatch):
+def test_offer_first_run_setup_routes_into_brain_wizard(monkeypatch):
     cli = _import_cli()
     shell = _make_shell(cli, monkeypatch)
 
     picker_calls = {"count": 0}
 
-    def _fake_picker():
+    def _fake_picker(args=None):
         picker_calls["count"] += 1
 
-    monkeypatch.setattr("nunmai_cli.main.select_provider_and_model", _fake_picker)
+    # Nunmai: first-run routes into the `brain` wizard, not the shared picker.
+    monkeypatch.setattr("nunmai_cli.brain_cmd.cmd_brain", _fake_picker)
     monkeypatch.setattr("builtins.input", lambda *a, **k: "y")
     # After the picker "runs", config has a provider and creds resolve.
     monkeypatch.setattr(
@@ -194,10 +195,10 @@ def test_offer_first_run_setup_declined(monkeypatch):
     cli = _import_cli()
     shell = _make_shell(cli, monkeypatch)
 
-    def _fail_picker():
+    def _fail_picker(*a, **k):
         raise AssertionError("picker must not run when declined")
 
-    monkeypatch.setattr("nunmai_cli.main.select_provider_and_model", _fail_picker)
+    monkeypatch.setattr("nunmai_cli.brain_cmd.cmd_brain", _fail_picker)
     monkeypatch.setattr("builtins.input", lambda *a, **k: "n")
     assert shell._offer_first_run_setup() is False
 
@@ -206,10 +207,10 @@ def test_offer_first_run_setup_picker_cancel_is_graceful(monkeypatch):
     cli = _import_cli()
     shell = _make_shell(cli, monkeypatch)
 
-    def _cancel_picker():
+    def _cancel_picker(*a, **k):
         raise KeyboardInterrupt()
 
-    monkeypatch.setattr("nunmai_cli.main.select_provider_and_model", _cancel_picker)
+    monkeypatch.setattr("nunmai_cli.brain_cmd.cmd_brain", _cancel_picker)
     monkeypatch.setattr("builtins.input", lambda *a, **k: "")
     # Empty answer defaults to yes -> picker runs -> cancels -> False, no raise.
     assert shell._offer_first_run_setup() is False

@@ -34,18 +34,14 @@ def _nunmai_argv() -> List[str]:
 
 
 def _ask(prompt: str) -> str:
+    # Plain input(): works inside the chat's first-run path and standalone;
+    # prompt_toolkit's line_input can drop the first keystroke during its
+    # terminal probe when called from the CLI startup path.
     try:
-        from nunmai_cli.cli_output import line_input  # chat-safe prompt (prompt_toolkit on a TTY)
-        return line_input(prompt).strip()
+        return input(prompt).strip()
     except (EOFError, KeyboardInterrupt):
         print()
         return ""
-    except Exception:
-        try:
-            return input(prompt).strip()
-        except (EOFError, KeyboardInterrupt):
-            print()
-            return ""
 
 
 def _secret(prompt: str) -> str:

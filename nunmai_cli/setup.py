@@ -3245,7 +3245,7 @@ def _run_setup_wizard_impl(args):
         setup_mode = prompt_choice(
             "How would you like to set up Nunmai?",
             [
-                "Quick Setup (Nous Portal) — free OAuth login, no API keys, model + tools (recommended)",
+                "Quick Setup — connect your AI accounts: Claude, ChatGPT, Kimi, Gemini, OpenRouter (recommended)",
                 "Full setup — configure every provider, tool & option yourself (bring your own keys)",
                 "Blank Slate — everything off except the bare minimum; opt in to each capability",
             ],
@@ -3257,8 +3257,8 @@ def _run_setup_wizard_impl(args):
                 [
                     (
                         "Quick Setup",
-                        lambda: _run_first_time_quick_setup(
-                            config, nunmai_home, is_existing
+                        lambda: __import__("nunmai_cli.brain_cmd", fromlist=["cmd_brain"]).cmd_brain(
+                            __import__("types").SimpleNamespace(providers=None, skip_connect=False)
                         ),
                     )
                 ]

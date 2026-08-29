@@ -224,6 +224,35 @@ class CLIAgentSetupMixin:
             and not base_url_host_matches(base_url, "openrouter.ai")
         )
 
+    def _run_brain_wizard(self) -> None:
+        """Run the `brain` wizard on the real terminal.
+
+        Spawned as a subprocess bound to /dev/tty so its prompts are immune to
+        whatever state the chat process left stdin in (terminal probes,
+        prompt_toolkit). Falls back to in-process when no controlling tty is
+        available (tests, CI, Windows without a console).
+        """
+        import os as _os
+        import subprocess as _sp
+        import sys as _sys
+        from types import SimpleNamespace
+        in_proc = "pytest" in _sys.modules or _os.environ.get("NUNMAI_BRAIN_INPROC") == "1"
+        if not in_proc and _os.name != "nt" and _os.path.exists("/dev/tty"):
+            try:
+                with open("/dev/tty", "rb", buffering=0) as tty_in:
+                    rc = _sp.call(
+                        [_sys.executable, "-m", "nunmai_cli.main", "brain"],
+                        stdin=tty_in,
+                        env={**_os.environ, "NUNMAI_NO_AUTO_UPDATE": "1"},
+                    )
+                if rc != 0:
+                    raise SystemExit("")
+                return
+            except OSError:
+                pass  # no usable tty — fall through to in-process
+        from nunmai_cli.brain_cmd import cmd_brain
+        cmd_brain(SimpleNamespace(providers=None, skip_connect=False))
+
     def _offer_first_run_setup(self) -> bool:
         """Offer the provider picker when no provider is configured at all.
 
@@ -237,29 +266,22 @@ class CLIAgentSetupMixin:
         from cli import _cprint, logger
 
         _cprint("")
-        _cprint("◆ No inference provider is configured yet — let's fix that.")
-        _cprint("  You'll pick a provider (Nous Portal OAuth is the fastest; "
-                "no API key needed) and a model.")
+        _cprint("◆ No AI connected yet. Let's connect your AI account (Ctrl+C to skip).")
         try:
-            answer = input("  Set up a provider now? [Y/n]: ").strip().lower()
+            self._run_brain_wizard()
         except (KeyboardInterrupt, EOFError):
             print()
-            answer = "n"
-        if answer in {"n", "no"}:
-            _cprint("  Skipped. Run 'nunmai model' or 'nunmai setup' any time.")
+            _cprint("  Skipped. Type /brain any time to connect an AI account.")
             return False
-
-        try:
-            from nunmai_cli.main import select_provider_and_model
-            select_provider_and_model()
-        except (KeyboardInterrupt, EOFError, SystemExit):
-            print()
-            _cprint("  Setup cancelled. Run 'nunmai model' any time.")
+        except SystemExit as exc:
+            if exc.code:
+                _cprint(f"  {exc.code}")
+            _cprint("  Type /brain any time to connect an AI account.")
             return False
         except Exception as exc:
-            logger.debug("first-run provider setup failed: %s", exc)
-            _cprint(f"  ⚠️  Provider setup failed: {exc}")
-            _cprint("  Run 'nunmai model' to try again.")
+            logger.debug("first-run brain setup failed: %s", exc)
+            _cprint(f"  ⚠️  Setup failed: {exc}")
+            _cprint("  Type /brain to try again.")
             return False
 
         # Re-sync CLI state from what the picker persisted so the very next
@@ -285,7 +307,7 @@ class CLIAgentSetupMixin:
         if self._runtime_credentials_ready():
             _cprint("  ✓ Provider configured — you're ready to chat.")
             return True
-        _cprint("  Provider setup didn't complete. Run 'nunmai model' to retry.")
+        _cprint("  Setup didn't complete. Type /brain to retry.")
         return False
 
     def _resolve_turn_agent_config(self, user_message: str) -> dict:

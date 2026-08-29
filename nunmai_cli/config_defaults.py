@@ -1411,7 +1411,7 @@ DEFAULT_CONFIG = {
         # Default ON: on thinking models the reasoning phase can run tens of
         # seconds, and with this off the user stares at a spinner the whole
         # time even though tokens are streaming. Set false for quiet output.
-        "show_reasoning": True,
+        "show_reasoning": False,   # Nunmai: clean output — answers only (toggle with /reasoning)
         # When reasoning display is on, the post-response "Reasoning" recap box
         # collapses long thinking to the first 10 lines. Set true to print the
         # complete thinking text uncollapsed (live streaming is always full).
@@ -2981,6 +2981,8 @@ DEFAULT_CONFIG = {
     # The default URL is served by the docs site GitHub Pages deploy.
     "model_catalog": {
         "enabled": True,
+        # Nunmai: providers hidden from every model/provider picker.
+        "excluded_providers": ["nous", "nous-api"],
         "url": "https://nunmai.in/docs/api/model-catalog.json",
         # Disk cache TTL in hours.  Beyond this, the CLI refetches on the
         # next /model or `nunmai model` invocation; network failures
