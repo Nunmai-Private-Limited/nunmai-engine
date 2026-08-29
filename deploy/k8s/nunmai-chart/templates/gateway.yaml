@@ -49,11 +49,26 @@ spec:
             {{- range $k, $v := .Values.gateway.extraEnv }}
             - { name: {{ $k }}, value: {{ $v | quote }} }
             {{- end }}
-          {{- if or .Values.secrets.existingSecret .Values.secrets.env }}
+            {{- if .Values.dashboard.enabled }}
+            - { name: NUNMAI_DASHBOARD, value: "1" }
+            - { name: NUNMAI_DASHBOARD_PORT, value: {{ .Values.dashboard.port | quote }} }
+            {{- if .Values.dashboard.host }}
+            - { name: NUNMAI_DASHBOARD_PUBLIC_URL, value: {{ printf "https://%s" .Values.dashboard.host | quote }} }
+            {{- end }}
+            {{- end }}
+          {{- if or .Values.secrets.existingSecret .Values.secrets.env (and .Values.dashboard.enabled .Values.dashboard.authSecret) }}
           envFrom:
+            {{- if or .Values.secrets.existingSecret .Values.secrets.env }}
             - secretRef:
                 name: {{ include "nunmai.secretName" . }}
+            {{- end }}
+            {{- if and .Values.dashboard.enabled .Values.dashboard.authSecret }}
+            - secretRef:
+                name: {{ .Values.dashboard.authSecret }}
+            {{- end }}
           {{- end }}
+          ports:
+            - { name: dashboard, containerPort: {{ .Values.dashboard.port }} }
           resources: {{- toYaml .Values.gateway.resources | nindent 12 }}
           volumeMounts:
             - { name: data, mountPath: /opt/data }

@@ -41,16 +41,12 @@ gateway:
   nodeSelector: {}
 
 dashboard:
-  enabled: false              # web dashboard for the customer (behind ingress)
-  host: ""                    # e.g. acme.app.nunmai.in
+  enabled: false              # web dashboard for the customer at https://<host>/
+  host: ""                    # e.g. acme.platform.nunmai.in (wildcard TLS from deploy/k8s/platform)
   port: 9119
-  args: ["dashboard", "--host", "0.0.0.0", "--no-open"]
-  resources:
-    requests: { cpu: 50m,  memory: 256Mi }
-    limits:   { cpu: 500m, memory: 768Mi }
+  authSecret: ""              # Secret with NUNMAI_DASHBOARD_BASIC_AUTH_USERNAME / _PASSWORD (required)
   ingress:
     className: traefik
-    tls: true                 # requires cert-manager ClusterIssuer "letsencrypt"
     annotations: {}
 
 persistence:

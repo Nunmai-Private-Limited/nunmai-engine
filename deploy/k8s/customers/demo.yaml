@@ -12,4 +12,6 @@ config:
   soulMd: |
     You are Demo Co's assistant. Be concise and friendly.
 dashboard:
-  enabled: false
+  enabled: true
+  host: demo.platform.nunmai.in
+  authSecret: nunmai-demo-dashboard   # kubectl -n cust-demo create secret generic nunmai-demo-dashboard --from-literal=NUNMAI_DASHBOARD_BASIC_AUTH_USERNAME=admin --from-literal=NUNMAI_DASHBOARD_BASIC_AUTH_PASSWORD=...
