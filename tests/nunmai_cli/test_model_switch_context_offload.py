@@ -3,7 +3,7 @@
 ``resolve_display_context_length`` runs two blocking chains — the route
 comparison in ``should_clear_context_pin`` and the provider probe ladder in
 ``get_model_context_length`` (blocking ``requests`` calls to Anthropic
-``/v1/models``, Copilot, Nous, Codex, GMI, Ollama, models.dev and OpenRouter).
+``/v1/models``, Copilot, Nunmai, Codex, GMI, Ollama, models.dev and OpenRouter).
 
 The gateway message path already offloads both (``get_model_context_length_async``,
 ``should_clear_context_pin_async``); the ``/model`` slash-command handlers called

@@ -207,7 +207,7 @@ FAL_MODELS: Dict[str, Dict[str, Any]] = {
             "output_format": "png",
             "safety_tolerance": "5",
             # "1K" is the cheapest tier; 4K doubles the per-image cost.
-            # Users on Nous Subscription should stay at 1K for predictable billing.
+            # Users on Nunmai Subscription should stay at 1K for predictable billing.
             "resolution": "1K",
         },
         "supports": {
@@ -308,7 +308,7 @@ FAL_MODELS: Dict[str, Dict[str, Any]] = {
             "portrait": "portrait_4_3",       # 768x1024
         },
         "defaults": {
-            # Same quality pinning as gpt-image-1.5: medium keeps Nous
+            # Same quality pinning as gpt-image-1.5: medium keeps Nunmai
             # Portal billing predictable. "high" is 3-4x the per-image
             # cost at the same size; "low" is too rough for production use.
             "quality": "medium",
@@ -731,7 +731,7 @@ _managed_fal_client_lock = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
-# Managed FAL gateway (Nous Subscription)
+# Managed FAL gateway (Nunmai Subscription)
 # ---------------------------------------------------------------------------
 def _resolve_managed_fal_gateway():
     """Resolve the FAL route from the stored `nunmai tools` selection.
@@ -757,7 +757,7 @@ def _resolve_managed_fal_gateway():
             raise ValueError(selection_error(
                 "image_gen",
                 NOUS_MANAGED_PROVIDER,
-                "the Nous Tool Gateway is not available (not entitled or "
+                "the Nunmai Tool Gateway is not available (not entitled or "
                 "unreachable)",
             ))
         return gateway
@@ -872,9 +872,9 @@ def _submit_fal_request(model: str, arguments: Dict[str, Any]):
                     )
                 )
             raise ValueError(
-                f"Nous Subscription gateway rejected model '{model}' "
+                f"Nunmai Subscription gateway rejected model '{model}' "
                 f"(HTTP {status}). This model may not yet be enabled on "
-                f"the Nous Portal's FAL proxy. Either:\n"
+                f"the Nunmai Portal's FAL proxy. Either:\n"
                 f"  • Set FAL_KEY in your environment to use FAL.ai directly, or\n"
                 f"  • Pick a different model via `nunmai tools` → Image Generation."
                 f"{gateway_message}"
@@ -1431,7 +1431,7 @@ def _build_no_backend_setup_message() -> str:
 
     Used by the in-tree FAL path. Mentions:
       - FAL_KEY signup link
-      - managed-gateway status (if Nous tools are enabled)
+      - managed-gateway status (if Nunmai tools are enabled)
       - plugin alternative pointer (so users on a stale ``image_gen.provider``
         know the registry exists and how to inspect it)
     """
@@ -1456,7 +1456,7 @@ def _build_no_backend_setup_message() -> str:
     )
     if managed_nous_tools_enabled():
         lines.append(
-            "  2. Sign in to a Nous account that has the managed FAL "
+            "  2. Sign in to a Nunmai account that has the managed FAL "
             "gateway enabled (`nunmai setup`)"
         )
     lines.append(
@@ -1642,7 +1642,7 @@ def _dispatch_to_plugin_provider(
     configured = _read_configured_image_provider()
     if not configured or configured in ("fal", NOUS_MANAGED_PROVIDER):
         # Unset/explicit FAL keeps the legacy FAL path; "nous" (managed
-        # Nous Subscription selection) also runs the legacy pipeline, which
+        # Nunmai Subscription selection) also runs the legacy pipeline, which
         # routes through the managed fal-queue gateway.
         return None
 

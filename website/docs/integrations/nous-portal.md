@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-title: "Nous Portal"
+title: "Nunmai Portal"
 description: "One subscription, 300+ frontier models, and the Tool Gateway — the recommended way to run Nunmai Engine"
 ---
 
-# Nous Portal
+# Nunmai Portal
 
-[Nous Portal](https://portal.nousresearch.com) is Nunmai Research's unified subscription gateway and **the recommended way to run Nunmai Engine**. One OAuth login replaces the juggling act of separate accounts, API keys, and billing relationships across every model lab, search API, image generator, and browser provider you'd otherwise need to wire up by hand.
+[Nunmai Portal](https://portal.nousresearch.com) is Nunmai Research's unified subscription gateway and **the recommended way to run Nunmai Engine**. One OAuth login replaces the juggling act of separate accounts, API keys, and billing relationships across every model lab, search API, image generator, and browser provider you'd otherwise need to wire up by hand.
 
 If you only have time to set up one thing, set up this. The fastest path:
 
@@ -14,7 +14,7 @@ If you only have time to set up one thing, set up this. The fastest path:
 nunmai setup --portal
 ```
 
-That single command runs the Portal OAuth, lets you pick a Nous model, sets Nous as your inference provider in `config.yaml`, and turns on the Tool Gateway. You're ready to `nunmai chat` immediately after.
+That single command runs the Portal OAuth, lets you pick a Nunmai model, sets Nunmai as your inference provider in `config.yaml`, and turns on the Tool Gateway. You're ready to `nunmai chat` immediately after.
 
 Don't have a subscription yet? [portal.nousresearch.com/manage-subscription](https://portal.nousresearch.com/manage-subscription) — sign up, then come back and run the command above.
 
@@ -22,7 +22,7 @@ Don't have a subscription yet? [portal.nousresearch.com/manage-subscription](htt
 
 ### 300+ frontier models, one bill
 
-The Portal proxies a curated catalog of agentic models from across the ecosystem — billed against your Nous subscription instead of one credit balance per lab.
+The Portal proxies a curated catalog of agentic models from across the ecosystem — billed against your Nunmai subscription instead of one credit balance per lab.
 
 | Family | Models |
 |--------|--------|
@@ -42,15 +42,15 @@ The Portal proxies a curated catalog of agentic models from across the ecosystem
 | **Nunmai** | Hermes-4-70B, Hermes-4-405B (chat, see [note below](#a-note-on-hermes-4)) |
 | **+ everything else** | 280+ additional models — the full agentic frontier |
 
-Under the hood, the Portal routes each model to the backend best suited for it — some models go through OpenRouter, others through proprietary or secondary providers, and the routing for a given model can change over time. Everything is billed against your Nous subscription either way. Switch between Claude Sonnet 4.6 for code and Gemini 3 Pro for long context with `/model` mid-session — no new credentials, no top-ups, no surprise zero-balance errors.
+Under the hood, the Portal routes each model to the backend best suited for it — some models go through OpenRouter, others through proprietary or secondary providers, and the routing for a given model can change over time. Everything is billed against your Nunmai subscription either way. Switch between Claude Sonnet 4.6 for code and Gemini 3 Pro for long context with `/model` mid-session — no new credentials, no top-ups, no surprise zero-balance errors.
 
 :::note
 Because routing is per-model and not always through OpenRouter, OpenRouter-specific request extensions (such as `provider` routing preferences, `session_id` sticky routing, or top-level `cache_control`) are not part of the Portal's API contract and may be ignored depending on which backend serves the model.
 :::
 
-### The Nous Tool Gateway
+### The Nunmai Tool Gateway
 
-The same subscription unlocks the [Tool Gateway](/user-guide/features/tool-gateway), which routes Nunmai Engine's tool calls through Nous-managed infrastructure. Five backends, one login:
+The same subscription unlocks the [Tool Gateway](/user-guide/features/tool-gateway), which routes Nunmai Engine's tool calls through Nunmai-managed infrastructure. Five backends, one login:
 
 | Tool | Partner | What it does |
 |------|---------|--------------|
@@ -99,8 +99,8 @@ This runs the full setup in one shot:
 
 1. Opens your browser to portal.nousresearch.com for OAuth login
 2. Stores the refresh token at `~/.nunmai/auth.json`
-3. Lets you pick a Nous model from the curated list (or skip to keep your current one)
-4. Sets Nous as your inference provider in `~/.nunmai/config.yaml` (when you pick a model)
+3. Lets you pick a Nunmai model from the curated list (or skip to keep your current one)
+4. Sets Nunmai as your inference provider in `~/.nunmai/config.yaml` (when you pick a model)
 5. Turns on the Tool Gateway (web, image, TTS, browser routing)
 6. Returns you to your terminal ready to `nunmai chat`
 
@@ -112,7 +112,7 @@ If you already have Nunmai configured with OpenRouter, Anthropic, or any other p
 
 ```bash
 nunmai model
-# pick "Nous Portal" from the provider list
+# pick "Nunmai Portal" from the provider list
 # browser opens, sign in, done
 ```
 
@@ -131,30 +131,30 @@ If you use [Nunmai profiles](/user-guide/profiles), the Portal refresh token is 
 ### Inspecting what's wired up
 
 ```bash
-nunmai portal            # log in to Nous Portal + set it up (one-shot onboarding)
+nunmai portal            # log in to Nunmai Portal + set it up (one-shot onboarding)
 nunmai portal info       # login status, subscription info, model + gateway routing
 nunmai portal status     # alias for `portal info`
 nunmai portal tools      # detailed Tool Gateway catalog with per-tool routing
 nunmai portal open       # open the subscription management page in your browser
 ```
 
-`nunmai portal` (with no subcommand) is the human-readable alias for `nunmai auth add nous --type oauth` — it logs you in, lets you pick a Nous model, sets Nous as your inference provider, and offers the Tool Gateway opt-in (identical to `nunmai setup --portal`, and the same Nous flow as the first-time quick setup).
+`nunmai portal` (with no subcommand) is the human-readable alias for `nunmai auth add nous --type oauth` — it logs you in, lets you pick a Nunmai model, sets Nunmai as your inference provider, and offers the Tool Gateway opt-in (identical to `nunmai setup --portal`, and the same Nunmai flow as the first-time quick setup).
 
 `nunmai portal info` gives you the high-level overview:
 
 ```
-  Nous Portal
+  Nunmai Portal
   ───────────
   Auth:    ✓ logged in
   Portal:  https://portal.nousresearch.com
-  Model:   ✓ using Nous as inference provider
+  Model:   ✓ using Nunmai as inference provider
 
   Tool Gateway
   ────────────
-  Web search & extract  via Nous Portal
-  Image generation      via Nous Portal
-  Text-to-speech        via Nous Portal
-  Browser automation    via Nous Portal
+  Web search & extract  via Nunmai Portal
+  Image generation      via Nunmai Portal
+  Text-to-speech        via Nunmai Portal
+  Browser automation    via Nunmai Portal
   Cloud terminal        not configured
 ```
 
@@ -183,17 +183,17 @@ nunmai model
 
 ### Mixing the gateway with your own backends
 
-If you already have, say, a Browserbase account and want to keep using it while routing web search and image generation through Nous, that's supported. Use `nunmai tools` to pick backends per tool:
+If you already have, say, a Browserbase account and want to keep using it while routing web search and image generation through Nunmai, that's supported. Use `nunmai tools` to pick backends per tool:
 
 ```bash
 nunmai tools
-# → Web search       → "Nous Subscription"
-# → Image generation → "Nous Subscription"
+# → Web search       → "Nunmai Subscription"
+# → Image generation → "Nunmai Subscription"
 # → Browser          → "Browserbase"  (your existing key)
-# → TTS              → "Nous Subscription"
+# → TTS              → "Nunmai Subscription"
 ```
 
-The Tool Gateway is opt-in per tool, not all-or-nothing. The managed backends show up in `nunmai tools` whether or not you're logged into Nous Portal — if you pick "Nous Subscription" before authenticating, Nunmai runs the Portal login inline (it won't change your inference provider or touch your other tools). See the [Tool Gateway docs](/user-guide/features/tool-gateway) for the full per-tool configuration matrix.
+The Tool Gateway is opt-in per tool, not all-or-nothing. The managed backends show up in `nunmai tools` whether or not you're logged into Nunmai Portal — if you pick "Nunmai Subscription" before authenticating, Nunmai runs the Portal login inline (it won't change your inference provider or touch your other tools). See the [Tool Gateway docs](/user-guide/features/tool-gateway) for the full per-tool configuration matrix.
 
 ### Subscription management
 
@@ -213,7 +213,7 @@ model:
   base_url: https://inference-api.nousresearch.com/v1
 ```
 
-The Tool Gateway settings live under their respective tool sections — each category has a single selection key, and picking **Nous Subscription** in `nunmai tools` (or `nunmai setup --portal`) writes the value `nous`:
+The Tool Gateway settings live under their respective tool sections — each category has a single selection key, and picking **Nunmai Subscription** in `nunmai tools` (or `nunmai setup --portal`) writes the value `nous`:
 
 ```yaml
 web:
@@ -249,7 +249,7 @@ You haven't completed the OAuth flow, or your refresh token was wiped. Run:
 nunmai portal
 ```
 
-or use `nunmai model` and re-select Nous Portal.
+or use `nunmai model` and re-select Nunmai Portal.
 
 ### Got a "re-authentication required" message mid-session
 
@@ -267,7 +267,7 @@ If a model is genuinely missing, [open an issue](https://github.com/NousResearch
 
 ### Bills not appearing on my Portal account
 
-Check `nunmai portal info` first — if it shows you're using a different provider (`Model: currently openrouter` instead of `using Nous as inference provider`), your local config has drifted. Run `nunmai model`, pick Nous Portal, and the next request will route through your subscription.
+Check `nunmai portal info` first — if it shows you're using a different provider (`Model: currently openrouter` instead of `using Nunmai as inference provider`), your local config has drifted. Run `nunmai model`, pick Nunmai Portal, and the next request will route through your subscription.
 
 ## See also
 

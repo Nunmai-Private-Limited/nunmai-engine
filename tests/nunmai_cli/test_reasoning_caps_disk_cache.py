@@ -2,7 +2,7 @@
 
 Every consumer of these capabilities sits on a per-request hot path that must
 never block on HTTP, so a process whose in-memory cache is cold answers
-"unknown" — and on that answer the Nous profile drops a "thinking off" disable
+"unknown" — and on that answer the Nunmai profile drops a "thinking off" disable
 rather than risk a 400. A short-lived process (``nunmai -p``, a cron job, a
 freshly booted gateway) is ALWAYS cold, so without a disk copy that fallback is
 the only behavior those runs ever get and the user keeps paying for reasoning

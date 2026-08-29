@@ -9238,7 +9238,7 @@ def _define_discord_view_classes() -> None:
             Discord caps each ``discord.ui.Select`` at 25 options and a View at
             5 action rows. We keep 2 rows for Back/Cancel, so partition the
             model list across up to 3 select menus (75 slots) instead of
-            truncating at 25. This matters for providers like Nous whose
+            truncating at 25. This matters for providers like Nunmai whose
             curated + Portal free-recommendation list exceeds 25 entries — the
             tail (typically the ``:free`` Portal picks) was previously dropped
             on Discord, so free-tier models never surfaced there.
@@ -9359,7 +9359,7 @@ def _define_discord_view_classes() -> None:
 
             # `shown` counts models actually rendered across the partitioned
             # select menus (up to 3×25 = 75); the old code hard-capped at 25
-            # and silently dropped the tail (e.g. Nous `:free` Portal picks).
+            # and silently dropped the tail (e.g. Nunmai `:free` Portal picks).
             total = provider.get("total_models", 0) if provider else 0
             shown = (
                 min(len(provider.get("models", [])), _DISCORD_MODEL_SELECT_CAPACITY)

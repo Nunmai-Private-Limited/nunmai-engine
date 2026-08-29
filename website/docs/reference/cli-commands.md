@@ -50,7 +50,7 @@ nunmai [global-options] <command> [subcommand/options]
 | `nunmai whatsapp` | Configure and pair the WhatsApp bridge. |
 | `nunmai whatsapp-cloud` | Configure the official Meta WhatsApp Business Cloud API adapter (Business account + public webhook required). Distinct from `nunmai whatsapp` (Baileys personal-account bridge). |
 | `nunmai slack` | Slack helpers (currently: generate the app manifest with every command as a native slash). |
-| `nunmai auth` | Manage credentials — add, list, remove, reset, status, logout. Handles OAuth flows for Codex/Nous/Anthropic. |
+| `nunmai auth` | Manage credentials — add, list, remove, reset, status, logout. Handles OAuth flows for Codex/Nunmai/Anthropic. |
 | `nunmai login` / `logout` | **Deprecated** — use `nunmai auth` instead. |
 | `nunmai send` | Send a one-shot message to a configured messaging platform (Telegram, Discord, Slack, Signal, SMS, …). Useful from shell scripts, cron jobs, CI hooks, and monitoring daemons — no agent loop, no LLM. |
 | `nunmai peer` | Register peer Nunmai gateways on other machines and DM their agents' canonical Bot Chats (`nunmai peer dm <peer>[/<agent>] "…"`). The transport behind cross-machine bot-to-bot messaging. |
@@ -84,7 +84,7 @@ nunmai [global-options] <command> [subcommand/options]
 | `nunmai acp` | Run Nunmai as an ACP server for editor integration. |
 | `nunmai mcp` | Manage MCP server configurations and run Nunmai as an MCP server. |
 | `nunmai plugins` | Manage Nunmai Engine plugins (install, enable, disable, remove). |
-| `nunmai portal` | Nous Portal status, subscription link, and Tool Gateway routing. See [Tool Gateway](../user-guide/features/tool-gateway.md). |
+| `nunmai portal` | Nunmai Portal status, subscription link, and Tool Gateway routing. See [Tool Gateway](../user-guide/features/tool-gateway.md). |
 | `nunmai tools` | Configure enabled tools per platform. |
 | `nunmai computer-use` | Install or check the Computer Use (cua-driver) backend (macOS/Windows/Linux). |
 | `nunmai pets` | Browse, install, and select [petdex](../user-guide/features/pets.md) animated pets shown across the CLI, TUI, and desktop app. Subcommands: `list`, `install`, `select`, `show`, `off`, `scale`, `remove`, `doctor`. |
@@ -193,7 +193,7 @@ nunmai model
 
 Use this when you want to:
 - **add a new provider** (OpenRouter, Anthropic, Copilot, DeepSeek, custom, etc.)
-- log into OAuth-backed providers (Anthropic, Copilot, Codex, Nous Portal)
+- log into OAuth-backed providers (Anthropic, Copilot, Codex, Nunmai Portal)
 - enter or update API keys
 - pick from provider-specific model lists
 - configure a custom/self-hosted endpoint
@@ -310,7 +310,7 @@ the full guide, supported languages, and configuration knobs.
 nunmai setup [model|tts|terminal|gateway|tools|agent] [--non-interactive] [--reset] [--quick] [--reconfigure] [--portal]
 ```
 
-**Easiest path:** `nunmai setup --portal` — OAuth into Nous Portal and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md) in one shot.
+**Easiest path:** `nunmai setup --portal` — OAuth into Nunmai Portal and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md) in one shot.
 
 **First run:** launches the first-time wizard.
 
@@ -334,7 +334,7 @@ Options:
 | `--non-interactive` | Use defaults / environment values without prompts. |
 | `--reset` | Reset configuration to defaults before setup. |
 | `--reconfigure` | Backwards-compat alias — bare `nunmai setup` on an existing install now does this by default. |
-| `--portal` | One-shot Nous Portal setup: log in via OAuth, set Nous as the inference provider, and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md). Skips the rest of the wizard. |
+| `--portal` | One-shot Nunmai Portal setup: log in via OAuth, set Nunmai as the inference provider, and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md). Skips the rest of the wizard. |
 
 ## `nunmai portal`
 
@@ -342,13 +342,13 @@ Options:
 nunmai portal [status|open|tools]
 ```
 
-Inspect Nous Portal auth, Tool Gateway routing, and reach the subscription page. Subcommand-less invocation runs `status`.
+Inspect Nunmai Portal auth, Tool Gateway routing, and reach the subscription page. Subcommand-less invocation runs `status`.
 
 | Subcommand | Description |
 |------------|-------------|
 | `status` (default) | Portal auth state + per-tool Tool Gateway routing summary. Also shown when no subcommand is given. |
 | `open` | Open `portal.nousresearch.com/manage-subscription` in your default browser. |
-| `tools` | List every Tool Gateway partner (Firecrawl, FAL, OpenAI TTS, Browser Use, Modal) and which are routed via Nous. |
+| `tools` | List every Tool Gateway partner (Firecrawl, FAL, OpenAI TTS, Browser Use, Modal) and which are routed via Nunmai. |
 
 For configuration of the gateway itself, see [Tool Gateway](../user-guide/features/tool-gateway.md). For the one-shot setup path, see `nunmai setup --portal` above.
 
@@ -527,7 +527,7 @@ Common flags for migration subcommands:
 nunmai proxy <subcommand>
 ```
 
-Run a local OpenAI-compatible HTTP server that forwards requests to an OAuth-authenticated upstream provider (e.g. Nous Portal, xAI). External apps can point at the proxy with any bearer token; the proxy attaches your real OAuth credentials on the way out. See [Subscription Proxy](../user-guide/features/subscription-proxy.md) for the full guide.
+Run a local OpenAI-compatible HTTP server that forwards requests to an OAuth-authenticated upstream provider (e.g. Nunmai Portal, xAI). External apps can point at the proxy with any bearer token; the proxy attaches your real OAuth credentials on the way out. See [Subscription Proxy](../user-guide/features/subscription-proxy.md) for the full guide.
 
 | Subcommand | Description |
 |------------|-------------|
@@ -908,13 +908,13 @@ Upload a debug report (system info + recent logs) to a paste service and get a s
 |--------|-------------|
 | `--lines <N>` | Number of log lines to include per log file (default: 200). |
 | `--expire <days>` | Paste expiry in days (default: 7). |
-| `--nous` | Upload to Nous-internal diagnostics storage instead of a public paste service. Use this when Nous support asks for a private diagnostic bundle. |
+| `--nous` | Upload to Nunmai-internal diagnostics storage instead of a public paste service. Use this when Nunmai support asks for a private diagnostic bundle. |
 | `--local` | Print the report locally instead of uploading. |
 | `--no-redact` | Disable upload-time secret redaction. By default, uploads are redacted. |
 
 The report includes system info (OS, Python version, Nunmai version), recent agent, gateway, GUI/dashboard, and desktop logs (512 KB limit per file), and redacted API key status. By default, uploads are redacted so secrets are not included.
 
-Default uploads use public paste services tried in order: paste.rs, dpaste.com. `--nous` uploads the same debug bundle to private Nous diagnostics storage instead; the returned viewer link is for the Nous team and auto-deletes after 14 days.
+Default uploads use public paste services tried in order: paste.rs, dpaste.com. `--nous` uploads the same debug bundle to private Nunmai diagnostics storage instead; the returned viewer link is for the Nunmai team and auto-deletes after 14 days.
 
 ### Examples
 
@@ -922,7 +922,7 @@ Default uploads use public paste services tried in order: paste.rs, dpaste.com. 
 nunmai debug share              # Upload debug report, print URL
 nunmai debug share --lines 500  # Include more log lines
 nunmai debug share --expire 30  # Keep paste for 30 days
-nunmai debug share --nous       # Upload a private diagnostics bundle for Nous support
+nunmai debug share --nous       # Upload a private diagnostics bundle for Nunmai support
 nunmai debug share --local      # Print report to terminal (no upload)
 ```
 
@@ -1387,8 +1387,8 @@ Manage MCP (Model Context Protocol) server configurations and run Nunmai as an M
 
 | Subcommand | Description |
 |------------|-------------|
-| *(none)* or `picker` | Interactive catalog picker — browse Nous-approved MCPs and install/enable/disable. |
-| `catalog` | List Nous-approved MCPs (plain text, scriptable). |
+| *(none)* or `picker` | Interactive catalog picker — browse Nunmai-approved MCPs and install/enable/disable. |
+| `catalog` | List Nunmai-approved MCPs (plain text, scriptable). |
 | `install <name>` | Install a catalog entry (e.g. `nunmai mcp install n8n`). |
 | `serve [-v\|--verbose]` | Run Nunmai as an MCP server — expose conversations to other agents. |
 | `add <name> [--url URL] [--command CMD] [--auth oauth\|header] [--args ...]` | Add a custom MCP server with automatic tool discovery. `--args` passes the remaining argv to the stdio command, so put it last. |
@@ -1653,13 +1653,13 @@ Launch the web dashboard — a browser-based UI for managing configuration, API 
 
 ### `nunmai dashboard register`
 
-Register this install as a self-hosted dashboard with your Nous Portal account. Creates an OAuth client, writes `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` into `~/.nunmai/.env`, and prints how to engage the login gate. Requires being logged in (`nunmai setup`).
+Register this install as a self-hosted dashboard with your Nunmai Portal account. Creates an OAuth client, writes `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` into `~/.nunmai/.env`, and prints how to engage the login gate. Requires being logged in (`nunmai setup`).
 
 | Option | Description |
 |--------|-------------|
 | `--name` | Human-readable label for the dashboard (default: auto-generated). |
 | `--redirect-uri` | Public HTTPS OAuth redirect URI (e.g. `https://hermes.example.com/auth/callback`). Omit for localhost-only use. |
-| `--portal-url` | Override the Nous Portal base URL for registration (default: the portal you logged into). Also settable via `NUNMAI_DASHBOARD_PORTAL_URL`. |
+| `--portal-url` | Override the Nunmai Portal base URL for registration (default: the portal you logged into). Also settable via `NUNMAI_DASHBOARD_PORTAL_URL`. |
 
 ```bash
 # Default — opens browser to http://127.0.0.1:9119

@@ -227,8 +227,8 @@ TIPS = [
     "browser_vision with annotate=true overlays numbered labels on interactive elements.",
 
     # --- MCP ---
-    "nunmai mcp opens an interactive picker of Nous-approved MCPs you can install in one keystroke.",
-    "nunmai mcp catalog lists Nous-approved MCP servers shipped with the repo.",
+    "nunmai mcp opens an interactive picker of Nunmai-approved MCPs you can install in one keystroke.",
+    "nunmai mcp catalog lists Nunmai-approved MCP servers shipped with the repo.",
     "nunmai mcp install <name> installs a catalog entry, prompts for credentials, and lets you pick which of its tools to enable.",
     "MCP servers are configured in config.yaml — both stdio and HTTP transports supported.",
     "Per-server tool filtering: tools.include whitelists and tools.exclude blacklists specific tools.",
@@ -371,7 +371,7 @@ TIPS = [
     # --- Credential Pools & Routing ---
     'nunmai auth reset <provider> clears all cooldowns and exhaustion flags on a credential pool.',
     'credential_pool_strategies.<provider>: round_robin cycles keys evenly instead of the fill_first default.',
-    'use_gateway: true per-tool routes web, image, tts, or browser through your Nous subscription — no extra keys.',
+    'use_gateway: true per-tool routes web, image, tts, or browser through your Nunmai subscription — no extra keys.',
     'provider_routing.data_collection: deny excludes data-storing providers on OpenRouter.',
     'provider_routing.require_parameters: true only routes to providers that support every param in your request.',
 

@@ -191,10 +191,10 @@ describe('BootFailureOverlay', () => {
     }
   })
 
-  it('shows the Nous Cloud down recovery when the backend flags isCloudBackendDown', async () => {
+  it('shows the Nunmai Cloud down recovery when the backend flags isCloudBackendDown', async () => {
     const restore = stubDesktop(remoteToken)
     $desktopBoot.set({
-      error: 'Nous Cloud agent ares-3009.agents.nousresearch.com is down (HTTP 503: server-side fault).',
+      error: 'Nunmai Cloud agent ares-3009.agents.nousresearch.com is down (HTTP 503: server-side fault).',
       fakeMode: false,
       isCloudBackendDown: true,
       message: 'boot failed',
@@ -210,7 +210,7 @@ describe('BootFailureOverlay', () => {
       render(<BootFailureOverlay />)
       // Cloud-specific title + actionable recovery instead of the generic
       // remote-failure copy.
-      expect(await screen.findByText(/Nous Cloud agent is down/i)).toBeTruthy()
+      expect(await screen.findByText(/Nunmai Cloud agent is down/i)).toBeTruthy()
       // Portal and Discord are dedicated action buttons (localized labels
       // can't drift the URLs, which live in code).
       expect(screen.getByRole('button', { name: /check portal status/i })).toBeTruthy()

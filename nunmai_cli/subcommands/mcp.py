@@ -104,14 +104,14 @@ def build_mcp_parser(subparsers, *, cmd_mcp: Callable) -> None:
         help="Re-authenticate every OAuth server in config, one at a time",
     )
 
-    # ── Catalog (Nous-approved MCPs shipped with the repo) ─────────────────
+    # ── Catalog (Nunmai-approved MCPs shipped with the repo) ─────────────────
     mcp_sub.add_parser(
         "picker",
         help="Interactive catalog picker (also the default for `nunmai mcp`)",
     )
     mcp_sub.add_parser(
         "catalog",
-        help="List Nous-approved MCPs available for one-click install",
+        help="List Nunmai-approved MCPs available for one-click install",
     )
     mcp_install_p = mcp_sub.add_parser(
         "install",

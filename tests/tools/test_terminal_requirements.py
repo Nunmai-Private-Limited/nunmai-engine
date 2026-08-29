@@ -34,7 +34,7 @@ def _clear_terminal_env(monkeypatch):
     ]
     for key in keys:
         monkeypatch.delenv(key, raising=False)
-    # Default: no Nous subscription — patch both the terminal_tool local
+    # Default: no Nunmai subscription — patch both the terminal_tool local
     # binding and tool_backend_helpers (used by resolve_modal_backend_state).
     monkeypatch.setattr(terminal_tool_module, "managed_nous_tools_enabled", lambda: False)
     import tools.tool_backend_helpers as _tbh
@@ -80,7 +80,7 @@ def test_modal_backend_managed_mode_without_feature_flag_logs_clear_error(monkey
 
     assert ok is False
     assert any(
-        "Nous Tool Gateway access is not currently available" in record.getMessage()
+        "Nunmai Tool Gateway access is not currently available" in record.getMessage()
         for record in caplog.records
     )
 

@@ -31960,7 +31960,7 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
 
         start_nous_auth_keepalive()
     except Exception as exc:
-        logger.debug("Nous auth keepalive did not start: %s", exc)
+        logger.debug("Nunmai auth keepalive did not start: %s", exc)
 
     _ensure_windows_gateway_venv_imports()
 

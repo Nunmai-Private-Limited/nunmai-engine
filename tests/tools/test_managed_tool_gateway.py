@@ -165,7 +165,7 @@ def test_managed_gateway_auth_headers_carry_the_bearer():
 
 
 def test_managed_gateway_auth_headers_reflect_a_rotated_token():
-    # Read fresh on every call: a Nous access token expires within the hour,
+    # Read fresh on every call: a Nunmai access token expires within the hour,
     # and a long session must not keep presenting a dead bearer.
     tokens = iter(["first-token", "second-token"])
     builder = lambda vendor: f"https://{vendor}-gateway.example.com"
@@ -327,7 +327,7 @@ class TestManagedMediaUploader:
 
         with patch.object(managed_tool_gateway, "managed_nous_tools_enabled", return_value=True), \
                 patch.object(managed_tool_gateway, "managed_gateway_auth_headers", return_value={}):
-            with pytest.raises(RuntimeError, match="no Nous credential"):
+            with pytest.raises(RuntimeError, match="no Nunmai credential"):
                 asyncio.run(uploader(b"x", "image/png"))
 
     def test_a_gateway_refusal_surfaces_its_own_message(self):

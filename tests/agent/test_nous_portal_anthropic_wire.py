@@ -1,4 +1,4 @@
-"""Nous Portal ``anthropic/*`` models route on the native Messages wire.
+"""Nunmai Portal ``anthropic/*`` models route on the native Messages wire.
 
 Portal serves its ``anthropic/*`` catalog at
 ``https://inference-api.nousresearch.com/v1/messages`` alongside the
@@ -56,7 +56,7 @@ class TestApiModeRouting:
     def test_determine_api_mode_honors_the_model_for_nous(self):
         """Callers that skip resolve_runtime_provider (fallback, switch_model
         empty-mode path) must still land Claude on Messages — the Nunmai
-        overlay alone advertises openai_chat for every Nous model."""
+        overlay alone advertises openai_chat for every Nunmai model."""
         from nunmai_cli.providers import determine_api_mode
 
         assert (
@@ -259,7 +259,7 @@ class TestModelIdPassthrough:
 class TestPortalBodyFields:
     """``tags`` and ``session_id`` are top-level Portal body fields.
 
-    They are produced by the Nous provider profile, which only the OpenAI-wire
+    They are produced by the Nunmai provider profile, which only the OpenAI-wire
     transport consults — so the Anthropic branch has to merge them in itself.
     """
 

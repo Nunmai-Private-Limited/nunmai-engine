@@ -9,7 +9,7 @@ description: "Master the Nunmai Engine terminal interface — commands, keybindi
 Nunmai Engine's CLI is a full terminal user interface (TUI) — not a web UI. It features multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output. Built for people who live in the terminal.
 
 :::tip First-time setup
-One command — `nunmai setup --portal` — and you're ready to `nunmai chat`. See [Nous Portal](/integrations/nous-portal).
+One command — `nunmai setup --portal` — and you're ready to `nunmai chat`. See [Nunmai Portal](/integrations/nous-portal).
 :::
 
 :::tip
@@ -34,7 +34,7 @@ nunmai chat --query-file - < prompt.txt
 nunmai chat --model "anthropic/claude-sonnet-4"
 
 # With a specific provider
-nunmai chat --provider nous        # Use Nous Portal
+nunmai chat --provider nous        # Use Nunmai Portal
 nunmai chat --provider openrouter  # Force OpenRouter
 
 # With specific toolsets

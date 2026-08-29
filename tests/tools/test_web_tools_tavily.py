@@ -175,7 +175,7 @@ class TestTavilyAvailability:
             assert _is_backend_available("tavily") is True
 
     def test_keyless_does_not_preempt_managed_firecrawl(self):
-        """No TAVILY_API_KEY + Nous gateway ready → firecrawl, not keyless tavily."""
+        """No TAVILY_API_KEY + Nunmai gateway ready → firecrawl, not keyless tavily."""
         from tools.web_tools import _get_backend
         with patch("tools.web_tools._load_web_config", return_value={}), \
              patch("tools.web_tools._is_tool_gateway_ready", return_value=True), \

@@ -830,7 +830,7 @@ def _migrate_to_38(results: Dict[str, Any], quiet: bool) -> None:
 def _migrate_to_39(results: Dict[str, Any], quiet: bool) -> None:
     # ── Version 38 → 39: remove the retired `bfl` toolset from saved lists ──
     # The six bfl_flux3_* core tools shipped for a free FLUX 3 promotional
-    # period that has since ended server-side, leaving every Nous-signed-in
+    # period that has since ended server-side, leaving every Nunmai-signed-in
     # install paying ~2.7K tokens of schema per API call for tools that can
     # only refuse. They were removed in favor of the standard video_gen
     # provider surface (`video_generate`, `nunmai tools` → Video Generation).
@@ -859,7 +859,7 @@ def _migrate_to_39(results: Dict[str, Any], quiet: bool) -> None:
             print(
                 "  ✓ Removed the retired BFL FLUX 3 toolset from saved toolset "
                 "lists — video generation now lives under `nunmai tools` → "
-                "Video Generation (Nous Subscription or FAL)."
+                "Video Generation (Nunmai Subscription or FAL)."
             )
 
 

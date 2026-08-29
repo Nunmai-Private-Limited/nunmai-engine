@@ -118,7 +118,7 @@ Type `/` in the CLI to open the autocomplete menu. Built-in commands are case-in
 | `/reload` | Reload `.env` variables into the running session (picks up new API keys without restarting) |
 | `/plugins` | List installed plugins and their status |
 | `/pet [list\|<slug>]` | Toggle or adopt a [petdex](/user-guide/features/pets) mascot. `/pet` toggles the pane, `/pet list` shows installed pets, `/pet <slug>` adopts a specific one. |
-| `/hatch <description>` (alias: `/generate-pet`) | Generate a brand-new petdex pet from a text description, using the configured image backend (OpenRouter / Nous Portal). See [Pets](/user-guide/features/pets). |
+| `/hatch <description>` (alias: `/generate-pet`) | Generate a brand-new petdex pet from a text description, using the configured image backend (OpenRouter / Nunmai Portal). See [Pets](/user-guide/features/pets). |
 
 ### Info
 
@@ -129,8 +129,8 @@ Type `/` in the CLI to open the autocomplete menu. Built-in commands are case-in
 | `/version` | Show Nunmai Engine version, build, and environment info. |
 | `/whoami` | Show your slash command access level (admin / user). |
 | `/usage` | Show token usage, cost breakdown, session duration, and — when available from the active provider — an **Account limits** section with remaining quota / credits / plan usage pulled live from the provider's API. |
-| `/topup` | Show your Nous balance and manage billing on the portal (replaces the old `/credits` and `/billing` commands). |
-| `/subscription` (alias: `/upgrade`) | **CLI only.** View your Nous plan and change it in the browser. |
+| `/topup` | Show your Nunmai balance and manage billing on the portal (replaces the old `/credits` and `/billing` commands). |
+| `/subscription` (alias: `/upgrade`) | **CLI only.** View your Nunmai plan and change it in the browser. |
 | `/insights` | Show usage insights and analytics (last 30 days) |
 | `/update` | Update Nunmai Engine to the latest version. |
 | `/platforms` (alias: `/gateway`) | Show gateway/messaging platform status (CLI-only summary view). |
@@ -243,7 +243,7 @@ The messaging gateway supports the following built-in commands inside Telegram, 
 | `/resume [name]` | Resume a previously named session. |
 | `/sessions [all] [search <query>]` | List previous sessions for this chat. `/sessions search <query>` filters by title/id match (most recently active first); `/sessions all` lists across origins (admin only). |
 | `/usage` | Show token usage, estimated cost breakdown (input/output), context window state, session duration, and — when available from the active provider — an **Account limits** section with remaining quota / credits pulled live from the provider's API. |
-| `/topup` | Show your Nous balance and manage billing on the portal. |
+| `/topup` | Show your Nunmai balance and manage billing on the portal. |
 | `/whoami` | Show your slash command access level (admin / user). |
 | `/insights [days]` | Show usage analytics. |
 | `/reasoning [level\|show\|hide\|full\|clamp] [--global]` | Change reasoning effort (levels up to `max` / `ultra`) or toggle reasoning display (`full` / `clamp` included). `--global` persists to config. |

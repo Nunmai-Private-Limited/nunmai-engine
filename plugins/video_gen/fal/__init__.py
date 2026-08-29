@@ -36,7 +36,7 @@ Selection precedence for the active family:
        or a full endpoint path that contains a family ID)
     5. ``DEFAULT_MODEL``
 
-Authentication via ``FAL_KEY`` or the managed Nous gateway. Output is an
+Authentication via ``FAL_KEY`` or the managed Nunmai gateway. Output is an
 HTTPS URL from FAL's CDN; the gateway downloads and delivers it.
 """
 
@@ -568,7 +568,7 @@ def _load_fal_client() -> Any:
 
 
 # ---------------------------------------------------------------------------
-# Managed FAL gateway (Nous Subscription)
+# Managed FAL gateway (Nunmai Subscription)
 # ---------------------------------------------------------------------------
 
 _managed_fal_video_client: Any = None
@@ -600,7 +600,7 @@ def _resolve_managed_fal_video_gateway():
             raise ValueError(selection_error(
                 "video_gen",
                 NOUS_MANAGED_PROVIDER,
-                "the Nous Tool Gateway is not available (not entitled or "
+                "the Nunmai Tool Gateway is not available (not entitled or "
                 "unreachable)",
             ))
         return gateway
@@ -665,9 +665,9 @@ def _submit_fal_video_request(endpoint: str, arguments: Dict[str, Any]):
         status = _extract_http_status(exc)
         if status is not None and 400 <= status < 500:
             raise ValueError(
-                f"Nous Subscription gateway rejected endpoint '{endpoint}' "
+                f"Nunmai Subscription gateway rejected endpoint '{endpoint}' "
                 f"(HTTP {status}). This model may not yet be enabled on "
-                f"the Nous Portal's FAL proxy. Either:\n"
+                f"the Nunmai Portal's FAL proxy. Either:\n"
                 f"  • Set FAL_KEY in your environment to use FAL.ai directly, or\n"
                 f"  • Pick a different model via `nunmai tools` → Video Generation."
             ) from exc
@@ -918,7 +918,7 @@ class FALVideoGenProvider(VideoGenProvider):
                 error=(
                     "No FAL backend available. Either set FAL_KEY "
                     "(run `nunmai tools` → Video Generation → FAL to configure) "
-                    "or sign in to Nous (`nunmai setup`) for managed gateway access."
+                    "or sign in to Nunmai (`nunmai setup`) for managed gateway access."
                 ),
                 error_type="auth_required",
                 provider="fal",

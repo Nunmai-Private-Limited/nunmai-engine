@@ -38,8 +38,8 @@ A fresh install with **no web credentials at all** gets working `web_search` and
 
 **Choosing free vs paid explicitly:** in `nunmai tools`, Exa, Parallel, and Keenable each appear as two rows — **Free (keyless)** and **Paid (API key)**. Picking Free pins that vendor's anonymous endpoint (even if you later add a key); picking Paid pins the keyed path (a missing key then errors instead of silently downgrading to the free tier). The selection is stored as `web.provider_tier.<name>: free|paid`; leave it unset for auto (key present → paid, otherwise the keyless ring).
 
-:::tip Nous Subscribers
-If you have a paid [Nous Portal](https://portal.nousresearch.com) subscription, web search and extract are available through the **[Tool Gateway](tool-gateway.md)** via managed Firecrawl — no API key needed. New installs can run `nunmai setup --portal` to log in and turn on all gateway tools at once; existing installs can flip just web via `nunmai tools`.
+:::tip Nunmai Subscribers
+If you have a paid [Nunmai Portal](https://portal.nousresearch.com) subscription, web search and extract are available through the **[Tool Gateway](tool-gateway.md)** via managed Firecrawl — no API key needed. New installs can run `nunmai setup --portal` to log in and turn on all gateway tools at once; existing installs can flip just web via `nunmai tools`.
 :::
 
 ---
@@ -402,7 +402,7 @@ If no backend has **ever** been selected (no `web.backend` / per-capability key 
 | `TAVILY_API_KEY` | tavily |
 | `EXA_API_KEY` | exa |
 | `PARALLEL_API_KEY` | parallel |
-| `FIRECRAWL_API_KEY` or `FIRECRAWL_API_URL` (or the Nous Tool Gateway is ready) | firecrawl |
+| `FIRECRAWL_API_KEY` or `FIRECRAWL_API_URL` (or the Nunmai Tool Gateway is ready) | firecrawl |
 | `SEARXNG_URL` | searxng |
 | `BRAVE_SEARCH_API_KEY` | brave-free |
 | `ddgs` package importable | ddgs |

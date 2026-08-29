@@ -108,7 +108,7 @@ def test_gateway_topup_not_logged_in(monkeypatch):
     )
     stub = _make_gateway_stub()
     out = asyncio.run(stub._handle_topup_command(_FakeEvent()))
-    assert "Not logged into Nous Portal" in out
+    assert "Not logged into Nunmai Portal" in out
 
 
 

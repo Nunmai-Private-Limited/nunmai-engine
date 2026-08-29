@@ -104,11 +104,11 @@ export const en: Translations = {
         `Signs out of the saved remote browser session, then opens ${signInLabel}. Use local gateway to switch to the bundled backend instead.`,
       signOutAndSignIn: 'Sign out & sign in',
       remoteFailureHint: 'Check the gateway URL and sign-in under Gateway settings, or switch to the local gateway.',
-      cloudDownTitle: 'Nous Cloud agent is down',
+      cloudDownTitle: 'Nunmai Cloud agent is down',
       cloudDownDescription:
-        'The Nous-managed cloud agent this gateway connects to is returning a server error. It cannot be restarted from here — check its status, switch to the local gateway, or get support.',
+        'The Nunmai-managed cloud agent this gateway connects to is returning a server error. It cannot be restarted from here — check its status, switch to the local gateway, or get support.',
       cloudDownHint:
-        'The buttons below open the Nous Portal (instance status and controls) and our Discord for support.',
+        'The buttons below open the Nunmai Portal (instance status and controls) and our Discord for support.',
       cloudDownCheckPortal: 'Check Portal status',
       cloudDownDiscord: 'Get help on Discord',
       hideRecentLogs: 'Hide recent logs',
@@ -204,7 +204,7 @@ export const en: Translations = {
   },
 
   billingBlock: {
-    titleNous: 'Out of Nous credits',
+    titleNous: 'Out of Nunmai credits',
     titleProvider: provider => `Out of credits — ${provider}`,
     fallbackMessage: 'Your account is out of credits. Add credits to keep going.',
     openBilling: 'Open billing',
@@ -213,9 +213,9 @@ export const en: Translations = {
   },
 
   sendDiagnostics: {
-    title: 'Send diagnostics to Nous',
+    title: 'Send diagnostics to Nunmai',
     privacyNotice:
-      'This uploads a debug bundle to Nous-internal storage (not a public paste). It includes system info (OS, versions, provider, which API keys are configured — never the keys themselves) and full agent, gateway, and desktop logs (up to 512 KB each), which likely contain conversation content, tool outputs, and file paths. Secrets are redacted before upload. The bundle is viewable only by Nous staff and allowlisted Discord moderators, and auto-deletes after 14 days.',
+      'This uploads a debug bundle to Nunmai-internal storage (not a public paste). It includes system info (OS, versions, provider, which API keys are configured — never the keys themselves) and full agent, gateway, and desktop logs (up to 512 KB each), which likely contain conversation content, tool outputs, and file paths. Secrets are redacted before upload. The bundle is viewable only by Nunmai staff and allowlisted Discord moderators, and auto-deletes after 14 days.',
     upload: 'Upload',
     uploading: 'Uploading…',
     cancel: 'Cancel',
@@ -231,7 +231,7 @@ export const en: Translations = {
     handoffLead: 'Pick up the discussion in:',
     links: {
       github: 'GitHub Issues',
-      portal: 'Nous Portal Support',
+      portal: 'Nunmai Portal Support',
       discord: 'Discord'
     }
   },
@@ -869,7 +869,7 @@ export const en: Translations = {
       cloudLoadingAgents: 'Loading your agents…',
       cloudNoAgents: {
         before: 'No agents found on this account. Create one in the ',
-        linkText: 'Nous portal',
+        linkText: 'Nunmai portal',
         after: ', then refresh.'
       },
       cloudRefresh: 'Refresh',
@@ -1197,13 +1197,13 @@ export const en: Translations = {
       activeBackend: 'Active',
       activeBackendHint: 'This is your active backend',
       useBackend: 'Use this backend',
-      nousIncluded: 'Included with a Nous subscription — sign in to Nous Portal to activate.',
-      nousAuthNeededTitle: 'Sign in to Nous Portal',
-      nousAuthNeededMessage: provider => `${provider} is saved but won't activate until you sign in to Nous Portal.`,
+      nousIncluded: 'Included with a Nunmai subscription — sign in to Nunmai Portal to activate.',
+      nousAuthNeededTitle: 'Sign in to Nunmai Portal',
+      nousAuthNeededMessage: provider => `${provider} is saved but won't activate until you sign in to Nunmai Portal.`,
       nousAuthSignIn: 'Sign in',
-      nousAuthDoneTitle: 'Nous Portal connected',
+      nousAuthDoneTitle: 'Nunmai Portal connected',
       nousAuthDoneMessage: 'Your subscription backends are now active.',
-      nousAuthFailed: 'Nous Portal sign-in did not complete',
+      nousAuthFailed: 'Nunmai Portal sign-in did not complete',
       noApiKeyRequired: 'No API key required.',
       postSetupHint: step =>
         `This backend needs a one-time install (${step}). Runs on this machine — may take a few minutes.`,
@@ -2807,7 +2807,7 @@ export const en: Translations = {
     loadFailed: 'Could not load models',
     noAuthenticatedProviders: 'No authenticated providers.',
     pro: 'Pro',
-    proNeedsSubscription: 'Pro models need a paid Nous subscription.',
+    proNeedsSubscription: 'Pro models need a paid Nunmai subscription.',
     free: 'Free',
     freeTier: 'Free tier',
     priceTitle: 'Input / Output price per million tokens',
@@ -3282,7 +3282,7 @@ export const en: Translations = {
       unanswered: 'No response',
       toolCount: count => (count === 1 ? '1 tool' : `${count} tools`),
       notInCatalog: server => `“${server}” is not in the MCP catalog`,
-      catalogSource: 'From the Nous-approved catalog',
+      catalogSource: 'From the Nunmai-approved catalog',
       envRequired: 'Fill in the required credentials first',
       sendFailed: 'Could not send MCP setup response',
       reloadFailed: 'Server saved, but reloading MCP tools failed — they load next session',

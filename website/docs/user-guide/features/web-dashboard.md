@@ -9,7 +9,7 @@ description: "Browser-based administration panel for managing configuration, API
 The web dashboard is a browser-based UI for managing your Nunmai Engine installation. Instead of editing YAML files or running CLI commands, you can configure settings, manage API keys, and monitor sessions from a clean web interface.
 
 :::tip
-Hosted-mode auth uses Nous Portal OAuth; if you also want the dashboard to talk to a real backend, `nunmai setup --portal` wires up the model and tool gateway too. See [Nous Portal](/integrations/nous-portal).
+Hosted-mode auth uses Nunmai Portal OAuth; if you also want the dashboard to talk to a real backend, `nunmai setup --portal` wires up the model and tool gateway too. See [Nunmai Portal](/integrations/nous-portal).
 :::
 
 ## Quick Start
@@ -331,7 +331,7 @@ block in `config.yaml` that `nunmai mcp` reads from.
 - **Remove** — delete a server from the config
 - Secret-shaped env values are redacted in the list view
 
-**Catalog:** browse the Nous-approved MCP servers (the bundled `optional-mcps/`
+**Catalog:** browse the Nunmai-approved MCP servers (the bundled `optional-mcps/`
 catalog) and install any of them with one click. Entries that need API keys
 prompt for them inline; the values go to `.env`. This is the same catalog
 `nunmai mcp catalog` / `nunmai mcp install` use.
@@ -383,7 +383,7 @@ the API server and webhook endpoints) with its live connection status.
 A consolidated administration panel for installation-wide operations:
 
 - **Host** — live system stats: OS / kernel, architecture, hostname, Python and Nunmai versions, CPU core count + utilization, memory, disk usage of the Nunmai home, uptime, and load average. (CPU/memory/disk come from `psutil` when installed; identity fields are always shown.) The Nunmai version shows an **update-status badge** (up to date / N commits behind) and a **Check for updates** button. When an update is available on a git install, an **Update now** button opens a confirmation dialog — showing how many commits you'll pull — before running `nunmai update` in the background. On Docker/Nix installs the dashboard can't apply the update in place, so it shows the correct out-of-band command instead.
-- **Nous Portal** — login status, the active inference provider, and the Tool Gateway routing table (which tools run via the Portal vs. locally), with a link to manage your subscription. Read-only mirror of `nunmai portal`.
+- **Nunmai Portal** — login status, the active inference provider, and the Tool Gateway routing table (which tools run via the Portal vs. locally), with a link to manage your subscription. Read-only mirror of `nunmai portal`.
 - **Skill curator** — the background skill-maintenance status (active / paused, interval, last run) with pause/resume and a run-now button. Mirrors `nunmai curator`.
 - **Gateway** — start, stop, and restart the messaging gateway, with live status (running/stopped, PID, state)
 - **Memory** — pick the external memory provider (or built-in only), and reset the built-in `MEMORY.md` / `USER.md` stores
@@ -392,7 +392,7 @@ A consolidated administration panel for installation-wide operations:
 - **Checkpoints** — see the `/rollback` shadow store size and prune it
 - **Shell hooks** — list configured hooks with their consent + executable status, **create** a hook (event, command, matcher, timeout, with an opt-in consent grant), and remove one. Hooks run arbitrary commands, so the create form carries a security warning and the hook only fires after consent is granted.
 
-![System admin page — host stats and Nous Portal status](/img/dashboard/admin-system-top.png)
+![System admin page — host stats and Nunmai Portal status](/img/dashboard/admin-system-top.png)
 
 ![System admin page — skill curator, gateway, memory, and credential pool](/img/dashboard/admin-system-curator.png)
 
@@ -562,7 +562,7 @@ same auth gate as the rest of `/api/`.
 | `POST /api/mcp/servers/{name}/test` | Connect, list tools, disconnect |
 | `PUT /api/mcp/servers/{name}/enabled` | Enable / disable a server |
 | `DELETE /api/mcp/servers/{name}` | Remove a server |
-| `GET /api/mcp/catalog` | Browse the Nous-approved MCP catalog |
+| `GET /api/mcp/catalog` | Browse the Nunmai-approved MCP catalog |
 | `POST /api/mcp/catalog/install` | Install a catalog entry (with required env) |
 | `GET /api/messaging/platforms` | List every messaging channel with status + per-platform setup fields |
 | `PUT /api/messaging/platforms/{id}` | Configure a channel. Body: `{enabled?, env?, clear_env?}` (env writes to `.env`, enabled to `config.yaml`) |
@@ -588,7 +588,7 @@ same auth gate as the rest of `/api/`.
 | `GET /api/system/stats` | Host stats — OS, CPU, memory, disk, uptime |
 | `GET /api/nunmai/update/check` | Report update availability (commits behind, install method) without applying. For git installs that are behind, also returns a `commits` list (`sha`, `summary`, `author`, `at`) of what's changed. `?force=1` busts the 6h cache |
 | `GET /api/curator` · `PUT .../paused` · `POST .../run` | Skill-curator status + pause/resume + run |
-| `GET /api/portal` | Nous Portal auth + Tool Gateway routing (read-only) |
+| `GET /api/portal` | Nunmai Portal auth + Tool Gateway routing (read-only) |
 | `POST /api/ops/prompt-size` · `/dump` · `/config-migrate` | Diagnostics (backgrounded) |
 | `PUT /api/webhooks/{name}/enabled` | Enable / disable a webhook route |
 | `POST /api/skills/hub/install` · `/uninstall` · `/update` | Skills hub actions (backgrounded) |
@@ -604,8 +604,8 @@ same auth gate as the rest of `/api/`.
 When the dashboard is bound to a public or non-loopback address — anything other than `127.0.0.1` / `localhost` — Nunmai Engine engages an auth gate. Every request must carry a verified session cookie or it's bounced to the login page. Three providers ship in the box:
 
 - **[Username/password](#usernamepassword-provider-no-oauth-idp)** — the simplest way to put auth on a self-hosted / on-prem / homelab dashboard. No external identity provider. **Use it only on a trusted network or behind a VPN — not for public-internet exposure.**
-- **[OAuth (Nous Portal)](#default-provider-nous-research)** — for hosted deployments and any dashboard reachable over the public internet, and the recommended path for a [remote Nunmai Desktop connection](#connecting-nunmai-desktop-to-a-remote-backend). Every login is verified against your Nous account, so this is the provider suitable for internet-facing use.
-- **[Self-hosted OIDC](#self-hosted-oidc-provider)** — for bringing your own identity provider via standard OpenID Connect (Keycloak, Auth0, Okta, Google, GitHub via an OIDC bridge, etc.). No Nous Portal involved; suitable for public-internet exposure when fronted by a conformant OIDC server.
+- **[OAuth (Nunmai Portal)](#default-provider-nous-research)** — for hosted deployments and any dashboard reachable over the public internet, and the recommended path for a [remote Nunmai Desktop connection](#connecting-nunmai-desktop-to-a-remote-backend). Every login is verified against your Nunmai account, so this is the provider suitable for internet-facing use.
+- **[Self-hosted OIDC](#self-hosted-oidc-provider)** — for bringing your own identity provider via standard OpenID Connect (Keycloak, Auth0, Okta, Google, GitHub via an OIDC bridge, etc.). No Nunmai Portal involved; suitable for public-internet exposure when fronted by a conformant OIDC server.
 
 Operator-owned dashboards bound to loopback are unaffected — no auth, no login page.
 
@@ -624,7 +624,7 @@ Since the June 2026 hardening, `--insecure` no longer bypasses dashboard authent
 
 ### Fail-closed semantics
 
-If the gate would engage but **no** `DashboardAuthProvider` is registered (no Nous plugin, no custom plugin), `nunmai dashboard` refuses to bind with an explicit error message. There is no "default-deny but accept everything" fallback — a misconfigured gated dashboard never starts.
+If the gate would engage but **no** `DashboardAuthProvider` is registered (no Nunmai plugin, no custom plugin), `nunmai dashboard` refuses to bind with an explicit error message. There is no "default-deny but accept everything" fallback — a misconfigured gated dashboard never starts.
 
 When you run `nunmai dashboard --host 0.0.0.0` **interactively** (a real terminal) and no provider is configured yet, Nunmai doesn't just fail — it offers to set one up on the spot: pick **username & password** (writes `dashboard.basic_auth` to `config.yaml` and you're running in seconds) or **OAuth** (points you at `nunmai dashboard register`). Non-interactive callers — Docker/s6, CI, piped runs — skip the prompt and hit the fail-closed error above, so an unattended deploy still never starts without auth.
 
@@ -632,13 +632,13 @@ When you run `nunmai dashboard --host 0.0.0.0` **interactively** (a real termina
 
 The bundled `plugins/dashboard_auth/nous` plugin is **always installed** and auto-loaded. It auto-registers a `DashboardAuthProvider` named `nous` when a client ID is configured.
 
-Because every login is verified against Nous Portal and protected by your Nous account, **the Nous provider is the one suitable for exposing a dashboard to the public internet.**
+Because every login is verified against Nunmai Portal and protected by your Nunmai account, **the Nunmai provider is the one suitable for exposing a dashboard to the public internet.**
 
 #### Registering a dashboard
 
-To use the Nous provider you need an OAuth client ID (shape `agent:{id}`). There are two ways to get one:
+To use the Nunmai provider you need an OAuth client ID (shape `agent:{id}`). There are two ways to get one:
 
-- **CLI — `nunmai dashboard register`.** Run it on the host where the dashboard lives. It resolves your existing Nous login (run `nunmai setup` first if you're not logged in), registers a self-hosted OAuth client with the Portal, and writes `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` into `~/.nunmai/.env` for you. Optional flags: `--name` (a human-readable label, otherwise auto-generated) and `--redirect-uri` (a public HTTPS callback URL for an internet-facing host).
+- **CLI — `nunmai dashboard register`.** Run it on the host where the dashboard lives. It resolves your existing Nunmai login (run `nunmai setup` first if you're not logged in), registers a self-hosted OAuth client with the Portal, and writes `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` into `~/.nunmai/.env` for you. Optional flags: `--name` (a human-readable label, otherwise auto-generated) and `--redirect-uri` (a public HTTPS callback URL for an internet-facing host).
 
   ```bash
   nunmai dashboard register
@@ -646,7 +646,7 @@ To use the Nous provider you need an OAuth client ID (shape `agent:{id}`). There
   # …writes NUNMAI_DASHBOARD_OAUTH_CLIENT_ID to ~/.nunmai/.env
   ```
 
-- **GUI — the Local Dashboards page.** Open [`/local-dashboards`](https://portal.nousresearch.com/local-dashboards) in the Nous Portal to register, name, manage, and revoke self-hosted dashboards from the browser. Copy the resulting `agent:{id}` client ID into `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` (env) or `dashboard.oauth.client_id` (config.yaml). This is also where you revoke a dashboard registered via the CLI.
+- **GUI — the Local Dashboards page.** Open [`/local-dashboards`](https://portal.nousresearch.com/local-dashboards) in the Nunmai Portal to register, name, manage, and revoke self-hosted dashboards from the browser. Copy the resulting `agent:{id}` client ID into `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` (env) or `dashboard.oauth.client_id` (config.yaml). This is also where you revoke a dashboard registered via the CLI.
 
 #### Configuration
 
@@ -682,7 +682,7 @@ Bundled providers reported these issues:
 
 Configure an auth provider before exposing the dashboard:
   • Password: set dashboard.basic_auth.username + password_hash in config.yaml
-  • OAuth: run `nunmai dashboard register` (Nous Portal) or install a
+  • OAuth: run `nunmai dashboard register` (Nunmai Portal) or install a
     DashboardAuthProvider plugin.
 There is no unauthenticated public-bind option — to keep it local, bind
 127.0.0.1 and tunnel in (SSH / Tailscale).
@@ -690,12 +690,12 @@ There is no unauthenticated public-bind option — to keep it local, bind
 
 #### Worked example: Nunmai Research
 
-From a logged-in Nunmai install to a Nous-gated dashboard in three steps.
+From a logged-in Nunmai install to a Nunmai-gated dashboard in three steps.
 
-**1. Log in and register the dashboard.** `nunmai dashboard register` uses your existing Nous login to provision an OAuth client and writes `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` into `~/.nunmai/.env` for you:
+**1. Log in and register the dashboard.** `nunmai dashboard register` uses your existing Nunmai login to provision an OAuth client and writes `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` into `~/.nunmai/.env` for you:
 
 ```bash
-nunmai setup            # if you're not already logged into Nous Portal
+nunmai setup            # if you're not already logged into Nunmai Portal
 nunmai dashboard register
 # ✓ Registered dashboard "swift_falcon"
 # …writes NUNMAI_DASHBOARD_OAUTH_CLIENT_ID to ~/.nunmai/.env
@@ -729,7 +729,7 @@ The username/password provider is intended for self-hosted / on-prem / homelab d
 
 #### Configuration
 
-Like the Nous provider, it reads from `config.yaml` (canonical) with environment variables winning when set non-empty. It activates only when `username` plus either `password_hash` (preferred) or `password` are configured — otherwise it's a no-op, so OAuth users and loopback operators are unaffected.
+Like the Nunmai provider, it reads from `config.yaml` (canonical) with environment variables winning when set non-empty. It activates only when `username` plus either `password_hash` (preferred) or `password` are configured — otherwise it's a no-op, so OAuth users and loopback operators are unaffected.
 
 **`config.yaml`:**
 
@@ -802,11 +802,11 @@ curl -s http://<host>:9119/api/status | jq '.auth_required, .auth_providers'
 
 ### Self-hosted OIDC provider
 
-If you run your own identity provider, the bundled `plugins/dashboard_auth/self_hosted` plugin authenticates the dashboard against it using **standard OpenID Connect** — no per-IDP code, no Nous Portal involved. It's verified against and works with any conformant OIDC server:
+If you run your own identity provider, the bundled `plugins/dashboard_auth/self_hosted` plugin authenticates the dashboard against it using **standard OpenID Connect** — no per-IDP code, no Nunmai Portal involved. It's verified against and works with any conformant OIDC server:
 
 > **Authentik · Keycloak · Zitadel · Authelia · Auth0 · Okta · Google · …**
 
-Like the Nous provider, it auto-loads and only registers itself once it's configured, so it's a no-op for loopback dashboards.
+Like the Nunmai provider, it auto-loads and only registers itself once it's configured, so it's a no-op for loopback dashboards.
 
 #### Configuration
 
@@ -999,7 +999,7 @@ Validation rejects values without `http://` / `https://` scheme, without a host,
 
 ### OAuth flow
 
-The provider implements the [Nous Portal OAuth contract v1](https://github.com/NousResearch/nous-account-service/blob/main/docs/agent-dashboard-oauth-contract.md) — authorization-code grant with PKCE (S256):
+The provider implements the [Nunmai Portal OAuth contract v1](https://github.com/NousResearch/nous-account-service/blob/main/docs/agent-dashboard-oauth-contract.md) — authorization-code grant with PKCE (S256):
 
 1. User hits `/` without a session cookie → gate redirects to `/login`.
 2. Login page shows a "Continue with Nunmai Research" button → `/auth/login?provider=nous`.
@@ -1030,7 +1030,7 @@ Every login start, success, failure, and session-verify failure is written as a 
 
 ### Custom providers
 
-To plug a non-Nous OAuth provider (e.g. Google, GitHub, custom OIDC), create a plugin that registers a `DashboardAuthProvider`:
+To plug a non-Nunmai OAuth provider (e.g. Google, GitHub, custom OIDC), create a plugin that registers a `DashboardAuthProvider`:
 
 ```python
 # ~/.nunmai/plugins/dashboard-auth-myidp/__init__.py
@@ -1088,7 +1088,7 @@ The dashboard's React StatusPage shows the same fields under "Web server". A sid
 
 Nunmai Desktop can drive a Nunmai backend running on another machine (a VPS, a home server, a Mini behind Tailscale). In the app this lives under **Settings → Gateways → Remote gateway**, which asks for a **Remote URL** and a way to **Sign in**. (For the desktop app itself — install, settings, chat — see the [Nunmai Desktop](/user-guide/desktop) page.)
 
-You protect the remote dashboard with one of the bundled auth providers, and the desktop app signs in against whichever one the backend advertises. For a backend reachable beyond your own machine — a VPS, a public host, anything internet-facing — the recommended provider is **OAuth (Nous Portal)** (register it with [`nunmai dashboard register`](#registering-a-dashboard) and sign in with *Sign in with Nunmai Research*). The bundled [username/password provider](#usernamepassword-provider-no-oauth-idp) is the quickest option when the backend is on a trusted LAN or reachable only over a VPN, but is **not suitable for direct public-internet exposure**. Binding the dashboard to a non-loopback address engages its auth gate; once signed in, Desktop reuses the session for the chat WebSocket automatically — there is no token to copy or paste.
+You protect the remote dashboard with one of the bundled auth providers, and the desktop app signs in against whichever one the backend advertises. For a backend reachable beyond your own machine — a VPS, a public host, anything internet-facing — the recommended provider is **OAuth (Nunmai Portal)** (register it with [`nunmai dashboard register`](#registering-a-dashboard) and sign in with *Sign in with Nunmai Research*). The bundled [username/password provider](#usernamepassword-provider-no-oauth-idp) is the quickest option when the backend is on a trusted LAN or reachable only over a VPN, but is **not suitable for direct public-internet exposure**. Binding the dashboard to a non-loopback address engages its auth gate; once signed in, Desktop reuses the session for the chat WebSocket automatically — there is no token to copy or paste.
 
 The recipe below uses the username/password path because it's the quickest to stand up on a trusted network; for the OAuth path see [Default provider: Nunmai Research](#default-provider-nous-research).
 
@@ -1114,7 +1114,7 @@ Prefer no plaintext at rest? Use `NUNMAI_DASHBOARD_BASIC_AUTH_PASSWORD_HASH` wit
 If you run the dashboard as a systemd service, `~/.nunmai/.env` is picked up automatically when the unit has `EnvironmentFile=%h/.nunmai/.env`, so the credentials are in the environment at boot.
 
 :::warning
-The dashboard reads and writes your `.env` (API keys, secrets) and can run agent commands. The **username/password** setup shown here is for a trusted network — never expose a password-protected dashboard directly to the open internet. Put it behind a VPN. [Tailscale](https://tailscale.com/) is the clean option: bind to the machine's tailscale IP (`--host <tailscale-ip>`) and use `http://<tailscale-ip>:9119` as the Remote URL. Only devices on your tailnet can reach it. To reach a backend over the public internet, use the **OAuth (Nous Portal)** provider instead.
+The dashboard reads and writes your `.env` (API keys, secrets) and can run agent commands. The **username/password** setup shown here is for a trusted network — never expose a password-protected dashboard directly to the open internet. Put it behind a VPN. [Tailscale](https://tailscale.com/) is the clean option: bind to the machine's tailscale IP (`--host <tailscale-ip>`) and use `http://<tailscale-ip>:9119` as the Remote URL. Only devices on your tailnet can reach it. To reach a backend over the public internet, use the **OAuth (Nunmai Portal)** provider instead.
 :::
 
 ### In Nunmai Desktop
@@ -1189,7 +1189,7 @@ Built-in themes:
 |-------|-----------|
 | **Nunmai Teal** (`default`) | Dark teal + cream, system fonts, comfortable spacing |
 | **Nunmai Teal (Large)** (`default-large`) | Same as default with 18px text and roomier spacing |
-| **Nous Blue** (`nous-blue`) | Nous-branded blue accents with airy spacing |
+| **Nunmai Blue** (`nous-blue`) | Nunmai-branded blue accents with airy spacing |
 | **Midnight** (`midnight`) | Deep blue-violet, Inter + JetBrains Mono |
 | **Ember** (`ember`) | Warm crimson + bronze, Spectral serif + IBM Plex Mono |
 | **Mono** (`mono`) | Grayscale, IBM Plex, compact |

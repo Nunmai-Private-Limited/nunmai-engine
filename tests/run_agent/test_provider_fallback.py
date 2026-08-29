@@ -218,7 +218,7 @@ class TestFallbackChainAdvancement:
     def test_nous_anthropic_fallback_uses_the_messages_wire(self):
         """Portal Claude fallbacks must not stay on chat_completions.
 
-        ``resolve_provider_client`` still returns an OpenAI client for Nous;
+        ``resolve_provider_client`` still returns an OpenAI client for Nunmai;
         activation has to re-derive api_mode from the model and rebuild the
         Anthropic client — otherwise the turn POSTs /chat/completions.
         """

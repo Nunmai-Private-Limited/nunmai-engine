@@ -25,7 +25,7 @@ nunmai chat -q "Hello"
 nunmai chat --model "anthropic/claude-sonnet-4"
 
 # 使用指定提供商
-nunmai chat --provider nous        # 使用 Nous Portal
+nunmai chat --provider nous        # 使用 Nunmai Portal
 nunmai chat --provider openrouter  # 强制使用 OpenRouter
 
 # 使用指定工具集

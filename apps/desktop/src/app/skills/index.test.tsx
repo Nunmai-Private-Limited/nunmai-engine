@@ -90,7 +90,7 @@ beforeEach(() => {
   getSkillContent.mockResolvedValue({
     name: 'web-research',
     path: '/skills/web-research/SKILL.md',
-    content: '---\nname: web-research\nversion: 1.2.0\nauthor: Nous\n---\n\n# Web Research\n\nDeep research steps.'
+    content: '---\nname: web-research\nversion: 1.2.0\nauthor: Nunmai\n---\n\n# Web Research\n\nDeep research steps.'
   })
   // Single profile by default → the scope selector stays hidden (>1 gate),
   // so existing tests see unchanged single-profile behavior.

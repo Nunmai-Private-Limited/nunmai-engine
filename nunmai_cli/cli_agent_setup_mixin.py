@@ -258,7 +258,7 @@ class CLIAgentSetupMixin:
 
         Called from the interactive startup path when
         ``_runtime_credentials_ready()`` is False and stdin is a TTY. Runs the
-        exact same flow as ``nunmai model`` (which fronts Quick Setup / Nous
+        exact same flow as ``nunmai model`` (which fronts Quick Setup / Nunmai
         Portal OAuth as the first, recommended option) so there is a single
         source of truth for provider onboarding. Returns True when a provider
         was configured.
@@ -581,7 +581,7 @@ class CLIAgentSetupMixin:
             # Hydrate credits notices at session OPEN (parity with the TUI), so a
             # depletion / usage-band warning shows before the first message. The
             # notice_callback is bound above → _on_notice renders the line. Idempotent
-            # + fail-open inside the helper; harmless for non-Nous providers.
+            # + fail-open inside the helper; harmless for non-Nunmai providers.
             try:
                 from agent.credits_tracker import seed_credits_at_session_start
 

@@ -608,7 +608,7 @@ def _is_deepseek_anthropic_endpoint(base_url: str | None) -> bool:
 
 
 def _is_nous_portal_endpoint(base_url: str | None) -> bool:
-    """Return True for Nous Portal's Anthropic Messages route.
+    """Return True for Nunmai Portal's Anthropic Messages route.
 
     Portal serves its ``anthropic/*`` catalog natively at
     ``https://inference-api.nousresearch.com/v1/messages``.  Portal-specific
@@ -645,7 +645,7 @@ def _requires_bearer_auth(base_url: str | None) -> bool:
     Some third-party /anthropic endpoints implement Anthropic's Messages API but
     require Authorization: Bearer instead of Anthropic's native x-api-key header.
     MiniMax's global and China Anthropic-compatible endpoints, Azure AI
-    Foundry's Anthropic-style endpoint, Palantir Foundry's LLM proxy, and Nous
+    Foundry's Anthropic-style endpoint, Palantir Foundry's LLM proxy, and Nunmai
     Portal's Messages route follow this pattern.
     """
     if _is_nous_portal_endpoint(base_url):
@@ -2564,7 +2564,7 @@ def _manage_thinking_signatures(
     replayed assistant tool-call messages.  See nunmai-engine#13848 (Kimi) and
     nunmai-engine#16748 (DeepSeek).
 
-    Nous Portal's ``/v1/messages`` route is the exception among third-party
+    Nunmai Portal's ``/v1/messages`` route is the exception among third-party
     hosts: it proxies Claude to Anthropic/Vertex/Bedrock and validates the
     same signed thinking blocks.  Sticky ``session_id`` keeps a conversation
     on one upstream instance so those signatures stay warm — stripping them
@@ -2961,7 +2961,7 @@ def build_anthropic_kwargs(
     )
     anthropic_tools = convert_tools_to_anthropic(tools) if tools else []
 
-    # Nous Portal routes on its own catalog ids (``anthropic/claude-opus-4.8``);
+    # Nunmai Portal routes on its own catalog ids (``anthropic/claude-opus-4.8``);
     # normalizing to the bare Anthropic slug would make the model unresolvable
     # there. Skipping the call preserves the prefix AND the dots, so
     # ``preserve_dots`` stays irrelevant for Portal.
@@ -3235,7 +3235,7 @@ def create_anthropic_message(
     ``on_response``: optional callable invoked once with the underlying httpx
     response before the message is aggregated (best-effort, exceptions
     swallowed). Response *headers* carry out-of-band provider state that the
-    parsed ``Message`` drops — Nous Portal's ``x-nous-credits-*`` balance family
+    parsed ``Message`` drops — Nunmai Portal's ``x-nous-credits-*`` balance family
     in particular. Only fires on the streaming path, which is the one the main
     turn loop takes.
     """

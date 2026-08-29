@@ -1032,7 +1032,7 @@ export interface DesktopOauthLogoutResult {
 export interface DesktopCloudStatus {
   // The portal base URL the desktop talks to (default or env-overridden).
   portalBaseUrl: string
-  // Whether the OAuth partition holds a live Nous portal (Privy) session — the
+  // Whether the OAuth partition holds a live Nunmai portal (Privy) session — the
   // portal authenticates via Privy, so this reflects the privy-token cookie, NOT
   // the nunmai gateway session cookies. See cookiesHavePrivySession.
   signedIn: boolean
@@ -1079,7 +1079,7 @@ export interface DesktopCloudAgentSignInResult {
 export interface DesktopBootProgress {
   error: string | null
   fakeMode: boolean
-  /** True when the boot failure is a Nous Cloud agent that is down (HTTP 502/503/504). */
+  /** True when the boot failure is a Nunmai Cloud agent that is down (HTTP 502/503/504). */
   isCloudBackendDown?: boolean
   message: string
   phase: string

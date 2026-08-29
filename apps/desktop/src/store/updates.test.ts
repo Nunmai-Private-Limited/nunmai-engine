@@ -999,7 +999,7 @@ describe('applyBackendUpdate recovery', () => {
   it('proves a pre-action-ID backend reached its requested commit after restart', async () => {
     $backendUpdateStatus.set({
       behind: 2,
-      commits: [{ at: 1, author: 'Nous', sha: 'requested-target', summary: 'target' }],
+      commits: [{ at: 1, author: 'Nunmai', sha: 'requested-target', summary: 'target' }],
       fetchedAt: 1,
       supported: true,
       targetSha: 'backend:0.18.2',
@@ -1027,7 +1027,7 @@ describe('applyBackendUpdate recovery', () => {
       .mockResolvedValueOnce({
         behind: 1,
         can_apply: true,
-        commits: [{ at: 2, author: 'Nous', sha: 'newer-commit', summary: 'newer' }],
+        commits: [{ at: 2, author: 'Nunmai', sha: 'newer-commit', summary: 'newer' }],
         current_version: '0.18.2',
         install_method: 'git',
         message: null,

@@ -1,4 +1,4 @@
-"""Credits tracking for Nous inference API responses.
+"""Credits tracking for Nunmai inference API responses.
 
 Parses x-nous-credits-* (and optional x-nous-tool-pool-*) headers from
 inference responses into a validated CreditsState dataclass.  Provides
@@ -219,14 +219,14 @@ class AgentNotice:
 
 
 def is_free_tier_model(model: str, base_url: str = "") -> bool:
-    """Return True when *model* is a Nous free-tier model, using ONLY local data.
+    """Return True when *model* is a Nunmai free-tier model, using ONLY local data.
 
     Two signals, both zero-network:
 
-    1. The ``:free`` suffix — the canonical Nous free SKU marker (e.g.
+    1. The ``:free`` suffix — the canonical Nunmai free SKU marker (e.g.
        ``nvidia/nemotron-3-ultra:free``). Free by construction on the API side
        (spend is forced to 0 for ``:free`` ids).
-    2. The ``stealth/`` prefix — Nous stealth-preview SKUs (e.g.
+    2. The ``stealth/`` prefix — Nunmai stealth-preview SKUs (e.g.
        ``stealth/ox-alpha``) are free-tier but carry no ``:free`` suffix.  Spend
        is forced to zero server-side, so these are also free by construction.
     3. A peek into the in-process pricing cache in ``nunmai_cli.models``
@@ -255,7 +255,7 @@ def is_free_tier_model(model: str, base_url: str = "") -> bool:
         from nunmai_cli.models import _is_model_free, _pricing_cache
 
         # Mirror get_pricing_for_provider's key normalization: the agent's
-        # Nous base_url is /v1-suffixed (https://inference-api.nousresearch.com/v1)
+        # Nunmai base_url is /v1-suffixed (https://inference-api.nousresearch.com/v1)
         # but the picker keys _pricing_cache on the pre-/v1 root.
         key = base_url.rstrip("/")
         if key.endswith("/v1"):
@@ -282,7 +282,7 @@ def evaluate_credits_notices(
     latch = {"active": set[str], "seen_below_90": bool, "usage_band": Optional[int],
     "seen_grant_unspent": bool}.
 
-    ``model_is_free``: True when the session's active model is a Nous free-tier
+    ``model_is_free``: True when the session's active model is a Nunmai free-tier
     model (see :func:`is_free_tier_model`). Suppresses the ``credits.depleted``
     notice — a depleted account on a free model can keep inferencing, so the
     error banner is noise (and confuses free-tier users who never had credits).
@@ -362,7 +362,7 @@ def evaluate_credits_notices(
             _cap_usd = state.subscription_limit_usd or "?"
             _level = current_band[1]  # type: ignore[index]  (current_band set when target_band set)
             # Report absolute dollars used, not a bare "N% used": the percentage is
-            # only meaningful against a Nous subscription cap (no cap → never fires),
+            # only meaningful against a Nunmai subscription cap (no cap → never fires),
             # so dollars are clearer and don't imply a universal %. Used = cap −
             # remaining (micros, money-safe), clamped to [0, cap]. Re-emits on band
             # change (50 → 75 → 90), not every turn — a snapshot, not a live ticker.
@@ -473,7 +473,7 @@ def parse_credits_headers(
 
     try:
         # Cheap probe before the full lowercase copy: bail when the version
-        # sentinel header is absent (the common case for non-Nous providers, on
+        # sentinel header is absent (the common case for non-Nunmai providers, on
         # every API call) — skips allocating a dict over the whole response's
         # headers on the hot path, while preserving case-insensitivity. Behaviour
         # is identical: a missing version header was already a None return below.

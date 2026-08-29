@@ -275,7 +275,7 @@ export function BootFailureOverlay() {
 
   let actions: RecoveryAction[]
   let hint: string
-  // The electron boot path flags a Nous Cloud backend-down (502/503/504) with
+  // The electron boot path flags a Nunmai Cloud backend-down (502/503/504) with
   // the structured isCloudBackendDown/statusCode it carries through boot
   // progress. When set, the recovery screen leads with the cloud-specific
   // guidance instead of the generic remote-failure copy (#85335).
@@ -295,7 +295,7 @@ export function BootFailureOverlay() {
     ]
     hint = copy.remoteSignInHint(label)
   } else if (cloudDown) {
-    // A Nous Cloud agent is down — the user cannot restart the managed
+    // A Nunmai Cloud agent is down — the user cannot restart the managed
     // instance and Repair is local-only. Lead with the paths that actually
     // resolve it: check the portal (status/instance controls), switch to the
     // local gateway, retry, or get support on Discord. Portal/Discord are

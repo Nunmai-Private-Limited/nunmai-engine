@@ -214,7 +214,7 @@ DEFAULT_ELEVENLABS_VOICE_ID = "pNInz6obpgDQGcFmaJgB"  # Adam
 DEFAULT_ELEVENLABS_MODEL_ID = "eleven_multilingual_v2"
 DEFAULT_ELEVENLABS_STREAMING_MODEL_ID = "eleven_flash_v2_5"
 DEFAULT_OPENAI_MODEL = "gpt-4o-mini-tts"
-# The managed OpenAI audio gateway (Nous portal proxy) only proxies these speech
+# The managed OpenAI audio gateway (Nunmai portal proxy) only proxies these speech
 # models. A user's tts.openai.model set for *direct* OpenAI (e.g. "tts-1-hd")
 # is rejected with a 400 "Unsupported managed OpenAI speech model", so it must be
 # coerced to a supported model when routing through the gateway.
@@ -654,7 +654,7 @@ def _get_provider(tts_config: Dict[str, Any]) -> str:
     Users opt into cloud TTS by setting ``tts.provider`` (normally through
     ``nunmai tools``); otherwise the historical Edge backend remains active.
 
-    The managed "Nous Subscription" selection (``tts.provider: nous``) is
+    The managed "Nunmai Subscription" selection (``tts.provider: nous``) is
     serviced by the OpenAI provider implementation, routed through the
     managed openai-audio gateway by ``_resolve_openai_audio_client_config``.
     """
@@ -3792,7 +3792,7 @@ def check_tts_requirements() -> bool:
 def _resolve_openai_audio_client_config() -> tuple[str, str, bool]:
     """Return ``(api_key, base_url, is_managed)`` for the OpenAI audio client.
 
-    ``is_managed`` is True when the config resolves to the Nous managed audio
+    ``is_managed`` is True when the config resolves to the Nunmai managed audio
     gateway (a restricted proxy), so callers can coerce the request to what the
     gateway supports.
 
@@ -3820,7 +3820,7 @@ def _resolve_openai_audio_client_config() -> tuple[str, str, bool]:
             raise ValueError(selection_error(
                 "tts",
                 NOUS_MANAGED_PROVIDER,
-                "the Nous Tool Gateway is not available (not entitled or "
+                "the Nunmai Tool Gateway is not available (not entitled or "
                 "unreachable)",
             ))
         return (

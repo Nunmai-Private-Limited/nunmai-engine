@@ -4,7 +4,7 @@
 // crushes the entire blue family into a narrow band of its hue rail, so
 // dragging "to blue" lands you on ~266° — pure sRGB blue, which reads violet to
 // the eye. Every blue that actually looks blue (GitHub 257°, Tailwind 260°,
-// Nous 263°) sits in a few degrees you cannot reliably hit in HSV. In OKLCH the
+// Nunmai 263°) sits in a few degrees you cannot reliably hit in HSV. In OKLCH the
 // rail is perceptually even, so those degrees get their fair share of track.
 //
 // The field is a CANVAS, not a CSS gradient, because a hue slice of OKLCH is a
@@ -40,8 +40,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // judging an accent. The hue spread across the blues is the whole reason this
 // control exists: they look far apart and are 6° apart.
 const SWATCHES: ReadonlyArray<{ hex: string; name: string }> = [
-  { hex: '#0053FD', name: 'Nous blue · 263° (light seed)' },
-  { hex: '#4a84fe', name: 'Nous blue · 263° (dark seed)' },
+  { hex: '#0053FD', name: 'Nunmai blue · 263° (light seed)' },
+  { hex: '#4a84fe', name: 'Nunmai blue · 263° (dark seed)' },
   { hex: '#1540B1', name: 'Psyche blue · 264°' },
   { hex: '#0969da', name: 'GitHub blue · 257°' },
   { hex: '#196d31', name: 'GitHub green · 148°' },

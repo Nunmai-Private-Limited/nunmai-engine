@@ -17,8 +17,8 @@ Nunmai reads environment variables from the process environment and, for user-ma
 | `FIREWORKS_API_KEY` | Fireworks AI API key ([app.fireworks.ai](https://app.fireworks.ai/settings/users/api-keys)). Configure endpoint overrides with `model.base_url` in `config.yaml`. |
 | `NUNMAI_OPENROUTER_CACHE` | Enable OpenRouter response caching (`1`/`true`/`yes`/`on`). Overrides `openrouter.response_cache` in config.yaml. See [Response Caching](https://openrouter.ai/docs/guides/features/response-caching). |
 | `NUNMAI_OPENROUTER_CACHE_TTL` | Cache TTL in seconds (1-86400). Overrides `openrouter.response_cache_ttl` in config.yaml. |
-| `NOUS_BASE_URL` | Override Nous Portal base URL (rarely needed; development/testing only) |
-| `NOUS_INFERENCE_BASE_URL` | Override Nous inference endpoint directly |
+| `NOUS_BASE_URL` | Override Nunmai Portal base URL (rarely needed; development/testing only) |
+| `NOUS_INFERENCE_BASE_URL` | Override Nunmai inference endpoint directly |
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key ([ai-gateway.vercel.sh](https://ai-gateway.vercel.sh)) |
 | `AI_GATEWAY_BASE_URL` | Override AI Gateway base URL (default: `https://ai-gateway.vercel.sh/v1`) |
 | `OPENAI_API_KEY` | API key for custom OpenAI-compatible endpoints (used with `OPENAI_BASE_URL`) |
@@ -125,10 +125,10 @@ For native Anthropic auth, Nunmai prefers Claude Code's own credential files whe
 
 | Variable | Description |
 |----------|-------------|
-| `NUNMAI_PORTAL_BASE_URL` | Override Nous Portal URL (for development/testing) |
-| `NOUS_INFERENCE_BASE_URL` | Override Nous inference API URL |
+| `NUNMAI_PORTAL_BASE_URL` | Override Nunmai Portal URL (for development/testing) |
+| `NOUS_INFERENCE_BASE_URL` | Override Nunmai inference API URL |
 | `NUNMAI_NOUS_MIN_KEY_TTL_SECONDS` | Min agent key TTL before re-mint (default: 1800 = 30min) |
-| `NUNMAI_NOUS_TIMEOUT_SECONDS` | HTTP timeout for Nous credential / token flows |
+| `NUNMAI_NOUS_TIMEOUT_SECONDS` | HTTP timeout for Nunmai credential / token flows |
 | `NUNMAI_DUMP_REQUESTS` | Dump API request payloads to log files (`true`/`false`) |
 | `NUNMAI_PREFILL_MESSAGES_FILE` | Path to a JSON file of ephemeral prefill messages injected at API-call time |
 | `NUNMAI_TIMEZONE` | IANA timezone override (for example `America/New_York`) |
@@ -217,15 +217,15 @@ Environment variables for the bundled [`observability/langfuse`](/user-guide/fea
 | `NUNMAI_LANGFUSE_DEBUG` | `true` enables verbose plugin logging to `agent.log` |
 | `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_BASE_URL` | Standard Langfuse SDK names. Accepted as fallbacks when the `NUNMAI_LANGFUSE_*` equivalents are unset. |
 
-### Nous Tool Gateway
+### Nunmai Tool Gateway
 
-These variables configure the [Tool Gateway](/user-guide/features/tool-gateway) for paid Nous subscribers or self-hosted gateway deployments. Most users don't need to set these — the gateway is configured automatically via `nunmai model` or `nunmai tools`.
+These variables configure the [Tool Gateway](/user-guide/features/tool-gateway) for paid Nunmai subscribers or self-hosted gateway deployments. Most users don't need to set these — the gateway is configured automatically via `nunmai model` or `nunmai tools`.
 
 | Variable | Description |
 |----------|-------------|
 | `TOOL_GATEWAY_DOMAIN` | Base domain for Tool Gateway routing (default: `nousresearch.com`) |
 | `TOOL_GATEWAY_SCHEME` | HTTP or HTTPS scheme for gateway URLs (default: `https`) |
-| `TOOL_GATEWAY_USER_TOKEN` | Auth token for the Tool Gateway (normally auto-populated from Nous auth) |
+| `TOOL_GATEWAY_USER_TOKEN` | Auth token for the Tool Gateway (normally auto-populated from Nunmai auth) |
 | `FIRECRAWL_GATEWAY_URL` | Override URL for the Firecrawl gateway endpoint specifically |
 
 ## Terminal Backend
@@ -539,7 +539,7 @@ These are set automatically by the Docker terminal backend when `proxy.enabled: 
 
 Auth for the [web dashboard](/user-guide/features/web-dashboard) and for connecting [Nunmai Desktop to a remote backend](/user-guide/features/web-dashboard#connecting-nunmai-desktop-to-a-remote-backend). Per the secrets-only convention, credentials belong in `~/.nunmai/.env`; the OAuth `client_id` is better set under `dashboard.oauth` in `config.yaml` (env wins when set).
 
-Three dashboard-auth providers ship in the box. For a remote Nunmai Desktop connection or any internet-facing dashboard, the recommended provider is **OAuth (Nous Portal)** — set `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` (provision it with `nunmai dashboard register`). The bundled **username/password** provider (`NUNMAI_DASHBOARD_BASIC_AUTH_*`) is the quickest option for a backend on a trusted LAN or behind a VPN, but is not suitable for direct public-internet exposure. To authenticate against your own identity provider, use the **self-hosted OIDC** provider (`NUNMAI_DASHBOARD_OIDC_*`). Either way, a non-loopback bind (`nunmai dashboard --host 0.0.0.0`) engages the auth gate. See [Web Dashboard → Authentication](/user-guide/features/web-dashboard#authentication-gated-mode) for the full picture.
+Three dashboard-auth providers ship in the box. For a remote Nunmai Desktop connection or any internet-facing dashboard, the recommended provider is **OAuth (Nunmai Portal)** — set `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` (provision it with `nunmai dashboard register`). The bundled **username/password** provider (`NUNMAI_DASHBOARD_BASIC_AUTH_*`) is the quickest option for a backend on a trusted LAN or behind a VPN, but is not suitable for direct public-internet exposure. To authenticate against your own identity provider, use the **self-hosted OIDC** provider (`NUNMAI_DASHBOARD_OIDC_*`). Either way, a non-loopback bind (`nunmai dashboard --host 0.0.0.0`) engages the auth gate. See [Web Dashboard → Authentication](/user-guide/features/web-dashboard#authentication-gated-mode) for the full picture.
 
 | Variable | Description |
 |----------|-------------|
@@ -548,7 +548,7 @@ Three dashboard-auth providers ship in the box. For a remote Nunmai Desktop conn
 | `NUNMAI_DASHBOARD_BASIC_AUTH_PASSWORD_HASH` | scrypt password hash for the basic provider (preferred — no plaintext at rest). Compute with `python -c "from plugins.dashboard_auth.basic import hash_password; print(hash_password('PW'))"`. Overrides `dashboard.basic_auth.password_hash`. |
 | `NUNMAI_DASHBOARD_BASIC_AUTH_SECRET` | HMAC key (32+ bytes, base64/hex/raw) signing the basic provider's stateless session tokens. Set explicitly so sessions survive restarts / span multiple workers; blank → random per-process (you'll be logged out on every restart). Overrides `dashboard.basic_auth.secret`. |
 | `NUNMAI_DASHBOARD_BASIC_AUTH_TTL_SECONDS` | Access-token lifetime for the basic provider (default 12h). Overrides `dashboard.basic_auth.session_ttl_seconds`. |
-| `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` | OAuth client id (`agent:{instance_id}`) for the gated/public dashboard, activating the Nous (`plugins/dashboard_auth/nous`) provider. Overrides `dashboard.oauth.client_id`. Provision it with `nunmai dashboard register`. |
+| `NUNMAI_DASHBOARD_OAUTH_CLIENT_ID` | OAuth client id (`agent:{instance_id}`) for the gated/public dashboard, activating the Nunmai (`plugins/dashboard_auth/nous`) provider. Overrides `dashboard.oauth.client_id`. Provision it with `nunmai dashboard register`. |
 | `NUNMAI_DASHBOARD_PUBLIC_URL` | Complete public URL the dashboard is reached at behind a reverse proxy. It controls OAuth callback construction, adds its exact hostname to the HTTP Host/WebSocket Origin guard, and requires the auth gate for non-loopback public hosts even when the backend binds to loopback. Overrides `dashboard.public_url`. |
 | `NUNMAI_DASHBOARD_OIDC_ISSUER` | OIDC issuer URL for the bundled self-hosted OIDC provider (`plugins/dashboard_auth/self_hosted`). Required to activate it. Overrides `dashboard.oauth.self_hosted.issuer`. |
 | `NUNMAI_DASHBOARD_OIDC_CLIENT_ID` | Public OIDC client id (authorization-code + PKCE) for the self-hosted OIDC provider. Required to activate it. Overrides `dashboard.oauth.self_hosted.client_id`. |

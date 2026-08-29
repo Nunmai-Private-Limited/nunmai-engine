@@ -4,7 +4,7 @@
 // optional error context → the modal host renders the privacy notice → the
 // user explicitly clicks Upload → diagnostics.share_nous runs backend-side
 // (collect + force-redact + Nous-S3 upload) → the modal shows the private
-// view link plus the support handoff (GitHub Issues · Nous Portal Support ·
+// view link plus the support handoff (GitHub Issues · Nunmai Portal Support ·
 // Discord).
 //
 // Consent is per-upload and explicit — no "always allow", mirroring the CLI's

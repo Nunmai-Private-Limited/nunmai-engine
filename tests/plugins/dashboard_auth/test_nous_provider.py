@@ -1,4 +1,4 @@
-"""Tests for the bundled Nous dashboard-auth plugin.
+"""Tests for the bundled Nunmai dashboard-auth plugin.
 
 Covers four shapes from Phase 4 of ``.nunmai/plans/2026-05-21-dashboard-oauth-auth.md``:
 
@@ -182,7 +182,7 @@ class TestPluginRegister:
         self, monkeypatch
     ):
         """Phase 7 follow-up: NUNMAI_DASHBOARD_PORTAL_URL is optional —
-        defaults to the production Nous Portal. The user shouldn't have
+        defaults to the production Nunmai Portal. The user shouldn't have
         to set it for the common production deployment path."""
         monkeypatch.setenv("NUNMAI_DASHBOARD_OAUTH_CLIENT_ID", "agent:inst1")
         monkeypatch.delenv("NUNMAI_DASHBOARD_PORTAL_URL", raising=False)

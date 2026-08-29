@@ -1701,7 +1701,7 @@ class TestLeastUsedStrategy:
         )
 
 
-# ── PR #10160 salvage: Nous OAuth cross-process sync tests ─────────────────
+# ── PR #10160 salvage: Nunmai OAuth cross-process sync tests ─────────────────
 
 
 

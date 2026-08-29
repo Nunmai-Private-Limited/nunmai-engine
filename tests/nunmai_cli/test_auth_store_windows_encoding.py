@@ -1,6 +1,6 @@
 """Regression tests for auth store encoding on Windows.
 
-``_load_auth_store`` and the Codex/Nous shared-store readers previously called
+``_load_auth_store`` and the Codex/Nunmai shared-store readers previously called
 ``Path.read_text()`` with no ``encoding=``, so the bytes were decoded with
 ``locale.getpreferredencoding()`` — cp1252 on Windows. The store is *written* as
 UTF-8 (``_save_auth_store`` uses ``encoding="utf-8"``), so any non-ASCII byte
@@ -217,9 +217,9 @@ class TestAuthJsonSiblingReaders:
         assert has_xai_credentials() is True
 
     def test_auxiliary_nous_provider_reads_non_ascii_store(self, nunmai_home, windows_default_encoding, monkeypatch):
-        """agent/auxiliary_client's Nous-provider lookup reads the same store.
+        """agent/auxiliary_client's Nunmai-provider lookup reads the same store.
 
-        The lookup returns None on any read failure, silently disabling Nous as
+        The lookup returns None on any read failure, silently disabling Nunmai as
         the auxiliary (vision/summarization) provider. A non-ASCII label must
         not trigger that path.
         """
@@ -251,7 +251,7 @@ class TestAuthJsonSiblingReaders:
     ):
         """nunmai_cli.auth._read_shared_nous_state must read a non-ASCII store.
 
-        The shared Nous store (``nous_auth.json``) is written as UTF-8. A
+        The shared Nunmai store (``nous_auth.json``) is written as UTF-8. A
         non-ASCII field (e.g. an accented display name) must not cause the
         read to raise under the Windows-default-encoding fixture and be
         silently swallowed — which would drop the user's shared OAuth
@@ -329,10 +329,10 @@ class TestAuthJsonSiblingReaders:
     ):
         """tools.managed_tool_gateway._read_nous_provider_state reads auth.json.
 
-        The Nous provider entry can carry a non-ASCII label. Under the
+        The Nunmai provider entry can carry a non-ASCII label. Under the
         Windows-default-encoding fixture a no-encoding read raises and the
         broad except swallows it, returning None — so the gateway treats
-        Nous as unconfigured.
+        Nunmai as unconfigured.
         """
         store = {
             "version": auth.AUTH_STORE_VERSION,

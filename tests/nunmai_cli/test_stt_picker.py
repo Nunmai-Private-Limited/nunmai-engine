@@ -48,7 +48,7 @@ class TestSttCategory:
         from nunmai_cli.nous_subscription import MANAGED_FEATURE_COVERAGE_CATEGORY
 
         managed = [p for p in _stt_cat()["providers"] if p.get("managed_nous_feature")]
-        assert managed, "expected a Nous Subscription row"
+        assert managed, "expected a Nunmai Subscription row"
         for p in managed:
             assert p["managed_nous_feature"] == "stt"
         assert MANAGED_FEATURE_COVERAGE_CATEGORY["stt"] == "openai-audio"

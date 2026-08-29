@@ -511,7 +511,7 @@ def _resolve_backend_cdp(
        user/operator override, passed through untouched.
     2. ``BROWSER_CDP_URL`` env / ``browser.cdp_url`` config override — the
        ``/browser connect`` path, same precedence the built-in tools honor.
-    3. A configured cloud browser provider (Browserbase, Firecrawl, Nous
+    3. A configured cloud browser provider (Browserbase, Firecrawl, Nunmai
        gateway/Browser Use cloud, …): reuse the legacy stack's
        ``_get_session_info()`` so browser_exec shares the SAME provider
        session machinery — per-task session cache, expiry replacement,
@@ -559,7 +559,7 @@ def _resolve_backend_cdp(
     # Browser Use direct-API configs: the CLI talks to Browser Use cloud
     # natively (BU_AUTOSPAWN / auth login) — routing through the legacy
     # provider here would just create a second, redundant session. The
-    # Nous-gateway variant (use_gateway: true) DOES resolve through the
+    # Nunmai-gateway variant (use_gateway: true) DOES resolve through the
     # provider: the gateway provisions the cloud browser server-side and
     # returns its CDP URL, giving subscribers CLI mode with no raw key.
     provider_key = str(getattr(provider, "name", "") or "").strip().lower()
@@ -727,7 +727,7 @@ def browser_exec(
                 "the desktop Settings → Browser section, then retry."
             )
     # Route through the configured browser backend (Browserbase, Firecrawl,
-    # Nous gateway, CDP override, local Chrome, …). Named sessions compose
+    # Nunmai gateway, CDP override, local Chrome, …). Named sessions compose
     # with the backend: BU_NAME namespaces the harness daemon (its IPC
     # socket, log, and pid), and on provider backends the name additionally
     # keys its own cloud browser — so concurrent sessions stop clobbering

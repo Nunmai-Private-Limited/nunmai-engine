@@ -257,7 +257,7 @@ _LONG_HANDLERS = frozenset(
         "complete.slash",
         "llm.oneshot",
         # model.options builds the full picker payload — per-provider credential
-        # pool checks, pricing fetch, Nous tier check, optional custom-provider
+        # pool checks, pricing fetch, Nunmai tier check, optional custom-provider
         # probe — measured seconds inline. While it runs on the reader thread,
         # prompt.submit / session.interrupt sit unread (same class as #21123),
         # and the Desktop model pill / picker block on it every open.
@@ -5265,8 +5265,8 @@ def _stored_session_runtime_overrides(row: dict | None) -> dict:
     # per-member scratch conversations inside a group chat. They must always
     # rebuild from the member profile's CURRENT config: restoring the stored
     # model/provider pin from an old row is what left room bots stuck on
-    # Nous (or any earlier provider) long after the profile was switched —
-    # every room message then failed with "out of Nous credits" while the
+    # Nunmai (or any earlier provider) long after the profile was switched —
+    # every room message then failed with "out of Nunmai credits" while the
     # same bots worked fine in DMs. 1:1 chats keep the stored-runtime
     # restore (opening an older chat must show the model it actually used);
     # only the room plumbing is exempt.
@@ -5298,7 +5298,7 @@ def _stored_session_runtime_overrides(row: dict | None) -> dict:
     # sessions are plugin-owned scratch conversations. They must always rebuild
     # from the member profile's CURRENT config: restoring the stored
     # model/provider pin from an old row is what left bot DMs stuck on a stale
-    # provider (e.g. "out of Nous credits" after the profile was switched to
+    # provider (e.g. "out of Nunmai credits" after the profile was switched to
     # ollama-cloud) while the same bot worked fine in rooms. 1:1 user chats
     # keep the stored-runtime restore (opening an older chat must show the
     # model it actually used); only the plugin-owned bot sessions are exempt.

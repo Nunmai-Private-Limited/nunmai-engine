@@ -9,7 +9,7 @@ description: "Practical advice to get the most out of Nunmai Engine — prompt t
 A quick-wins collection of practical tips that make you immediately more effective with Nunmai Engine. Each section targets a different aspect — scan the headers and jump to what's relevant.
 
 :::tip Confused which model to pick?
-Run `nunmai setup --portal` — you get 300+ models including Claude, GPT-5, and Gemini under one subscription. See [Nous Portal](/integrations/nous-portal).
+Run `nunmai setup --portal` — you get 300+ models including Claude, GPT-5, and Gemini under one subscription. See [Nunmai Portal](/integrations/nous-portal).
 :::
 
 ---

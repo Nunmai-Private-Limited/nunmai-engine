@@ -118,7 +118,7 @@ Multiple credentials per provider form a pool that rotates automatically and ski
 nunmai desktop / gui        Native desktop app
 nunmai dashboard            Web admin panel + embedded chat (--stop / --status)
 nunmai proxy                OpenAI-compatible local proxy backed by an OAuth provider
-nunmai portal               Quick setup / sign in via Nous Portal
+nunmai portal               Quick setup / sign in via Nunmai Portal
 nunmai kanban <verb>        Multi-agent work-queue board
 nunmai project              Named multi-folder workspaces
 nunmai skin list|use|set    Switch/tweak skins (see references/themes.md)

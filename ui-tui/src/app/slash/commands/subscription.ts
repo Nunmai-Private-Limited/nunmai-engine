@@ -142,7 +142,7 @@ const buildSubscriptionCtx = (
 
 export const subscriptionCommands: SlashCommand[] = [
   {
-    help: 'View or change your Nous subscription plan',
+    help: 'View or change your Nunmai subscription plan',
     name: 'subscription',
     aliases: ['upgrade'],
     // ZERO sub-commands: bare `/subscription` fetches state and opens the
@@ -156,7 +156,7 @@ export const subscriptionCommands: SlashCommand[] = [
         .then(
           ctx.guarded<SubscriptionStateResponse>(s => {
             if (!s.logged_in) {
-              sys('Not logged into Nous Portal — run /portal to log in, then /subscription.')
+              sys('Not logged into Nunmai Portal — run /portal to log in, then /subscription.')
 
               return
             }

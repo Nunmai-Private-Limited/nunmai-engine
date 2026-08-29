@@ -56,7 +56,7 @@ class FalImageGenProvider(ImageGenProvider):
         return "FAL.ai"
 
     def is_available(self) -> bool:
-        # Available when direct FAL_KEY is set OR the managed Nous
+        # Available when direct FAL_KEY is set OR the managed Nunmai
         # gateway resolves a fal-queue origin. Both checks come from the
         # legacy module so this provider tracks whatever logic ships
         # there.

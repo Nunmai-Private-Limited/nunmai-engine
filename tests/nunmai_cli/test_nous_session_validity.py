@@ -1,4 +1,4 @@
-"""Tests for the local-only Nous session classifier exposed on /api/status."""
+"""Tests for the local-only Nunmai session classifier exposed on /api/status."""
 
 import base64
 import json

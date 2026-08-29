@@ -417,9 +417,9 @@ export interface ModelOptionProvider {
   /** Per-model pricing keyed by model id (present when the picker requested
    *  pricing and the provider supports live pricing). */
   pricing?: Record<string, ModelPricing>
-  /** Nous only: whether the current account is on the free tier. */
+  /** Nunmai only: whether the current account is on the free tier. */
   free_tier?: boolean
-  /** Nous only: paid models a free-tier user cannot select (shown disabled). */
+  /** Nunmai only: paid models a free-tier user cannot select (shown disabled). */
   unavailable_models?: string[]
   /** Per-model option support, keyed by model id (present when the picker
    *  requested capabilities). Lets the UI gate fast/reasoning controls. */
@@ -1051,7 +1051,7 @@ export interface ToolProvider {
   /** True when this is the provider currently written to config (mirrors the
    *  CLI `nunmai tools` active-provider detection). */
   is_active: boolean
-  /** Honest readiness computed server-side (keys ∧ Nous entitlement ∧
+  /** Honest readiness computed server-side (keys ∧ Nunmai entitlement ∧
    *  post-setup install state). Optional for older backends. */
   status?: ToolProviderStatus
   /** Web toolset only: the backend key written to web.*backend config
@@ -1458,7 +1458,7 @@ export interface McpServerTestResponse {
   tools: { name: string; description: string }[]
 }
 
-/** One Nous-approved MCP catalog entry from `GET /api/mcp/catalog`. */
+/** One Nunmai-approved MCP catalog entry from `GET /api/mcp/catalog`. */
 export interface McpCatalogEntry {
   name: string
   description: string
@@ -1518,8 +1518,8 @@ export interface DebugShareResponse {
 export interface ModelAssignmentResponse {
   /** Persisted endpoint URL for custom/local providers (echoed back). */
   base_url?: string
-  /** Toolset keys auto-routed through the Nous Tool Gateway as a result of
-   *  switching the main provider to Nous. Empty unless provider === 'nous'
+  /** Toolset keys auto-routed through the Nunmai Tool Gateway as a result of
+   *  switching the main provider to Nunmai. Empty unless provider === 'nous'
    *  and the user is a paid subscriber with unconfigured tools. */
   gateway_tools?: string[]
   /** Additive profile-local cron impact returned after a persisted main assignment. */

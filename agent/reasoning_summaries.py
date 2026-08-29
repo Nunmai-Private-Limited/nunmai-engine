@@ -10,7 +10,7 @@ part, each opening with a bold markdown heading::
 
 On the Responses API those parts are delimited by ``summary_index``
 (``response.reasoning_summary_part.added`` / ``.done``). The OpenAI chat wire
-carries no such field — verified live against Nous Portal's
+carries no such field — verified live against Nunmai Portal's
 ``openai/gpt-5.6-sol``, whose reasoning chunks contain nothing but
 ``delta.reasoning_content`` — so the boundary cannot be recovered from
 metadata, and consumers that concatenate deltas glue the parts together:

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-title: "通过 Nous Portal 运行 Nunmai Engine"
+title: "通过 Nunmai Portal 运行 Nunmai Engine"
 description: "完整操作指南：订阅、配置、切换模型、启用 gateway 工具并验证路由"
 ---
 
-# 通过 Nous Portal 运行 Nunmai Engine
+# 通过 Nunmai Portal 运行 Nunmai Engine
 
-本指南带你从头到尾完成在 [Nous Portal](https://portal.nousresearch.com) 订阅下运行 Nunmai Engine 的全过程——从注册账号到验证每个工具的路由是否正确。如果你只想了解 Portal 的概述及订阅内容，请参阅 [Nous Portal 集成页面](/integrations/nous-portal)。本页是操作步骤脚本。
+本指南带你从头到尾完成在 [Nunmai Portal](https://portal.nousresearch.com) 订阅下运行 Nunmai Engine 的全过程——从注册账号到验证每个工具的路由是否正确。如果你只想了解 Portal 的概述及订阅内容，请参阅 [Nunmai Portal 集成页面](/integrations/nous-portal)。本页是操作步骤脚本。
 
 ## 前提条件
 
@@ -63,21 +63,21 @@ nunmai portal info
 你应该看到：
 
 ```
-  Nous Portal
+  Nunmai Portal
   ───────────
   Auth:    ✓ logged in
   Portal:  https://portal.nousresearch.com
-  Model:   ✓ using Nous as inference provider
+  Model:   ✓ using Nunmai as inference provider
 
   Tool Gateway
   ────────────
-  Web search & extract  via Nous Portal
-  Image generation      via Nous Portal
-  Text-to-speech        via Nous Portal
-  Browser automation    via Nous Portal
+  Web search & extract  via Nunmai Portal
+  Image generation      via Nunmai Portal
+  Text-to-speech        via Nunmai Portal
+  Browser automation    via Nunmai Portal
 ```
 
-如果任何一行显示的不是"via Nous Portal"，或者 auth 行显示"not logged in"，请跳至下方的[故障排查](#troubleshooting)。
+如果任何一行显示的不是"via Nunmai Portal"，或者 auth 行显示"not logged in"，请跳至下方的[故障排查](#troubleshooting)。
 
 ## 4. 运行第一次对话
 
@@ -122,18 +122,18 @@ nunmai config set model.default anthropic/claude-sonnet-4.6
 
 Hermes-4-70B 和 Hermes-4-405B 在 Portal 上以大幅折扣提供，但它们是**对话/推理模型**，并非针对工具调用优化的模型。它们在多步骤 agent 循环中表现不佳。请通过[订阅代理](/user-guide/features/subscription-proxy)从非 agent 工具中将它们用于对话或研究工作。对于 Nunmai Engine 本身，请坚持使用上述前沿 agentic 模型。
 
-Portal 的[信息页面](https://portal.nousresearch.com/info)也有此说明——这是 Nous 官方指导，并非仅代表 Nunmai 一方的意见。
+Portal 的[信息页面](https://portal.nousresearch.com/info)也有此说明——这是 Nunmai 官方指导，并非仅代表 Nunmai 一方的意见。
 
 ## 6. （可选）自定义 Tool Gateway 路由
 
-gateway 是按工具选择启用的，而非全部开启或全部关闭。如果你已有 Browserbase 账号并希望继续使用，同时将网页搜索和图像生成路由至 Nous，这是支持的：
+gateway 是按工具选择启用的，而非全部开启或全部关闭。如果你已有 Browserbase 账号并希望继续使用，同时将网页搜索和图像生成路由至 Nunmai，这是支持的：
 
 ```bash
 nunmai tools
-# → Web search       → "Nous Subscription"     （推荐）
-# → Image generation → "Nous Subscription"     （推荐）
+# → Web search       → "Nunmai Subscription"     （推荐）
+# → Image generation → "Nunmai Subscription"     （推荐）
 # → Browser          → "Browserbase"           （你自己的密钥）
-# → TTS              → "Nous Subscription"     （推荐）
+# → TTS              → "Nunmai Subscription"     （推荐）
 ```
 
 使用以下命令验证你的混合配置：
@@ -142,7 +142,7 @@ nunmai tools
 nunmai portal tools
 ```
 
-你将看到每个工具的路由情况——通过订阅路由的工具显示 `via Nous Portal`，使用你自己密钥的工具显示合作方名称（`browserbase`、`firecrawl` 等）。
+你将看到每个工具的路由情况——通过订阅路由的工具显示 `via Nunmai Portal`，使用你自己密钥的工具显示合作方名称（`browserbase`、`firecrawl` 等）。
 
 ## 7. （可选）启用语音模式
 
@@ -150,7 +150,7 @@ nunmai portal tools
 
 ```bash
 nunmai setup voice
-# → 为 TTS 选择 "Nous Subscription"
+# → 为 TTS 选择 "Nunmai Subscription"
 # → 选择语音转文字后端（本地 faster-whisper 免费，无需配置）
 ```
 
@@ -185,7 +185,7 @@ nunmai portal
 
 如果浏览器未打开或回调失败，你可能在远程/无头主机上——参见 [OAuth over SSH](/guides/oauth-over-ssh) 了解端口转发的解决方案。
 
-### "Model: currently openrouter"（或其他 provider）而非"using Nous as inference provider"
+### "Model: currently openrouter"（或其他 provider）而非"using Nunmai as inference provider"
 
 本地配置发生了偏移。OAuth 成功，但 `model.provider` 仍指向其他 provider。修复方法：
 
@@ -197,21 +197,21 @@ nunmai config set model.provider nous
 
 ```bash
 nunmai model
-# 选择 Nous Portal
+# 选择 Nunmai Portal
 ```
 
 使用 `nunmai portal info` 重新验证。
 
-### Tool Gateway 工具显示合作方名称而非"via Nous Portal"
+### Tool Gateway 工具显示合作方名称而非"via Nunmai Portal"
 
 按工具的配置覆盖了 gateway 设置。运行：
 
 ```bash
 nunmai tools
-# 对需要通过 gateway 路由的工具选择 "Nous Subscription"
+# 对需要通过 gateway 路由的工具选择 "Nunmai Subscription"
 ```
 
-部分用户会有意混合使用——例如网页搜索通过 Nous 路由，但浏览器使用自己的 Browserbase 密钥。如果这是有意为之，保持不变即可。如果不是，此命令可修复。
+部分用户会有意混合使用——例如网页搜索通过 Nunmai 路由，但浏览器使用自己的 Browserbase 密钥。如果这是有意为之，保持不变即可。如果不是，此命令可修复。
 
 ### 会话中途出现"Re-authentication required"
 
@@ -265,7 +265,7 @@ nunmai auth logout nous       # 清除本地 refresh token
 
 ## 另请参阅
 
-- **[Nous Portal 集成页面](/integrations/nous-portal)** — 订阅内容概述
+- **[Nunmai Portal 集成页面](/integrations/nous-portal)** — 订阅内容概述
 - **[Tool Gateway](/user-guide/features/tool-gateway)** — 每个 gateway 路由工具的完整说明
 - **[订阅代理](/user-guide/features/subscription-proxy)** — 在非 Nunmai 工具中使用你的 Portal 订阅
 - **[语音模式](/user-guide/features/voice-mode)** — 在 Portal 订阅上配置语音对话

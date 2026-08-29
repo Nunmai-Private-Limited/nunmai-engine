@@ -1,4 +1,4 @@
-"""NousDashboardAuthProvider — Nous Portal OAuth (authorization-code + PKCE).
+"""NousDashboardAuthProvider — Nunmai Portal OAuth (authorization-code + PKCE).
 
 Implements ``nous-account-service/docs/agent-dashboard-oauth-contract.md``
 (PR #180). The plugin auto-loads (bundled, kind=backend) but only registers
@@ -151,7 +151,7 @@ def _b64url_no_pad(raw: bytes) -> str:
 
 
 class NousDashboardAuthProvider(DashboardAuthProvider):
-    """Nous Portal OAuth via authorization-code + PKCE (S256)."""
+    """Nunmai Portal OAuth via authorization-code + PKCE (S256)."""
 
     name = "nous"
     display_name = "Nunmai Research"
@@ -214,7 +214,7 @@ class NousDashboardAuthProvider(DashboardAuthProvider):
     ) -> Session:
         # ``state`` is verified by the auth-route layer before this call
         # (it checks the cookie-stashed state matches the query-param state);
-        # we just receive it for symmetry with the protocol. Nous Portal
+        # we just receive it for symmetry with the protocol. Nunmai Portal
         # doesn't re-check state at the token endpoint, so we ignore it here.
         _ = state
 
@@ -503,7 +503,7 @@ class NousDashboardAuthProvider(DashboardAuthProvider):
         contract_version = claims.get("oauth_contract_version")
         if contract_version is None:
             logger.warning(
-                "Nous Portal token missing oauth_contract_version claim "
+                "Nunmai Portal token missing oauth_contract_version claim "
                 "(contract says it should be %d); proceeding anyway.",
                 _EXPECTED_CONTRACT_VERSION,
             )
@@ -634,7 +634,7 @@ def register(ctx) -> None:
         LAST_SKIP_REASON = (
             "NUNMAI_DASHBOARD_OAUTH_CLIENT_ID is not set (and "
             "dashboard.oauth.client_id in config.yaml is empty). The "
-            "Nous Portal provisions this env var (shape "
+            "Nunmai Portal provisions this env var (shape "
             "'agent:{instance_id}') when it deploys a Nunmai Engine "
             "instance — set it to your provisioned client id (either "
             "as an env var or under dashboard.oauth.client_id in "
@@ -647,7 +647,7 @@ def register(ctx) -> None:
     if not client_id.startswith("agent:"):
         LAST_SKIP_REASON = (
             f"NUNMAI_DASHBOARD_OAUTH_CLIENT_ID={client_id!r} doesn't match "
-            f"the contract shape 'agent:{{instance_id}}'. The Nous Portal "
+            f"the contract shape 'agent:{{instance_id}}'. The Nunmai Portal "
             f"provisions this value at deploy time; check your Fly app's "
             f"secrets or override with the value from the Portal admin UI."
         )

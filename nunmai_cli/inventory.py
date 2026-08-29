@@ -27,7 +27,7 @@ Substrate facts (verified May 2026):
 - ``list_authenticated_providers`` already populates each row's
   ``models`` from the curated catalog (same source as the picker). Do
   NOT call ``provider_model_ids()`` per row to "freshen" — that bypasses
-  curation and pulls in non-agentic models (Nous /models returns ~400
+  curation and pulls in non-agentic models (Nunmai /models returns ~400
   IDs including TTS, embeddings, rerankers, image/video generators).
 """
 
@@ -151,10 +151,10 @@ def build_models_payload(
       ``CANONICAL_PROVIDERS`` declaration order; truly-custom rows go
       last (TUI display order).
     - ``pricing``: enrich each row with formatted per-model pricing and,
-      for Nous, ``free_tier``/``unavailable_models`` so the GUI picker can
+      for Nunmai, ``free_tier``/``unavailable_models`` so the GUI picker can
       show $/Mtok columns and gate paid models on free accounts —
       mirroring the ``nunmai model`` CLI picker. Adds network calls
-      (pricing fetch + Nous tier check); only set for interactive pickers.
+      (pricing fetch + Nunmai tier check); only set for interactive pickers.
     - ``capabilities``: add a per-row ``capabilities`` map
       ``{model: {fast, reasoning}}`` so pickers can gate the model-options
       controls (fast toggle / reasoning) to what each model actually
@@ -166,8 +166,8 @@ def build_models_payload(
       these; the rest of ``models`` stays reachable via search / show-all. Empty
       for single-lab providers (callers fall back to top-N). Derived live from
       models.dev — no allowlist.
-    - ``force_fresh_nous_tier``: bypass the short Nous free-tier cache when
-      selecting Portal-recommended Nous models and applying tier gating. Keep
+    - ``force_fresh_nous_tier``: bypass the short Nunmai free-tier cache when
+      selecting Portal-recommended Nunmai models and applying tier gating. Keep
       this false for UI picker opens; explicit auth/model flows can opt in
       when they need freshly-purchased credits to show up immediately.
     - ``refresh``: bust the per-provider model-id disk cache so every row
@@ -881,7 +881,7 @@ def _apply_pricing(
     *,
     force_fresh_nous_tier: bool = False,
 ) -> None:
-    """Enrich each provider row with per-model pricing + Nous tier gating.
+    """Enrich each provider row with per-model pricing + Nunmai tier gating.
 
     Mutates ``rows`` in-place. For every row whose provider supports live
     pricing (openrouter / nous / novita) adds::
@@ -889,7 +889,7 @@ def _apply_pricing(
         row["pricing"] = {model_id: {"input": "$3.00", "output": "$15.00",
                                      "cache": "$0.30" | None, "free": bool}}
 
-    For Nous additionally adds::
+    For Nunmai additionally adds::
 
         row["free_tier"] = bool            # current account is free-tier
         row["unavailable_models"] = [...]  # paid models a free user can't pick
@@ -906,7 +906,7 @@ def _apply_pricing(
         partition_nous_models_by_tier,
     )
 
-    # Resolve Nous free-tier once (cached in models.py for the TTL window).
+    # Resolve Nunmai free-tier once (cached in models.py for the TTL window).
     nous_free_tier: Optional[bool] = None
 
     for row in rows:
@@ -940,7 +940,7 @@ def _apply_pricing(
                 "cache": cache,
                 "free": is_free,
             }
-            # Sale chrome is Nous Portal-only. Other providers (OpenRouter,
+            # Sale chrome is Nunmai Portal-only. Other providers (OpenRouter,
             # Novita, …) never get discount_percent / was_* even if a nested
             # pricing.original somehow appeared in their catalog. Free / $0
             # models get flat -100% chrome (was_* only when the gateway

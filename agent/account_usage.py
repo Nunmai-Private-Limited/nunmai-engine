@@ -221,7 +221,7 @@ def build_nous_credits_snapshot(account_info) -> Optional[AccountUsageSnapshot]:
             provider="nous",
             source="portal-account",
             fetched_at=_utc_now(),
-            title="Nous credits",
+            title="Nunmai credits",
             plan=plan,
             windows=tuple(windows),
             details=tuple(details),
@@ -231,9 +231,9 @@ def build_nous_credits_snapshot(account_info) -> Optional[AccountUsageSnapshot]:
 
 
 def nous_credits_lines(*, markdown: bool = False, timeout: float = 10.0) -> list[str]:
-    """Return rendered Nous-credits /usage lines, or [] when there's nothing to show.
+    """Return rendered Nunmai-credits /usage lines, or [] when there's nothing to show.
 
-    Account-independent of any live agent: gated on "a Nous account is logged in"
+    Account-independent of any live agent: gated on "a Nunmai account is logged in"
     (a cheap local auth-state check), then a wall-clock-bounded portal fetch. Shared
     by the CLI ``_show_usage`` and the TUI ``session.usage`` RPC so both surfaces show
     the same block regardless of session API-call count or resume state. Fail-open:
@@ -330,7 +330,7 @@ def _snapshot_from_credits_state(state) -> Optional[AccountUsageSnapshot]:
             provider="nous",
             source="dev-fixture",
             fetched_at=_utc_now(),
-            title="Nous credits",
+            title="Nunmai credits",
             windows=tuple(windows),
             details=tuple(details),
         )

@@ -55,7 +55,7 @@ EFFORT_LADDER: tuple[str, ...] = (
 # provider wire accepts it verbatim anywhere. Every declared wire set below
 # therefore stops at ``max`` — ``ultra`` always clamps down.
 
-#: The widest OpenAI-compatible wire vocabulary (OpenRouter, Nous Portal):
+#: The widest OpenAI-compatible wire vocabulary (OpenRouter, Nunmai Portal):
 #: exactly max|xhigh|high|medium|low|minimal|none.
 OPENAI_COMPAT_WIRE_EFFORTS: tuple[str, ...] = (
     "none", "minimal", "low", "medium", "high", "xhigh", "max",

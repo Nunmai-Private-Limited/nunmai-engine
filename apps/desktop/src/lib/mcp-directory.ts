@@ -1,7 +1,7 @@
 /**
  * COMPATIBILITY RUNG — superseded by the MCP catalog's `suggest` metadata.
  *
- * The Nous-approved install catalog (`optional-mcps/<name>/manifest.yaml`)
+ * The Nunmai-approved install catalog (`optional-mcps/<name>/manifest.yaml`)
  * is now the single source of truth for suggestible servers: each hosted
  * remote entry declares its own `suggest.keywords` / `suggest.hosts`, served
  * through `GET /api/mcp/catalog`. The suggestion provider and the inline

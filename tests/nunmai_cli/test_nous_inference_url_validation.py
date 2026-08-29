@@ -1,4 +1,4 @@
-"""Regression tests for Nous Portal inference_base_url host-allowlist validation.
+"""Regression tests for Nunmai Portal inference_base_url host-allowlist validation.
 
 A poisoned ``inference_base_url`` from a Portal refresh response (network
 MITM, malicious response injection) would otherwise be persisted to
@@ -110,7 +110,7 @@ class TestCallSiteWiring:
         assert mint_count == 0, f"expected 0 mint sites, found {mint_count}"
 
     def test_proxy_adapter_also_validates(self):
-        """The Nous proxy adapter applies the validator as defense-in-depth
+        """The Nunmai proxy adapter applies the validator as defense-in-depth
         even though auth.py already validates at the source, so a future
         bypass at the source layer still gets caught at the forward
         boundary."""
@@ -287,7 +287,7 @@ class TestEnvOverrideWins:
 
 
 class TestProxyAdapterEnvOverride:
-    """The Nous proxy adapter is the second chokepoint: it re-validates the
+    """The Nunmai proxy adapter is the second chokepoint: it re-validates the
     base_url returned by resolve_nous_runtime_credentials() against the prod
     allowlist. That re-validation must not clobber a legitimate
     NOUS_INFERENCE_BASE_URL staging override.

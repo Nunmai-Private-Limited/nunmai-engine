@@ -154,7 +154,7 @@ export function exposePluginSDK() {
     // plugins that need to build the WS URL themselves.
     buildWsAuthParam,
 
-    // UI components — Nous DS where available, shadcn/ui primitives elsewhere.
+    // UI components — Nunmai DS where available, shadcn/ui primitives elsewhere.
     components: {
       Card,
       CardHeader,

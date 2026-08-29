@@ -30,7 +30,7 @@ Examples:
     nunmai debug share --expire 30  Keep paste for 30 days
     nunmai debug share --local      Print report locally (no upload)
     nunmai debug share --no-redact  Disable upload-time secret redaction
-    nunmai debug share --nous       Upload to Nous-internal storage (private)
+    nunmai debug share --nous       Upload to Nunmai-internal storage (private)
     nunmai debug delete <url>       Delete a previously uploaded paste
 """,
     )
@@ -80,9 +80,9 @@ Examples:
         "--nous",
         action="store_true",
         help=(
-            "Upload the debug bundle to Nous-internal storage (AWS S3) instead "
+            "Upload the debug bundle to Nunmai-internal storage (AWS S3) instead "
             "of a public paste service. The bundle is private — viewable only "
-            "by Nous staff (and allowlisted Discord mods) via a Google-login-"
+            "by Nunmai staff (and allowlisted Discord mods) via a Google-login-"
             "gated viewer — and auto-deletes after 14 days. Still force-redacts "
             "secrets unless --no-redact is also passed."
         ),

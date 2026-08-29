@@ -285,7 +285,7 @@ def test_delegate_task_requires_parent_agent_for_control():
 
 def test_empty_tasks_array_with_goal_is_single_task_not_batch_error():
     """Small models emit tasks=[] alongside goal; that must not trip a
-    batch-count gate (observed live with gpt-5.4-mini on Nous Portal) —
+    batch-count gate (observed live with gpt-5.4-mini on Nunmai Portal) —
     it falls through to the no-tasks teaching error."""
     out = delegate_task(tasks=[], goal="", parent_agent=_StubParent())
     assert "No tasks provided" in out

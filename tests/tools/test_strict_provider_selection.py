@@ -1,7 +1,7 @@
 """Strict tool-provider selection: the `nunmai tools` choice always wins.
 
 Policy (owner decision): the provider string stored in config.yaml is what
-runs at call time. "nous" → managed Nous Tool Gateway only; a vendor name →
+runs at call time. "nous" → managed Nunmai Tool Gateway only; a vendor name →
 that vendor direct with the user's own credentials; no key ever written →
 today's credential autodetect. Credential presence must NEVER select or
 reroute; a selected-but-broken provider produces an honest error naming the
@@ -325,7 +325,7 @@ class TestWriteProviderConfig:
         from nunmai_cli.tools_config import _write_provider_config
 
         config = {"tts": {"provider": "edge", "use_gateway": False}}
-        provider = {"name": "Nous Subscription", "tts_provider": "openai"}
+        provider = {"name": "Nunmai Subscription", "tts_provider": "openai"}
         _write_provider_config(provider, config, managed_feature="tts")
         assert config["tts"]["provider"] == "nous"
         assert "use_gateway" not in config["tts"]
@@ -343,7 +343,7 @@ class TestWriteProviderConfig:
         from nunmai_cli.tools_config import _write_provider_config
 
         config = {}
-        provider = {"name": "Nous Subscription", "imagegen_backend": "fal"}
+        provider = {"name": "Nunmai Subscription", "imagegen_backend": "fal"}
         _write_provider_config(provider, config, managed_feature="image_gen")
         assert config["image_gen"]["provider"] == "nous"
         assert "use_gateway" not in config["image_gen"]

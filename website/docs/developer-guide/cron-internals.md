@@ -134,42 +134,42 @@ In CLI mode, cron jobs only fire when `nunmai cron` commands are run or during a
 Hosted gateways can run the **Chronos** provider (`cron.provider: chronos`)
 instead of the built-in ticker. Chronos lets an idle gateway **scale to zero**
 and still fire cron jobs: rather than a 60-second in-process loop (which would
-keep the process awake), it asks Nous infrastructure to arm exactly **one
-managed one-shot per job at that job's real next-fire time**. At fire time Nous
+keep the process awake), it asks Nunmai infrastructure to arm exactly **one
+managed one-shot per job at that job's real next-fire time**. At fire time Nunmai
 calls the gateway back over an authenticated webhook (`POST /api/cron/fire`);
 the gateway runs the job through the same `run_one_job` path as the built-in,
 then re-arms the next one-shot. Between fires the process can be fully stopped —
 it wakes only on a genuine fire, never on a periodic timer.
 
-The flow (the managed scheduler is provided by Nous; the agent holds no
+The flow (the managed scheduler is provided by Nunmai; the agent holds no
 scheduler credentials):
 
 ```
 create/update a cron job
-  → Chronos asks Nous to arm a one-shot at the job's next_run_at
-      (authenticated with the agent's existing Nous token)
-  → at fire time Nous calls the gateway: POST {callback_url}/api/cron/fire
-      (authenticated with a short-lived, purpose-scoped Nous-minted JWT)
+  → Chronos asks Nunmai to arm a one-shot at the job's next_run_at
+      (authenticated with the agent's existing Nunmai token)
+  → at fire time Nunmai calls the gateway: POST {callback_url}/api/cron/fire
+      (authenticated with a short-lived, purpose-scoped Nunmai-minted JWT)
   → the gateway verifies the token, claims the job (store compare-and-set so
     multi-replica deployments fire at-most-once), runs it, and re-arms the next
     one-shot
 ```
 
-Config (all non-secret; on hosted agents Nous sets these at provision time):
+Config (all non-secret; on hosted agents Nunmai sets these at provision time):
 
 | key | meaning |
 |---|---|
 | `cron.provider` | `chronos` to activate (empty = built-in ticker) |
-| `cron.chronos.portal_url` | Nous base URL (arming + the fire-token issuer) |
+| `cron.chronos.portal_url` | Nunmai base URL (arming + the fire-token issuer) |
 | `cron.chronos.callback_url` | the gateway's own public base URL for inbound fires |
 | `cron.chronos.expected_audience` | this agent's fire-token audience |
 | `cron.chronos.nas_jwks_url` | key set for verifying the inbound fire token |
 
-If Chronos is misconfigured or the agent isn't logged into Nous,
+If Chronos is misconfigured or the agent isn't logged into Nunmai,
 `resolve_cron_scheduler()` falls back to the built-in ticker (logged warning) —
 cron never loses its trigger. Recurring jobs re-arm after each fire; `repeat`-N
 jobs stop cleanly when the count is exhausted (no orphaned one-shot). The full
-agent↔Nous wire contract lives in `docs/chronos-managed-cron-contract.md`.
+agent↔Nunmai wire contract lives in `docs/chronos-managed-cron-contract.md`.
 
 ### Fresh Session Isolation
 

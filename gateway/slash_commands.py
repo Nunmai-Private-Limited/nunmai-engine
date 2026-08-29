@@ -2421,7 +2421,7 @@ class GatewaySlashCommandsMixin:
             lines.append(t("gateway.model.provider_label", provider=provider_label))
 
             # Context: always resolve via the provider-aware chain so Codex OAuth,
-            # Copilot, and Nous-enforced caps win over the raw models.dev entry.
+            # Copilot, and Nunmai-enforced caps win over the raw models.dev entry.
             mi = result.model_info
             from nunmai_cli.model_switch import resolve_display_context_length_async
             _sw2_config_ctx = None
@@ -5292,7 +5292,7 @@ class GatewaySlashCommandsMixin:
         return t(key, title=branch_title, count=msg_count, parent=parent_session_id, new=new_session_id)
 
     async def _handle_topup_command(self, event: MessageEvent) -> str:
-        """Handle /topup -- show the Nous balance and hand off to the portal.
+        """Handle /topup -- show the Nunmai balance and hand off to the portal.
 
         Renders the balance block + identity line + a tappable portal URL that
         opens the billing page. Remote spending is managed on the portal: this
@@ -5311,7 +5311,7 @@ class GatewaySlashCommandsMixin:
         if view is None or not view.logged_in:
             return t("gateway.credits.not_logged_in")
 
-        lines: list[str] = ["💳 **Nous balance**"]
+        lines: list[str] = ["💳 **Nunmai balance**"]
         for line in view.balance_lines:
             if line.lstrip().startswith("📈"):
                 continue  # drop the helper's header; we print our own
@@ -5491,12 +5491,12 @@ class GatewaySlashCommandsMixin:
             if account_snapshot:
                 account_lines = render_account_usage_lines(account_snapshot, markdown=True)
 
-        # ── Nous credits magnitudes + monthly-grant % gauge ─────────────
+        # ── Nunmai credits magnitudes + monthly-grant % gauge ─────────────
         # Shared with the CLI / TUI /usage block via nous_credits_lines(): a single
         # auth-gate + portal-fetch + render path (which also honors the dev fixture).
-        # Run off the event loop. The helper gates on "a Nous account is logged in"
+        # Run off the event loop. The helper gates on "a Nunmai account is logged in"
         # — NOT the inference provider and NOT nested under `if provider:` — so a
-        # Nous-credentialled user running inference elsewhere (or with none resident)
+        # Nunmai-credentialled user running inference elsewhere (or with none resident)
         # still sees their balance. NO recovery trigger: messaging binds no notice
         # consumer, so /usage only displays. Fail-open: never break /usage.
         try:

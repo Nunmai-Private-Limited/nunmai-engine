@@ -1,4 +1,4 @@
-"""Tests for normalized Nous Portal account entitlement helpers."""
+"""Tests for normalized Nunmai Portal account entitlement helpers."""
 
 from __future__ import annotations
 
@@ -297,7 +297,7 @@ def test_member_spend_cap_exceeded_message(monkeypatch):
     assert info.paid_service_access_info.member_spend_cap_usd == 500.0
     assert info.paid_service_access_info.member_spend_usd == 520.51
 
-    msg = format_nous_portal_entitlement_message(info, capability="Nous model access")
+    msg = format_nous_portal_entitlement_message(info, capability="Nunmai model access")
     assert msg is not None
     # Must mention spend cap, not "no active subscription or usable credits"
     assert "spend cap" in msg
@@ -325,7 +325,7 @@ def test_member_spend_cap_exceeded_without_amounts(monkeypatch):
     monkeypatch.setattr("nunmai_cli.nous_account._fetch_nous_account_info", lambda *a, **kw: payload)
 
     info = get_nous_portal_account_info(force_fresh=True)
-    msg = format_nous_portal_entitlement_message(info, capability="Nous model access")
+    msg = format_nous_portal_entitlement_message(info, capability="Nunmai model access")
     assert msg is not None
     assert "spend cap" in msg
     assert "no active subscription" not in msg

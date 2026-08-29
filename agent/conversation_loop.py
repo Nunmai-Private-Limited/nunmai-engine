@@ -853,7 +853,7 @@ def _print_billing_or_entitlement_guidance(
 
 
 def _try_refresh_nous_paid_entitlement_credentials(agent) -> bool:
-    """Refresh Nous runtime credentials after a fresh paid-entitlement check."""
+    """Refresh Nunmai runtime credentials after a fresh paid-entitlement check."""
     try:
         from nunmai_cli.nous_account import get_nous_portal_account_info
 
@@ -2919,8 +2919,8 @@ def run_conversation(
         agent._current_api_request_id = api_request_id
 
         while retry_count < max_retries:
-            # ── Nous Portal rate limit guard ──────────────────────
-            # If another session already recorded that Nous is rate-
+            # ── Nunmai Portal rate limit guard ──────────────────────
+            # If another session already recorded that Nunmai is rate-
             # limited, skip the API call entirely.  Each attempt
             # (including SDK-level retries) counts against RPH and
             # deepens the rate limit hole.
@@ -2933,7 +2933,7 @@ def run_conversation(
                     _nous_remaining = nous_rate_limit_remaining()
                     if _nous_remaining is not None and _nous_remaining > 0:
                         _nous_msg = (
-                            f"Nous Portal rate limit active — "
+                            f"Nunmai Portal rate limit active — "
                             f"resets in {_fmt_nous_remaining(_nous_remaining)}."
                         )
                         agent._buffer_vprint(
@@ -4445,9 +4445,9 @@ def run_conversation(
                 # usable content. Empty responses still loop through the
                 # empty-retry path below; the buffer is cleared when
                 # genuinely successful content is detected later (~L4127).
-                # Clear Nous rate limit state on successful request —
+                # Clear Nunmai rate limit state on successful request —
                 # proves the limit has reset and other sessions can
-                # resume hitting Nous.
+                # resume hitting Nunmai.
                 if agent.provider == "nous":
                     try:
                         from agent.nous_rate_guard import clear_nous_rate_limit
@@ -4820,7 +4820,7 @@ def run_conversation(
                     _retry.nous_paid_entitlement_refresh_attempted = True
                     if _try_refresh_nous_paid_entitlement_credentials(agent):
                         agent._vprint(
-                            f"{agent.log_prefix}🔐 Nous paid access verified — "
+                            f"{agent.log_prefix}🔐 Nunmai paid access verified — "
                             "refreshed runtime credentials and retrying request...",
                             force=True,
                         )
@@ -4978,7 +4978,7 @@ def run_conversation(
                 ):
                     _retry.nous_auth_retry_attempted = True
                     if agent._try_refresh_nous_client_credentials(force=True):
-                        print(f"{agent.log_prefix}🔐 Nous agent key refreshed after 401. Retrying request...")
+                        print(f"{agent.log_prefix}🔐 Nunmai agent key refreshed after 401. Retrying request...")
                         continue
                     # Credential refresh didn't help — show diagnostic info.
                     # Most common causes: Portal OAuth expired/revoked,
@@ -4992,10 +4992,10 @@ def run_conversation(
                             _body_text = str(_body)[:200]
                     except Exception:
                         pass
-                    print(f"{agent.log_prefix}🔐 Nous 401 — Portal authentication failed.")
+                    print(f"{agent.log_prefix}🔐 Nunmai 401 — Portal authentication failed.")
                     if _body_text:
                         print(f"{agent.log_prefix}   Response: {_body_text}")
-                    if not _print_nous_entitlement_guidance(agent, "Nous model access"):
+                    if not _print_nous_entitlement_guidance(agent, "Nunmai model access"):
                         print(f"{agent.log_prefix}   Most likely: Portal OAuth expired, account out of credits, or agent key revoked.")
                     print(f"{agent.log_prefix}   Troubleshooting:")
                     print(f"{agent.log_prefix}     • Re-authenticate: nunmai auth add nous")
@@ -5581,8 +5581,8 @@ def run_conversation(
                         _retry.restart_with_rebuilt_messages = True
                         break
 
-                # ── Nous Portal: record rate limit & skip retries ─────
-                # When Nous returns a 429 that is a genuine account-
+                # ── Nunmai Portal: record rate limit & skip retries ─────
+                # When Nunmai returns a 429 that is a genuine account-
                 # level rate limit, record the reset time to a shared
                 # file so ALL sessions (cron, gateway, auxiliary) know
                 # not to pile on, then skip further retries -- each
@@ -5590,13 +5590,13 @@ def run_conversation(
                 # The retry loop's top-of-iteration guard will catch
                 # this on the next pass and try fallback or bail.
                 #
-                # IMPORTANT: Nous Portal multiplexes multiple upstream
+                # IMPORTANT: Nunmai Portal multiplexes multiple upstream
                 # providers (DeepSeek, Kimi, MiMo, Nunmai).  A 429 can
                 # also mean an UPSTREAM provider is out of capacity
                 # for one specific model -- transient, clears in
                 # seconds, nothing to do with the caller's quota.
                 # Tripping the cross-session breaker on that would
-                # block every Nous model for minutes.  We use
+                # block every Nunmai model for minutes.  We use
                 # ``is_genuine_nous_rate_limit`` to tell the two
                 # apart via the 429's own x-ratelimit-* headers and
                 # the last-known-good state captured on the previous
@@ -5629,7 +5629,7 @@ def run_conversation(
                             )
                         else:
                             logger.info(
-                                "Nous 429 looks like upstream capacity "
+                                "Nunmai 429 looks like upstream capacity "
                                 "(no exhausted bucket in headers or "
                                 "last-known state) -- not tripping "
                                 "cross-session breaker."
@@ -5638,7 +5638,7 @@ def run_conversation(
                         pass
                     if _genuine_nous_rate_limit:
                         # Re-enter the loop exactly once so the
-                        # top-of-loop Nous guard handles fallback or
+                        # top-of-loop Nunmai guard handles fallback or
                         # bails cleanly. (Setting retry_count to
                         # max_retries would make the while condition
                         # false immediately and the guard would never
@@ -6262,7 +6262,7 @@ def run_conversation(
                             pass
                         elif _provider == "nous" and _print_nous_entitlement_guidance(
                             agent,
-                            "Nous model access",
+                            "Nunmai model access",
                         ):
                             pass
                         elif _provider in {"openai-codex", "xai-oauth", "nous"} and status_code == 401:
@@ -6275,16 +6275,16 @@ def run_conversation(
                                 agent._vprint(f"{agent.log_prefix}   💡 xAI OAuth token was rejected (HTTP 401). To fix:", force=True)
                                 agent._vprint(f"{agent.log_prefix}      re-authenticate with xAI Grok OAuth (SuperGrok / Premium+) from `nunmai model`.", force=True)
                             else:  # nous
-                                agent._vprint(f"{agent.log_prefix}   💡 Nous Portal OAuth token was rejected (HTTP 401). Your token may be", force=True)
+                                agent._vprint(f"{agent.log_prefix}   💡 Nunmai Portal OAuth token was rejected (HTTP 401). Your token may be", force=True)
                                 agent._vprint(f"{agent.log_prefix}      expired, revoked, or your account may be out of credits. To fix:", force=True)
                                 agent._vprint(f"{agent.log_prefix}      1. Re-authenticate: nunmai portal", force=True)
                                 agent._vprint(f"{agent.log_prefix}      2. Check your portal account: https://portal.nousresearch.com", force=True)
-                                # ``:free`` is OpenRouter slug syntax; Nous Portal will reject
+                                # ``:free`` is OpenRouter slug syntax; Nunmai Portal will reject
                                 # the model name even after a successful re-auth.
                                 if isinstance(_model, str) and _model.endswith(":free"):
                                     agent._vprint(f"{agent.log_prefix}      ⚠️  Note: `{_model}` looks like an OpenRouter slug (`:free` suffix).", force=True)
-                                    agent._vprint(f"{agent.log_prefix}         Nous Portal won't recognize that model name. Either switch to a", force=True)
-                                    agent._vprint(f"{agent.log_prefix}         Nous catalog model, or run `/model openrouter:{_model}` to use OpenRouter.", force=True)
+                                    agent._vprint(f"{agent.log_prefix}         Nunmai Portal won't recognize that model name. Either switch to a", force=True)
+                                    agent._vprint(f"{agent.log_prefix}         Nunmai catalog model, or run `/model openrouter:{_model}` to use OpenRouter.", force=True)
                         else:
                             agent._vprint(f"{agent.log_prefix}   💡 Your API key was rejected by the provider. Check:", force=True)
                             agent._vprint(f"{agent.log_prefix}      • Is the key valid? Run: nunmai setup", force=True)

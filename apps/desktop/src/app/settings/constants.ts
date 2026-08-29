@@ -46,8 +46,8 @@ export const CONTROL_TEXT = 'text-xs'
 export const PROVIDER_GROUPS: ProviderPrefix[] = [
   {
     prefix: 'NOUS_',
-    name: 'Nous Portal',
-    description: 'Hosted Nunmai & Nous-trained models',
+    name: 'Nunmai Portal',
+    description: 'Hosted Nunmai & Nunmai-trained models',
     docsUrl: 'https://portal.nousresearch.com',
     priority: 0
   },
@@ -56,7 +56,7 @@ export const PROVIDER_GROUPS: ProviderPrefix[] = [
     name: 'Fireworks AI',
     description: 'OpenAI-compatible direct model API',
     docsUrl: 'https://app.fireworks.ai/settings/users/api-keys',
-    // Slot #2 — mirrors CANONICAL_PROVIDERS (after Nous, ahead of OpenRouter).
+    // Slot #2 — mirrors CANONICAL_PROVIDERS (after Nunmai, ahead of OpenRouter).
     // Same numeric priority as OpenRouter; name sort puts Fireworks first.
     priority: 1
   },

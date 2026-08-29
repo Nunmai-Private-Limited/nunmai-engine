@@ -13,7 +13,7 @@ Coming from **Claude Code** or **OpenAI Codex CLI** instead? Use [`nunmai import
 :::
 
 :::tip
-If your OpenClaw setup was multi-provider, `nunmai setup --portal` collapses it to one OAuth — 300+ models plus the Tool Gateway in a single login. See [Nous Portal](/integrations/nous-portal).
+If your OpenClaw setup was multi-provider, `nunmai setup --portal` collapses it to one OAuth — 300+ models plus the Tool Gateway in a single login. See [Nunmai Portal](/integrations/nous-portal).
 :::
 
 ## Quick start

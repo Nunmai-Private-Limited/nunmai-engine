@@ -24,8 +24,8 @@ Before using voice features, make sure you have:
 The `~/.nunmai/` directory and default `config.yaml` are created automatically the first time you run `nunmai`. You only need to create `~/.nunmai/.env` manually for API keys.
 :::
 
-:::tip Nous Portal covers both
-A paid [Nous Portal](/user-guide/features/tool-gateway) subscription supplies the LLM (step 2) **and** OpenAI TTS via the Tool Gateway — no separate OpenAI key needed. On a fresh install, `nunmai setup --portal` wires both up at once.
+:::tip Nunmai Portal covers both
+A paid [Nunmai Portal](/user-guide/features/tool-gateway) subscription supplies the LLM (step 2) **and** OpenAI TTS via the Tool Gateway — no separate OpenAI key needed. On a fresh install, `nunmai setup --portal` wires both up at once.
 :::
 
 ## Overview
@@ -191,7 +191,7 @@ voice:
   client_direct: false
 ```
 
-Client-direct wire support: OpenAI (incl. Nous-managed audio), Groq, Mistral, and DeepInfra via the OpenAI-compatible shapes, xAI Grok STT, and ElevenLabs STT + TTS. xAI configured through OAuth stays on the relay (the OAuth bearer refreshes server-side).
+Client-direct wire support: OpenAI (incl. Nunmai-managed audio), Groq, Mistral, and DeepInfra via the OpenAI-compatible shapes, xAI Grok STT, and ElevenLabs STT + TTS. xAI configured through OAuth stays on the relay (the OAuth bearer refreshes server-side).
 
 ### Barge-in
 

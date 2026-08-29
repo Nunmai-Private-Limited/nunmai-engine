@@ -754,7 +754,7 @@ def _resolve_active_context_length() -> int:
         # for SIZING the tool-search gate — unlike compression budgeting, a
         # slightly stale window can't corrupt anything (should_activate only
         # picks a disclosure tier). The full resolver below deliberately
-        # bypasses the persistent cache for some providers (Nous portal,
+        # bypasses the persistent cache for some providers (Nunmai portal,
         # Codex OAuth) so IT can reconcile against the authoritative live
         # /models endpoint — correct for compression sizing, but it costs a
         # ~200ms network probe on EVERY CLI startup. When any prior session

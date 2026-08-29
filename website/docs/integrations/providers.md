@@ -14,7 +14,7 @@ You need at least one way to connect to an LLM. Use `nunmai model` to switch pro
 
 | Provider | Setup |
 |----------|-------|
-| **Nous Portal** | `nunmai model` (OAuth, subscription-based) |
+| **Nunmai Portal** | `nunmai model` (OAuth, subscription-based) |
 | **OpenAI Codex** | `nunmai model` → **ChatGPT or Codex Subscription** (ChatGPT OAuth, uses Codex models) |
 | **GitHub Copilot** | `nunmai model` (OAuth device code flow, `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, or `gh auth token`) |
 | **GitHub Copilot ACP** | `nunmai model` (spawns local `copilot --acp --stdio`) |
@@ -64,19 +64,19 @@ In the `model:` config section, you can use either `default:` or `model:` as the
 :::
 
 
-### Nous Portal
+### Nunmai Portal
 
-[Nous Portal](https://portal.nousresearch.com) is Nunmai Research's unified subscription gateway and **the recommended way to run Nunmai Engine**. One OAuth login covers 300+ frontier agentic models (Claude, GPT, Gemini, DeepSeek, Qwen, Kimi, GLM, MiniMax, Grok, ...) plus the [Tool Gateway](/user-guide/features/tool-gateway) (web search, image generation, TTS, browser automation) — billed against your Nous subscription instead of separate per-provider accounts.
+[Nunmai Portal](https://portal.nousresearch.com) is Nunmai Research's unified subscription gateway and **the recommended way to run Nunmai Engine**. One OAuth login covers 300+ frontier agentic models (Claude, GPT, Gemini, DeepSeek, Qwen, Kimi, GLM, MiniMax, Grok, ...) plus the [Tool Gateway](/user-guide/features/tool-gateway) (web search, image generation, TTS, browser automation) — billed against your Nunmai subscription instead of separate per-provider accounts.
 
 ```bash
 nunmai setup --portal     # fresh install — OAuth + provider + gateway in one command
-nunmai model              # existing install — pick "Nous Portal" from the list
+nunmai model              # existing install — pick "Nunmai Portal" from the list
 nunmai portal info        # inspect login + routing at any time
 ```
 
 Don't have a subscription yet? Get one at [portal.nousresearch.com/manage-subscription](https://portal.nousresearch.com/manage-subscription).
 
-**For full details:** see the dedicated [Nous Portal integration page](/integrations/nous-portal) (what's in the subscription, model catalog, troubleshooting) and the step-by-step [Run Nunmai Engine with Nous Portal guide](/guides/run-nunmai-with-nous-portal).
+**For full details:** see the dedicated [Nunmai Portal integration page](/integrations/nous-portal) (what's in the subscription, model catalog, troubleshooting) and the step-by-step [Run Nunmai Engine with Nunmai Portal guide](/guides/run-nunmai-with-nous-portal).
 
 **Client identification.** Every Portal request from Nunmai Engine carries a `client=nunmai-client-v<version>` tag (e.g. `client=nunmai-client-v0.13.0`) auto-aligned to your installed release. This is sent on all Portal pathways — main chat loop, auxiliary calls, compression summarizer, web extraction — and lets Portal-side telemetry distinguish Nunmai traffic from other clients. No config required; the tag updates automatically when you `nunmai update`.
 
@@ -90,11 +90,11 @@ If a token refresh fails with a terminal error (HTTP 4xx, `invalid_grant`, revok
 :::
 
 :::warning
-Even when using Nous Portal, Codex, or a custom endpoint, some tools (vision, web summarization, MoA) use a separate "auxiliary" model. By default (`auxiliary.*.provider: "auto"`), Nunmai routes these tasks to your **main chat model** — the same model you picked in `nunmai model`. You can override each task individually to route it to a cheaper/faster model (e.g. Gemini Flash on OpenRouter) — see [Auxiliary Models](/user-guide/configuration#auxiliary-models).
+Even when using Nunmai Portal, Codex, or a custom endpoint, some tools (vision, web summarization, MoA) use a separate "auxiliary" model. By default (`auxiliary.*.provider: "auto"`), Nunmai routes these tasks to your **main chat model** — the same model you picked in `nunmai model`. You can override each task individually to route it to a cheaper/faster model (e.g. Gemini Flash on OpenRouter) — see [Auxiliary Models](/user-guide/configuration#auxiliary-models).
 :::
 
-:::tip Nous Tool Gateway
-Paid Nous Portal subscribers also get access to the **[Tool Gateway](/user-guide/features/tool-gateway)** — web search, image generation, TTS, and browser automation routed through your subscription. No extra API keys needed. On a fresh install, `nunmai setup --portal` logs you in, sets Nous as your provider, and turns the gateway on in one command. Existing users can enable it from `nunmai model` or per-tool from `nunmai tools`. Inspect routing at any time with `nunmai portal info`.
+:::tip Nunmai Tool Gateway
+Paid Nunmai Portal subscribers also get access to the **[Tool Gateway](/user-guide/features/tool-gateway)** — web search, image generation, TTS, and browser automation routed through your subscription. No extra API keys needed. On a fresh install, `nunmai setup --portal` logs you in, sets Nunmai as your provider, and turns the gateway on in one command. Existing users can enable it from `nunmai model` or per-tool from `nunmai tools`. Inspect routing at any time with `nunmai portal info`.
 :::
 
 ### Two Commands for Model Management
@@ -125,14 +125,14 @@ Several providers let you sign in to Nunmai with a **consumer subscription** (Cl
 
 **Anthropic.** The OAuth path routes as Claude Code against your Anthropic account and **only works on a Claude Max plan with purchased extra usage credits** — the base Max allowance is never consumed by Nunmai, only the extra/overage credits on top. Claude Pro subscribers cannot use this path; the supported alternative is an `ANTHROPIC_API_KEY`, billed pay-per-token against that key's organization at standard API pricing. See [Anthropic (Native)](#anthropic-native) below.
 
-**OpenAI Codex.** Nunmai authenticates via ChatGPT device-code OAuth, stores credentials in `~/.nunmai/auth.json`, and can import existing Codex CLI credentials from `~/.codex/auth.json`. Which ChatGPT plan tiers are eligible, and how Nunmai usage counts against your plan's Codex limits, are **not currently documented** — the Codex note under [Nous Portal](#nous-portal) covers authentication and token-refresh behavior only.
+**OpenAI Codex.** Nunmai authenticates via ChatGPT device-code OAuth, stores credentials in `~/.nunmai/auth.json`, and can import existing Codex CLI credentials from `~/.codex/auth.json`. Which ChatGPT plan tiers are eligible, and how Nunmai usage counts against your plan's Codex limits, are **not currently documented** — the Codex note under [Nunmai Portal](#nous-portal) covers authentication and token-refresh behavior only.
 
 **xAI (SuperGrok / X Premium+).** Browser OAuth works with either an active SuperGrok subscription or an X Premium+ subscription on the linked X account, and the same bearer token is reused by direct-to-xAI tools (TTS, image gen, video gen, transcription, X Search). If inference returns `HTTP 403` after a successful login, that's a tier/entitlement restriction on xAI's side, not a stale token — the workaround is switching to an `XAI_API_KEY`. See [xAI (Grok)](#xai-grok--responses-api--prompt-caching) below and the [xAI Grok OAuth guide](../guides/xai-grok-oauth.md).
 
 **Google Gemini.** There is currently no way to sign in to Nunmai with a consumer Gemini subscription — the `gemini` provider takes an API key, and [Google Vertex AI](#google-vertex-ai) bills to your GCP project. A billing-enabled Google Cloud project is recommended for agent use; free-tier quotas are too small for long-running agent sessions. See the [Google Gemini guide](/guides/google-gemini).
 
 :::tip One subscription instead of five
-If you'd rather not track per-provider plan semantics at all, [Nous Portal](#nous-portal) covers 300+ models under a single subscription with one OAuth login.
+If you'd rather not track per-provider plan semantics at all, [Nunmai Portal](#nous-portal) covers 300+ models under a single subscription with one OAuth login.
 :::
 
 ### Anthropic (Native)
@@ -1224,7 +1224,7 @@ Nunmai uses a multi-source resolution chain to detect the correct context window
 4. **Endpoint `/models`** — queries your server's API (local/custom endpoints)
 5. **Anthropic `/v1/models`** — queries Anthropic's API for `max_input_tokens` (API-key users only)
 6. **OpenRouter API** — live model metadata from OpenRouter
-7. **Nous Portal** — suffix-matches Nous model IDs against OpenRouter metadata
+7. **Nunmai Portal** — suffix-matches Nunmai model IDs against OpenRouter metadata
 8. **[models.dev](https://models.dev)** — community-maintained registry with provider-specific context lengths for 3800+ models across 100+ providers
 9. **Fallback defaults** — broad model family patterns (128K default)
 
@@ -1472,7 +1472,7 @@ model:
 
 | Use Case | Recommended |
 |----------|-------------|
-| **Just want it to work** | OpenRouter (default) or Nous Portal |
+| **Just want it to work** | OpenRouter (default) or Nunmai Portal |
 | **Local models, easy setup** | Ollama |
 | **Production GPU serving** | vLLM or SGLang |
 | **Mac / no GPU** | Ollama or llama.cpp |

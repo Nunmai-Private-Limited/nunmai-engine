@@ -4,7 +4,7 @@ Vision Tools Module
 
 This module provides vision analysis tools that work with image URLs.
 Uses the centralized auxiliary vision router, which can select OpenRouter,
-Nous, Codex, native Anthropic, or a custom OpenAI-compatible endpoint.
+Nunmai, Codex, native Anthropic, or a custom OpenAI-compatible endpoint.
 
 Available tools:
 - vision_analyze_tool: Analyze images from URLs with custom prompts
@@ -1760,7 +1760,7 @@ if __name__ == "__main__":
     
     if not api_available:
         print("❌ No auxiliary vision model available")
-        print("Configure a supported multimodal backend (OpenRouter, Nous, Codex, Anthropic, or a custom OpenAI-compatible endpoint).")
+        print("Configure a supported multimodal backend (OpenRouter, Nunmai, Codex, Anthropic, or a custom OpenAI-compatible endpoint).")
         sys.exit(1)
     else:
         print("✅ Vision model available")

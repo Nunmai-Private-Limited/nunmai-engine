@@ -6,8 +6,8 @@ ABC introduced in PR #25214). The legacy in-tree module
 is now the canonical implementation.
 
 Browser Use is the only browser backend with dual auth: a direct
-``BROWSER_USE_API_KEY`` for self-billed users, or the managed Nous tool
-gateway (which Nunmai uses to bill Browser Use sessions to a Nous
+``BROWSER_USE_API_KEY`` for self-billed users, or the managed Nunmai tool
+gateway (which Nunmai uses to bill Browser Use sessions to a Nunmai
 subscription). The dispatch order — direct API key first, managed gateway
 second — preserves the pre-migration behaviour in
 ``tools.browser_providers.browser_use.BrowserUseProvider._get_config_or_none``.
@@ -23,7 +23,7 @@ Config keys this provider responds to::
 Auth env vars (one of)::
 
     BROWSER_USE_API_KEY=...           # https://browser-use.com
-    # OR a managed Nous gateway entry (configured via 'nunmai setup')
+    # OR a managed Nunmai gateway entry (configured via 'nunmai setup')
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ from agent.secret_scope import get_secret
 
 logger = logging.getLogger(__name__)
 
-# Idempotency tracking for managed-mode session creation. The managed Nous
+# Idempotency tracking for managed-mode session creation. The managed Nunmai
 # gateway returns 409 "already in progress" on retried POSTs; we forward the
 # original idempotency key so the gateway can deduplicate. Cleared on
 # success or terminal failure.
@@ -106,7 +106,7 @@ class BrowserUseBrowserProvider(BrowserProvider):
     """Browser Use (https://browser-use.com) cloud browser backend.
 
     Dual auth: prefers a direct BROWSER_USE_API_KEY when set, falling back
-    to the managed Nous tool gateway when ``tool_gateway.browser`` config
+    to the managed Nunmai tool gateway when ``tool_gateway.browser`` config
     routes through it. Setting ``tool_gateway.browser: gateway`` flips the
     order so managed billing wins even when BROWSER_USE_API_KEY is present.
     """
@@ -123,12 +123,12 @@ class BrowserUseBrowserProvider(BrowserProvider):
         return self._get_config_or_none(refresh_token=False) is not None
 
     # ------------------------------------------------------------------
-    # Config resolution (direct API key OR managed Nous gateway)
+    # Config resolution (direct API key OR managed Nunmai gateway)
     # ------------------------------------------------------------------
 
     def _get_config_or_none(self, *, refresh_token: bool = True) -> Optional[Dict[str, Any]]:
         # Import here to avoid a hard dependency at module-import time —
-        # managed_tool_gateway pulls in the Nous auth stack which can be
+        # managed_tool_gateway pulls in the Nunmai auth stack which can be
         # heavy and is not needed for direct-API-key users.
         from tools.managed_tool_gateway import (
             peek_nous_access_token,
@@ -193,7 +193,7 @@ class BrowserUseBrowserProvider(BrowserProvider):
                 raise ValueError(selection_error(
                     "browser",
                     NOUS_MANAGED_PROVIDER,
-                    "the Nous Tool Gateway is not available (not entitled or "
+                    "the Nunmai Tool Gateway is not available (not entitled or "
                     "unreachable)",
                 ))
             if selected is not None:
@@ -346,6 +346,6 @@ class BrowserUseBrowserProvider(BrowserProvider):
     def get_setup_schema(self) -> Optional[Dict[str, Any]]:
         # Hidden from the nunmai tools picker: the "Browser Use" row now
         # activates the CLI-based backend (tools/browser_use_cli.py). This
-        # provider stays registered for the Nous gateway path and un-migrated
+        # provider stays registered for the Nunmai gateway path and un-migrated
         # legacy cloud_provider configs.
         return None

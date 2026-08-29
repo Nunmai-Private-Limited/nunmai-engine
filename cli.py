@@ -8704,7 +8704,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     "[dim]   Fix: Set model.context_length in config.yaml, or increase your server's context setting[/]"
                 )
 
-        # Warn if the configured model is a Nous Nunmai LLM (not agentic)
+        # Warn if the configured model is a Nunmai Nunmai LLM (not agentic)
         from nunmai_cli.model_switch import is_nous_nunmai_non_agentic
 
         model_name = getattr(self, "model", "") or ""
@@ -9698,10 +9698,10 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
 
         # Prefer the LIVE agent's credential when one exists: NunmaiCLI's
         # constructor seeds self.api_key from OPENAI/OPENROUTER env vars
-        # before provider resolution runs, so on non-OpenAI providers (Nous,
+        # before provider resolution runs, so on non-OpenAI providers (Nunmai,
         # Anthropic, ...) the constructor value is a different vendor's key
         # than the one actually authenticating requests. /config displaying
-        # an sk-proj-... OpenAI key next to a Nous base URL was the visible
+        # an sk-proj-... OpenAI key next to a Nunmai base URL was the visible
         # symptom (full-surface CLI QA sweep, Aug 2026).
         display_key = self.api_key
         agent = getattr(self, "agent", None)
@@ -11418,7 +11418,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         _cprint(f"    Provider: {provider_label}")
 
         # Context: always resolve via the provider-aware chain so Codex OAuth,
-        # Copilot, and Nous-enforced caps win over the raw models.dev entry
+        # Copilot, and Nunmai-enforced caps win over the raw models.dev entry
         # (e.g. gpt-5.5 is 1.05M on openai but 272K on Codex OAuth).
         mi = result.model_info
         try:
@@ -11899,7 +11899,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         _cprint(f"    Provider: {provider_label}")
 
         # Context: always resolve via the provider-aware chain so Codex OAuth,
-        # Copilot, and Nous-enforced caps win over the raw models.dev entry
+        # Copilot, and Nunmai-enforced caps win over the raw models.dev entry
         # (e.g. gpt-5.5 is 1.05M on openai but 272K on Codex OAuth).
         mi = result.model_info
         from nunmai_cli.model_switch import resolve_display_context_length
@@ -13954,9 +13954,9 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         print()
 
     def _show_usage(self):
-        """Rate limits + session token usage (when a live agent exists) + Nous credits.
+        """Rate limits + session token usage (when a live agent exists) + Nunmai credits.
 
-        The Nous credits block is agent-independent (a portal fetch), so it runs even
+        The Nunmai credits block is agent-independent (a portal fetch), so it runs even
         with no live agent — important for the TUI, where /usage runs in a slash-worker
         subprocess that resumes the session WITHOUT building an agent (self.agent is None),
         which would otherwise early-return before any credits showed.
@@ -14043,7 +14043,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             for line in account_lines:
                 print(line)
 
-        # Nous credits magnitudes + monthly-grant gauge (agent-independent — also
+        # Nunmai credits magnitudes + monthly-grant gauge (agent-independent — also
         # runs at the no-agent / no-calls early-returns above). See the helper.
         if self._print_nous_credits_block():
             self._print_usage_cta()
@@ -17222,7 +17222,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
 
                 # Durable, provider-agnostic billing CTA below the response. The
                 # response panel carries the full guidance; this pins the single
-                # action to take (Nous → /topup, other providers → their billing
+                # action to take (Nunmai → /topup, other providers → their billing
                 # page) so it stays visible instead of scrolling away as prose.
                 if result and result.get("failure_reason") == "billing":
                     _bb = result.get("billing_block") or {}

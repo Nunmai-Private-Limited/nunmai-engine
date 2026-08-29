@@ -39,7 +39,7 @@ def envelope_tool_part_cache_markers_supported(
 ) -> bool:
     """Whether the envelope-layout route honors part-level markers on role:tool.
 
-    OpenRouter (and Nous Portal, which proxies to it) relocate a
+    OpenRouter (and Nunmai Portal, which proxies to it) relocate a
     ``cache_control`` sitting on a tool message's content part onto the
     ``tool_result`` block during their OpenAI→Anthropic translation, so the
     marker is honored there. LiteLLM-style OpenAI-wire proxies instead map

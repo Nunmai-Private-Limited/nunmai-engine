@@ -372,7 +372,7 @@ _NUNMAI_MODEL_WARNING = (
 # Negative examples it must NOT match:
 #   nunmai-brain:qwen3-14b-ctx16k, qwen3:14b, claude-opus-4-6
 _NOUS_NUNMAI_NON_AGENTIC_RE = re.compile(
-    r"(?:^|[/:])hermes[-_ ]?[34](?:[-_.:]|$)",  # rebrand-keep: Nous model IDs
+    r"(?:^|[/:])hermes[-_ ]?[34](?:[-_.:]|$)",  # rebrand-keep: Nunmai model IDs
     re.IGNORECASE,
 )
 
@@ -423,7 +423,7 @@ def format_model_for_display(model_name: str) -> str:
 
 # ---------------------------------------------------------------------------
 def is_nous_nunmai_non_agentic(model_name: str) -> bool:
-    """Return True if *model_name* is a real Nous Hermes 3/4 chat model.
+    """Return True if *model_name* is a real Nunmai Hermes 3/4 chat model.
 
     Used to decide whether to surface the non-agentic warning at startup.
     Callers in :mod:`cli.py` and here should go through this single helper
@@ -435,7 +435,7 @@ def is_nous_nunmai_non_agentic(model_name: str) -> bool:
 
 
 def _check_nunmai_model_warning(model_name: str) -> str:
-    """Return a warning string if *model_name* is a Nous Hermes 3/4 chat model."""
+    """Return a warning string if *model_name* is a Nunmai Hermes 3/4 chat model."""
     if is_nous_nunmai_non_agentic(model_name):
         return _NUNMAI_MODEL_WARNING
     return ""
@@ -1242,7 +1242,7 @@ def resolve_display_context_length(
     but provider-enforced limits can be lower (e.g. Codex OAuth caps the
     same slug at 272k). The authoritative source is
     ``agent.model_metadata.get_model_context_length`` which already knows
-    about Codex OAuth, Copilot, Nous, and falls back to models.dev for the
+    about Codex OAuth, Copilot, Nunmai, and falls back to models.dev for the
     rest.
 
     When ``custom_providers`` is provided, per-model ``context_length``
@@ -1307,7 +1307,7 @@ async def resolve_display_context_length_async(
     The sync version runs two blocking chains: the route comparison in
     ``should_clear_context_pin`` and the full provider probe ladder in
     ``get_model_context_length`` (blocking ``requests`` calls to Anthropic
-    ``/v1/models``, Copilot, Nous, Codex, GMI, Ollama, models.dev and
+    ``/v1/models``, Copilot, Nunmai, Codex, GMI, Ollama, models.dev and
     OpenRouter).  Async gateway handlers must not run either on the event
     loop — see ``agent.model_metadata.get_model_context_length_async`` and
     ``nunmai_cli.route_identity.should_clear_context_pin_async``, which
@@ -2137,7 +2137,7 @@ def switch_model(
     if target_provider in {"opencode-zen", "opencode-go", "opencode"}:
         api_mode = opencode_model_api_mode(target_provider, new_model)
 
-    # --- Nous Portal dual-wire override ---
+    # --- Nunmai Portal dual-wire override ---
     # Portal serves anthropic/* on /v1/messages and everything else on
     # /chat/completions. resolve_runtime_provider already sets this when it
     # succeeds; always re-derive from the *final* (post-normalize) model so
@@ -2599,7 +2599,7 @@ def list_authenticated_providers(
       - source: str — "built-in", "models.dev", "user-config"
 
     Only includes providers that have API keys set or are user-defined endpoints.
-    ``force_fresh_nous_tier`` bypasses the short Nous tier cache for explicit
+    ``force_fresh_nous_tier`` bypasses the short Nunmai tier cache for explicit
     account-sensitive flows. UI picker opens should leave it false so they do
     not block on fresh Portal/account checks every time.
 
@@ -3060,7 +3060,7 @@ def list_authenticated_providers(
             except Exception:
                 model_ids = curated.get(nunmai_slug, []) or curated.get(pid, [])
         elif nunmai_slug == "nous":
-            # Nous serves a large live /v1/models catalog (vendor-prefixed
+            # Nunmai serves a large live /v1/models catalog (vendor-prefixed
             # models from many providers, returned alphabetically). The
             # `nunmai model` picker deliberately shows ONLY the curated agentic
             # list — augmented with the Portal's free/paid recommendations so

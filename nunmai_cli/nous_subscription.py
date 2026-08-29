@@ -1,4 +1,4 @@
-"""Helpers for Nous subscription managed-tool capabilities."""
+"""Helpers for Nunmai subscription managed-tool capabilities."""
 
 from __future__ import annotations
 
@@ -449,7 +449,7 @@ def get_nous_subscription_features(
     web_extract_backend = str(web_cfg.get("extract_backend") or "").strip().lower()
     tts_provider = str(tts_cfg.get("provider") or "edge").strip().lower()
     # STT default is "local" (faster-whisper) per DEFAULT_CONFIG, which
-    # requires `pip install faster-whisper`. For Nous subscribers we'd
+    # requires `pip install faster-whisper`. For Nunmai subscribers we'd
     # rather route through the managed OpenAI audio gateway — see
     # apply_nous_managed_defaults below.
     stt_provider = str(stt_cfg.get("provider") or "local").strip().lower()
@@ -779,7 +779,7 @@ def get_nous_subscription_features(
             managed_by_nous=image_managed,
             direct_override=image_active and not image_managed,
             toolset_enabled=image_tool_enabled,
-            current_provider="FAL" if (image_selected not in (None, "nous") or (image_selected is None and direct_fal)) else ("Nous Subscription" if (image_managed or image_use_gateway) else ""),
+            current_provider="FAL" if (image_selected not in (None, "nous") or (image_selected is None and direct_fal)) else ("Nunmai Subscription" if (image_managed or image_use_gateway) else ""),
             explicit_configured=image_selected is not None or direct_fal,
         ),
         "video_gen": NousFeatureState(
@@ -791,7 +791,7 @@ def get_nous_subscription_features(
             managed_by_nous=video_managed,
             direct_override=video_active and not video_managed,
             toolset_enabled=video_tool_enabled,
-            current_provider="FAL" if (video_selected not in (None, "nous") or (video_selected is None and direct_fal_video)) else ("Nous Subscription" if (video_managed or video_use_gateway) else ""),
+            current_provider="FAL" if (video_selected not in (None, "nous") or (video_selected is None and direct_fal_video)) else ("Nunmai Subscription" if (video_managed or video_use_gateway) else ""),
             explicit_configured=video_selected is not None or direct_fal_video,
         ),
         "tts": NousFeatureState(
@@ -917,7 +917,7 @@ def apply_nous_managed_defaults(
         changed.add("tts")
 
     # STT: same pattern as TTS. The DEFAULT_CONFIG seed is "local"
-    # (requires `pip install faster-whisper`); for Nous subscribers we
+    # (requires `pip install faster-whisper`); for Nunmai subscribers we
     # flip it to the managed selection so the managed audio gateway handles
     # transcription via the same auth as TTS. Skipped when the user has
     # explicitly configured STT, has direct credentials for a non-managed
@@ -1074,8 +1074,8 @@ def get_gateway_eligible_tools(
       otherwise look unconfigured
     - already_managed: tools already routed through the gateway
 
-    All lists are empty when the user is not a paid Nous subscriber or
-    is not using Nous as their provider.
+    All lists are empty when the user is not a paid Nunmai subscriber or
+    is not using Nunmai as their provider.
     """
     # Fetch entitlement once: it gates the offer (paid access OR a live free tool
     # pool) AND tells us which categories are covered (the pool funds image but
@@ -1256,7 +1256,7 @@ def prompt_enable_tool_gateway(
         and account_info.tool_access is not None
         and account_info.tool_access.enabled
     )
-    source_label = "free tool pool" if pool_only else "Nous subscription"
+    source_label = "free tool pool" if pool_only else "Nunmai subscription"
 
     # Per-tool checklist: unconfigured tools first (pre-checked for new users),
     # then tools where the user already has their own key (left unchecked so we
@@ -1266,7 +1266,7 @@ def prompt_enable_tool_gateway(
     # and left unchecked are recorded in ``tool_gateway_declined_tools`` and
     # are never pre-checked again — the offer downgrades to opt-in-only.
     # Acceptance used to be sticky while refusal was not, so the identical
-    # pre-checked checklist re-fired on every Nous model swap.
+    # pre-checked checklist re-fired on every Nunmai model swap.
     declined_raw = config.get("tool_gateway_declined_tools")
     declined: set[str] = (
         {str(k) for k in declined_raw} if isinstance(declined_raw, list) else set()
@@ -1283,10 +1283,10 @@ def prompt_enable_tool_gateway(
     ]
 
     if pool_only:
-        title = "Your free Nous tool pool — pick the tools to enable:"
+        title = "Your free Nunmai tool pool — pick the tools to enable:"
     else:
         title = (
-            "Your Nous subscription includes the Tool Gateway — "
+            "Your Nunmai subscription includes the Tool Gateway — "
             "pick the tools to enable:"
         )
 
@@ -1299,7 +1299,7 @@ def prompt_enable_tool_gateway(
 
     # Persist per-tool declines: every unconfigured tool that was offered and
     # NOT chosen was actively left (or unchecked) by the user — remember that
-    # so the next Nous model swap doesn't pre-check it again. Cancel paths
+    # so the next Nunmai model swap doesn't pre-check it again. Cancel paths
     # (Ctrl-C/ESC above) return before this and record nothing. Choosing a
     # previously-declined tool clears its decline.
     newly_declined = [k for k in unconfigured if k not in chosen_keys and k not in declined]
@@ -1328,27 +1328,27 @@ def prompt_enable_tool_gateway(
 
 
 # ---------------------------------------------------------------------------
-# Inline Nous Portal login for the Tool Gateway picker (`nunmai tools`)
+# Inline Nunmai Portal login for the Tool Gateway picker (`nunmai tools`)
 # ---------------------------------------------------------------------------
 
 
 def ensure_nous_portal_access(
     *,
-    capability: str = "the Nous Tool Gateway",
+    capability: str = "the Nunmai Tool Gateway",
     coverage_category: Optional[str] = None,
 ) -> bool:
-    """Make sure the user is entitled to the Nous Tool Gateway, logging in if
+    """Make sure the user is entitled to the Nunmai Tool Gateway, logging in if
     needed.
 
-    Used by ``nunmai tools`` when a user selects a Nous-managed Tool Gateway
-    backend (e.g. "Firecrawl (Nous Portal)").  Unlike ``nunmai model``'s Nous
+    Used by ``nunmai tools`` when a user selects a Nunmai-managed Tool Gateway
+    backend (e.g. "Firecrawl (Nunmai Portal)").  Unlike ``nunmai model``'s Nunmai
     login, this:
 
     - does NOT change the inference provider (``model.provider`` is untouched),
     - does NOT run model selection, and
     - does NOT offer the bulk "enable for all tools" Tool Gateway prompt.
 
-    It only performs the Nous Portal device-code OAuth (when the user isn't
+    It only performs the Nunmai Portal device-code OAuth (when the user isn't
     already logged in) and refreshes entitlement, so the caller can enable the
     single tool the user picked.
 
@@ -1401,7 +1401,7 @@ def ensure_nous_portal_access(
 
 
 def _run_nous_portal_login_only(*, capability: str) -> bool:
-    """Run the Nous Portal device-code OAuth and persist credentials only.
+    """Run the Nunmai Portal device-code OAuth and persist credentials only.
 
     No model selection, no provider switch, no Tool Gateway bulk prompt.
     Returns ``True`` on a successful login, ``False`` if the user declined or
@@ -1420,23 +1420,23 @@ def _run_nous_portal_login_only(*, capability: str) -> bool:
             _write_shared_nous_state,
         )
     except Exception as exc:  # pragma: no cover - defensive
-        print(f"  Could not start Nous Portal login: {exc}")
+        print(f"  Could not start Nunmai Portal login: {exc}")
         return False
 
     print()
-    print(f"  {capability} requires a Nous Portal login.")
+    print(f"  {capability} requires a Nunmai Portal login.")
     try:
-        proceed = input("  Log in to Nous Portal now? [Y/n]: ").strip().lower()
+        proceed = input("  Log in to Nunmai Portal now? [Y/n]: ").strip().lower()
     except (EOFError, KeyboardInterrupt):
         print()
         return False
     if proceed not in {"", "y", "yes"}:
-        print("  Skipped Nous Portal login.")
+        print("  Skipped Nunmai Portal login.")
         return False
 
     try:
         # Snapshot the active_provider so a tool-config login never silently
-        # switches the user's inference provider to Nous.
+        # switches the user's inference provider to Nunmai.
         with _auth_store_lock():
             prior_active_provider = _load_auth_store().get("active_provider")
 
@@ -1445,7 +1445,7 @@ def _run_nous_portal_login_only(*, capability: str) -> bool:
         if shared:
             try:
                 do_import = input(
-                    "  Found existing Nous OAuth credentials. Import them? [Y/n]: "
+                    "  Found existing Nunmai OAuth credentials. Import them? [Y/n]: "
                 ).strip().lower()
             except (EOFError, KeyboardInterrupt):
                 do_import = "y"
@@ -1468,7 +1468,7 @@ def _run_nous_portal_login_only(*, capability: str) -> bool:
 
         _write_shared_nous_state(auth_state)
         _sync_nous_pool_from_auth_store()
-        print("  Nous Portal login successful.")
+        print("  Nunmai Portal login successful.")
         return True
     except KeyboardInterrupt:
         print("\n  Login cancelled.")
@@ -1478,5 +1478,5 @@ def _run_nous_portal_login_only(*, capability: str) -> bool:
         # it already printed billing guidance.
         return False
     except Exception as exc:
-        print(f"  Nous Portal login failed: {exc}")
+        print(f"  Nunmai Portal login failed: {exc}")
         return False

@@ -99,7 +99,7 @@ class TestDeepseekVSeriesPassThrough:
     and future ``deepseek-v<N>-*`` variants) are first-class model IDs
     accepted directly by DeepSeek's Chat Completions API. Earlier code
     folded every non-reasoner name into ``deepseek-chat``, which on
-    aggregators (Nous portal, OpenRouter via DeepInfra) routes to V3 —
+    aggregators (Nunmai portal, OpenRouter via DeepInfra) routes to V3 —
     silently downgrading users who picked V4.
     """
 

@@ -8,8 +8,8 @@ description: "Text-to-speech and voice message transcription across all platform
 
 Nunmai Engine supports both text-to-speech output and voice message transcription across all messaging platforms.
 
-:::tip Nous Subscribers
-If you have a paid [Nous Portal](https://portal.nousresearch.com) subscription, OpenAI TTS is available through the **[Tool Gateway](tool-gateway.md)** without a separate OpenAI API key. New installs can run `nunmai setup --portal` to log in and turn on every gateway tool at once; existing installs can pick **Nous Subscription** for just TTS via `nunmai model` or `nunmai tools`.
+:::tip Nunmai Subscribers
+If you have a paid [Nunmai Portal](https://portal.nousresearch.com) subscription, OpenAI TTS is available through the **[Tool Gateway](tool-gateway.md)** without a separate OpenAI API key. New installs can run `nunmai setup --portal` to log in and turn on every gateway tool at once; existing installs can pick **Nunmai Subscription** for just TTS via `nunmai model` or `nunmai tools`.
 :::
 
 ## Text-to-Speech
@@ -44,7 +44,7 @@ Convert text to speech with eleven providers:
 ```yaml
 # In ~/.nunmai/config.yaml
 tts:
-  provider: "edge"              # "edge" | "elevenlabs" | "openai" | "minimax" | "mistral" | "gemini" | "xai" | "deepinfra" | "neutts" | "kittentts" | "piper" — or "nous" for the managed Tool Gateway (written when you pick Nous Subscription in `nunmai tools`)
+  provider: "edge"              # "edge" | "elevenlabs" | "openai" | "minimax" | "mistral" | "gemini" | "xai" | "deepinfra" | "neutts" | "kittentts" | "piper" — or "nous" for the managed Tool Gateway (written when you pick Nunmai Subscription in `nunmai tools`)
   speed: 1.0                    # Global speed multiplier (provider-specific settings override this)
   edge:
     voice: "en-US-AriaNeural"   # 322 voices, 74 languages

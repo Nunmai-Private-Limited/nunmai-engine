@@ -101,7 +101,7 @@ def _list_auth_returning(rows: list[dict]):
 def _nous_row(model: str = "openai/gpt-5.5") -> dict:
     return {
         "slug": "nous",
-        "name": "Nous",
+        "name": "Nunmai",
         "models": [model],
         "total_models": 1,
         "is_current": True,
@@ -206,7 +206,7 @@ def test_explicit_only_filters_ambient_credentials_but_keeps_current_and_custom_
         {"slug": "copilot", "name": "Copilot", "models": ["gpt-5.4"],
          "total_models": 1, "is_current": False, "is_user_defined": False,
          "source": "nunmai"},
-        {"slug": "nous", "name": "Nous", "models": ["anthropic/claude-sonnet-5"],
+        {"slug": "nous", "name": "Nunmai", "models": ["anthropic/claude-sonnet-5"],
          "total_models": 1, "is_current": False, "is_user_defined": False,
          "source": "nunmai"},
         {"slug": "custom:lab", "name": "Lab", "models": ["lab-1"],

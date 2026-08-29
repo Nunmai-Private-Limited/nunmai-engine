@@ -1,7 +1,7 @@
 """Tests for inventory._apply_pricing — the pricing/tier enrichment that
 
 feeds the desktop GUI model picker (and onboarding) so it can show $/Mtok
-columns + Free/Pro badges and gate paid models on free Nous accounts, the
+columns + Free/Pro badges and gate paid models on free Nunmai accounts, the
 same way the `nunmai model` CLI picker does.
 """
 

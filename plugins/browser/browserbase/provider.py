@@ -6,7 +6,7 @@ ABC introduced in PR #25214). The legacy in-tree module
 is now the canonical implementation.
 
 Browserbase requires direct ``BROWSERBASE_API_KEY`` and ``BROWSERBASE_PROJECT_ID``
-credentials. Managed Nous gateway support has been removed — the Nous
+credentials. Managed Nunmai gateway support has been removed — the Nunmai
 subscription now routes through Browser Use instead (see
 ``plugins/browser/browser_use/``).
 

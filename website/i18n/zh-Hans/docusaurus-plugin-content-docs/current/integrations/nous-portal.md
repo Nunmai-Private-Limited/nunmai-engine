@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-title: "Nous Portal"
+title: "Nunmai Portal"
 description: "一个订阅，300+ 前沿模型，以及 Tool Gateway —— 运行 Nunmai Engine 的推荐方式"
 ---
 
-# Nous Portal
+# Nunmai Portal
 
-[Nous Portal](https://portal.nousresearch.com) 是 Nunmai Research 的统一订阅网关，也是**运行 Nunmai Engine 的推荐方式**。一次 OAuth 登录，即可替代原本需要手动配置的各模型厂商独立账号、API 密钥和计费关系。
+[Nunmai Portal](https://portal.nousresearch.com) 是 Nunmai Research 的统一订阅网关，也是**运行 Nunmai Engine 的推荐方式**。一次 OAuth 登录，即可替代原本需要手动配置的各模型厂商独立账号、API 密钥和计费关系。
 
 如果你只有时间配置一件事，就配置这个。最快路径：
 
@@ -14,7 +14,7 @@ description: "一个订阅，300+ 前沿模型，以及 Tool Gateway —— 运�
 nunmai setup --portal
 ```
 
-这条命令会完成 Portal OAuth 认证，让你选择一个 Nous 模型，在 `config.yaml` 中将 Nous 设为推理提供商，并开启 Tool Gateway。完成后即可立即运行 `nunmai chat`。
+这条命令会完成 Portal OAuth 认证，让你选择一个 Nunmai 模型，在 `config.yaml` 中将 Nunmai 设为推理提供商，并开启 Tool Gateway。完成后即可立即运行 `nunmai chat`。
 
 还没有订阅？前往 [portal.nousresearch.com/manage-subscription](https://portal.nousresearch.com/manage-subscription) 注册，然后回来运行上面的命令。
 
@@ -22,7 +22,7 @@ nunmai setup --portal
 
 ### 300+ 前沿模型，统一账单
 
-Portal 代理了来自整个生态系统的精选 agentic 模型目录——统一计入你的 Nous 订阅，而非每个厂商单独充值。
+Portal 代理了来自整个生态系统的精选 agentic 模型目录——统一计入你的 Nunmai 订阅，而非每个厂商单独充值。
 
 | 系列 | 模型 |
 |--------|--------|
@@ -38,15 +38,15 @@ Portal 代理了来自整个生态系统的精选 agentic 模型目录——统�
 | **Nunmai** | Hermes-4-70B、Hermes-4-405B（对话，见[下方说明](#a-note-on-hermes-4)） |
 | **+ 其他所有模型** | 240+ 额外模型——完整的 agentic 前沿生态 |
 
-底层上，Portal 会为每个模型选择最合适的后端——部分模型通过 OpenRouter 路由，其他模型则通过专有或备用提供商，且某个模型的路由方式可能随时间调整。所有用量都统一计入你的 Nous 订阅。在会话中途用 `/model` 即可在 Claude Sonnet 4.6（适合代码）和 Gemini 2.5 Pro（适合长上下文）之间切换——无需新凭证，无需充值，不会遇到余额为零的意外报错。
+底层上，Portal 会为每个模型选择最合适的后端——部分模型通过 OpenRouter 路由，其他模型则通过专有或备用提供商，且某个模型的路由方式可能随时间调整。所有用量都统一计入你的 Nunmai 订阅。在会话中途用 `/model` 即可在 Claude Sonnet 4.6（适合代码）和 Gemini 2.5 Pro（适合长上下文）之间切换——无需新凭证，无需充值，不会遇到余额为零的意外报错。
 
 :::note
 由于路由是按模型进行的，并非总是经过 OpenRouter，OpenRouter 专有的请求扩展（如 `provider` 路由偏好、`session_id` 粘性路由或顶层 `cache_control`）不属于 Portal 的 API 契约，可能会被忽略，具体取决于该模型由哪个后端提供服务。
 :::
 
-### Nous Tool Gateway
+### Nunmai Tool Gateway
 
-同一订阅还解锁了 [Tool Gateway](/user-guide/features/tool-gateway)，将 Nunmai Engine 的工具调用路由至 Nous 托管的基础设施。五个后端，一次登录：
+同一订阅还解锁了 [Tool Gateway](/user-guide/features/tool-gateway)，将 Nunmai Engine 的工具调用路由至 Nunmai 托管的基础设施。五个后端，一次登录：
 
 | 工具 | 合作方 | 功能说明 |
 |------|---------|--------------|
@@ -95,8 +95,8 @@ nunmai setup --portal
 
 1. 打开浏览器跳转至 portal.nousresearch.com 进行 OAuth 登录
 2. 将 refresh token 存储至 `~/.nunmai/auth.json`
-3. 让你从精选列表中选择一个 Nous 模型（也可跳过以保留当前模型）
-4. 在 `~/.nunmai/config.yaml` 中将 Nous 设为推理提供商（当你选择模型时）
+3. 让你从精选列表中选择一个 Nunmai 模型（也可跳过以保留当前模型）
+4. 在 `~/.nunmai/config.yaml` 中将 Nunmai 设为推理提供商（当你选择模型时）
 5. 开启 Tool Gateway（网页、图像、TTS、浏览器路由）
 6. 返回终端，即可运行 `nunmai chat`
 
@@ -108,7 +108,7 @@ nunmai setup --portal
 
 ```bash
 nunmai model
-# 从提供商列表中选择 "Nous Portal"
+# 从提供商列表中选择 "Nunmai Portal"
 # 浏览器打开，登录，完成
 ```
 
@@ -127,29 +127,29 @@ OAuth 需要浏览器，但回调的 loopback 运行在 Nunmai 所在的机器�
 ### 查看当前配置状态
 
 ```bash
-nunmai portal            # 登录 Nous Portal 并完成配置（一键引导）
+nunmai portal            # 登录 Nunmai Portal 并完成配置（一键引导）
 nunmai portal info       # 登录状态、订阅信息、模型与 gateway 路由
 nunmai portal tools      # 详细的 Tool Gateway 目录及每个工具的路由信息
 nunmai portal open       # 在浏览器中打开订阅管理页面
 ```
 
-`nunmai portal`（不带子命令）是 `nunmai auth add nous --type oauth` 的易记别名——它会登录、让你选择 Nous 模型、把 Nous 设为推理服务商，并提供 Tool Gateway 启用选项（与 `nunmai setup --portal` 等价，与首次快速设置走的是同一套 Nous 流程）。
+`nunmai portal`（不带子命令）是 `nunmai auth add nous --type oauth` 的易记别名——它会登录、让你选择 Nunmai 模型、把 Nunmai 设为推理服务商，并提供 Tool Gateway 启用选项（与 `nunmai setup --portal` 等价，与首次快速设置走的是同一套 Nunmai 流程）。
 
 `nunmai portal info` 给出高层概览：
 
 ```
-  Nous Portal
+  Nunmai Portal
   ───────────
   Auth:    ✓ logged in
   Portal:  https://portal.nousresearch.com
-  Model:   ✓ using Nous as inference provider
+  Model:   ✓ using Nunmai as inference provider
 
   Tool Gateway
   ────────────
-  Web search & extract  via Nous Portal
-  Image generation      via Nous Portal
-  Text-to-speech        via Nous Portal
-  Browser automation    via Nous Portal
+  Web search & extract  via Nunmai Portal
+  Image generation      via Nunmai Portal
+  Text-to-speech        via Nunmai Portal
+  Browser automation    via Nunmai Portal
   Cloud terminal        not configured
 ```
 
@@ -178,14 +178,14 @@ nunmai model
 
 ### 将 gateway 与自有后端混用
 
-如果你已有 Browserbase 账号并希望继续使用，同时通过 Nous 路由网页搜索和图像生成，这是支持的。使用 `nunmai tools` 为每个工具单独选择后端：
+如果你已有 Browserbase 账号并希望继续使用，同时通过 Nunmai 路由网页搜索和图像生成，这是支持的。使用 `nunmai tools` 为每个工具单独选择后端：
 
 ```bash
 nunmai tools
-# → 网页搜索       → "Nous Subscription"
-# → 图像生成       → "Nous Subscription"
+# → 网页搜索       → "Nunmai Subscription"
+# → 图像生成       → "Nunmai Subscription"
 # → 浏览器         → "Browserbase"（你的现有密钥）
-# → TTS            → "Nous Subscription"
+# → TTS            → "Nunmai Subscription"
 ```
 
 Tool Gateway 是按工具单独选择启用的，而非全部或全不。完整的每工具配置矩阵请参阅 [Tool Gateway 文档](/user-guide/features/tool-gateway)。
@@ -242,7 +242,7 @@ Nunmai 在每次推理调用时从存储的 Portal refresh token 生成短期 JW
 nunmai portal
 ```
 
-或使用 `nunmai model` 重新选择 Nous Portal。
+或使用 `nunmai model` 重新选择 Nunmai Portal。
 
 ### 会话中途收到"需要重新认证"提示
 
@@ -260,7 +260,7 @@ Portal 会为每个模型选择合适的后端——部分模型通过 OpenRoute
 
 ### 账单未出现在我的 Portal 账号中
 
-先检查 `nunmai portal info`——如果显示你正在使用其他提供商（`Model: currently openrouter` 而非 `using Nous as inference provider`），说明本地配置已偏离。运行 `nunmai model`，选择 Nous Portal，下一次请求将通过你的订阅路由。
+先检查 `nunmai portal info`——如果显示你正在使用其他提供商（`Model: currently openrouter` 而非 `using Nunmai as inference provider`），说明本地配置已偏离。运行 `nunmai model`，选择 Nunmai Portal，下一次请求将通过你的订阅路由。
 
 ## 另请参阅
 

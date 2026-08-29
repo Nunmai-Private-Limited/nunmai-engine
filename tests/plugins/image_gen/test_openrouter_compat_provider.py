@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the OpenRouter-compatible image gen provider (OpenRouter + Nous)."""
+"""Tests for the OpenRouter-compatible image gen provider (OpenRouter + Nunmai)."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ class TestProviderClass:
 
         by_name = {p.name: p for p in _build_providers()}
         assert by_name["openrouter"].display_name == "OpenRouter"
-        assert by_name["nous"].display_name == "Nous Portal"
+        assert by_name["nous"].display_name == "Nunmai Portal"
 
     def test_capabilities_support_image_input(self):
         caps = _openrouter().capabilities()
@@ -240,7 +240,7 @@ class TestLiveCatalog:
         assert len(ids) == len(set(ids))                   # deduped
 
     def test_nous_portal_picker_excludes_image_api_catalog(self):
-        """Nous Portal has no /images route; its picker must not offer
+        """Nunmai Portal has no /images route; its picker must not offer
         Image-API-only models it cannot serve."""
         from plugins.image_gen.openrouter import _build_providers
 
@@ -381,7 +381,7 @@ class TestGenerate:
         assert mock_post.call_args.kwargs["json"]["model"] == "openai/gpt-image-2"
 
     def test_posts_to_resolved_base_url(self):
-        """Nous routes to its own base URL — proves the same code serves both."""
+        """Nunmai routes to its own base URL — proves the same code serves both."""
         nous_runtime = _runtime_ok(
             provider="nous", base_url="https://inference.nousresearch.com/v1", api_key="nous-tok"
         )
@@ -572,7 +572,7 @@ class TestImageApiSurface:
         assert mock_post.call_args[0][0].endswith("/chat/completions")
 
     def test_nous_never_uses_the_image_api(self):
-        """Nous Portal proxies chat-completions and has no /images route."""
+        """Nunmai Portal proxies chat-completions and has no /images route."""
         from plugins.image_gen.openrouter import _build_providers
 
         nous_runtime = _runtime_ok(

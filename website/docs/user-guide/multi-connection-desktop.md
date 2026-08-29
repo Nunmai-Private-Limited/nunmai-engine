@@ -100,7 +100,7 @@ does not switch the current workspace.
        - **Session token** — paste the dashboard session token from the
          remote gateway. When editing, *"Leave blank to keep the saved
          token."*
-       - **OAuth** — sign in through the Nous Portal browser flow; no token
+       - **OAuth** — sign in through the Nunmai Portal browser flow; no token
          to paste.
    - *SSH only:*
      - **SSH host** — one composite field in `user@host:22` form (user and

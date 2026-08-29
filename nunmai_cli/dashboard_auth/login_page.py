@@ -7,7 +7,7 @@ registry; clicking a provider sends a GET to
 Visual styling mirrors the Nunmai Research design system (the
 ``@nous-research/ui`` package the React dashboard uses): the same
 ``Collapse`` / ``Rules Compressed`` typeface, amber-on-dark colour
-tokens (``#170d02`` / ``#ffac02`` / ``#fff``), uppercase + wide-tracking
+tokens (``#052819`` / ``#6BE7C8`` / ``#EFE9D7`` — the nunmai.in palette), uppercase + wide-tracking
 brand chrome, and the inset-bevel button shadow. Fonts are served
 out of the SPA's ``/fonts/`` directory which the dashboard-auth gate
 already allowlists pre-auth (see ``_GATE_PUBLIC_PREFIXES`` in
@@ -71,12 +71,12 @@ _LOGIN_HTML_TEMPLATE = """\
   }}
 
   :root {{
-    --background-base: #170d02;
-    --background: #170d02;
-    --midground: #ffac02;
-    --foreground: #ffffff;
-    --hairline: color-mix(in srgb, #ffac02 18%, transparent);
-    --hairline-strong: color-mix(in srgb, #ffac02 35%, transparent);
+    --background-base: #052819;
+    --background: #052819;
+    --midground: #6BE7C8;
+    --foreground: #EFE9D7;
+    --hairline: color-mix(in srgb, #6BE7C8 18%, transparent);
+    --hairline-strong: color-mix(in srgb, #6BE7C8 35%, transparent);
   }}
 
   *, *::before, *::after {{ box-sizing: border-box; }}
@@ -133,6 +133,8 @@ _LOGIN_HTML_TEMPLATE = """\
     main {{ animation: none; }}
   }}
 
+  .logo {{ text-align: center; margin-bottom: 0.9rem; }}
+  .logo svg {{ display: inline-block; filter: drop-shadow(0 0 12px color-mix(in srgb, #6BE7C8 35%, transparent)); }}
   /* Brand wordmark above the card — same uppercase + wide-tracking
      idiom DS Buttons use. */
   .brand {{
@@ -302,7 +304,8 @@ _LOGIN_HTML_TEMPLATE = """\
 </head>
 <body>
 <main>
-  <div class="brand">Nous<span class="dot"></span>Research</div>
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 120 120" width="56" height="56" xmlns="http://www.w3.org/2000/svg"><path fill="#EFE9D7" d="M60 18c-14.4 0-26.1 11.7-26.1 26.1 0 7.8 3.7 18.3 9.4 26.8 5.4 8 11.8 13 16.7 13 3.5 0 9.9-4.1 16.2-13.1 6-8.7 9.9-19.2 9.9-26.7C86.1 29.7 74.4 18 60 18m0 85.9c-6.6 0-13.1-2.3-19.4-6.9-5.1-3.7-9.7-8.7-13.9-15-8-11.9-12.8-26.1-12.8-38 0-12.3 4.8-23.9 13.5-32.6S47.7-1.9 60-1.9s23.9 4.8 32.6 13.3 13.5 20.3 13.5 32.6c0 11.7-5 25.9-13.4 38.1-4.2 6-8.9 11.1-13.8 14.8-6.2 4.7-12.6 7-18.9 7"/></svg></div>
+  <div class="brand">Nunmai<span class="dot"></span>Research</div>
   <div class="card">
     <h1>Sign in</h1>
     <p class="subtitle">Choose a sign-in method to continue to the Nunmai Engine dashboard.</p>
@@ -342,10 +345,10 @@ _EMPTY_HTML = """\
     src: url('/fonts/RulesCompressed-Medium.woff2') format('woff2');
   }
   :root {
-    --background-base: #170d02;
-    --midground: #ffac02;
-    --foreground: #ffffff;
-    --hairline: color-mix(in srgb, #ffac02 18%, transparent);
+    --background-base: #052819;
+    --midground: #6BE7C8;
+    --foreground: #EFE9D7;
+    --hairline: color-mix(in srgb, #6BE7C8 18%, transparent);
   }
   *, *::before, *::after { box-sizing: border-box; }
   html, body {

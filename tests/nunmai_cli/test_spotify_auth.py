@@ -117,7 +117,7 @@ def test_resolve_credentials_quarantines_dead_tokens_on_terminal_refresh_failure
     """Terminal refresh failure (relogin_required=True + refresh_token present)
     must clear access_token/refresh_token/expires_* from auth.json and write a
     last_auth_error marker so subsequent calls fail fast without a network retry.
-    Mirrors Nous / xAI-OAuth / Codex-OAuth / MiniMax quarantine pattern.
+    Mirrors Nunmai / xAI-OAuth / Codex-OAuth / MiniMax quarantine pattern.
     """
     monkeypatch.setenv("NUNMAI_HOME", str(tmp_path))
     _seed_spotify_state(tmp_path, dict(_STALE_SPOTIFY_STATE))

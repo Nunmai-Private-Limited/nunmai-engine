@@ -1,6 +1,6 @@
 """Regression tests for the ``auto`` → main-model-first policy.
 
-Prior to this change, aggregator users (OpenRouter / Nous Portal) had aux
+Prior to this change, aggregator users (OpenRouter / Nunmai Portal) had aux
 tasks routed through a cheap provider-side default (Gemini Flash) while
 non-aggregator users got their main model.  This made behavior inconsistent
 and surprising — users picked Claude but got Gemini Flash summaries.
@@ -281,7 +281,7 @@ class TestResolveVisionMainFirst:
 
     @staticmethod
     def _stub_nous_portal(seen: dict):
-        """Stub the Nous network boundary, keeping the resolution chain real.
+        """Stub the Nunmai network boundary, keeping the resolution chain real.
 
         Returns a ``_try_nous`` replacement that answers with the Portal's
         tier-aware slots: a vision model for ``vision=True``, the text chat
@@ -300,11 +300,11 @@ class TestResolveVisionMainFirst:
         return nous_client, fake_try_nous
 
     def test_nous_main_vision_uses_portal_pick_not_text_chat_model(self):
-        """Nous main → vision runs the Portal's vision slot, not the chat model.
+        """Nunmai main → vision runs the Portal's vision slot, not the chat model.
 
-        A Nous chat default is routinely text-only (e.g. a ``:free`` chat SKU).
+        A Nunmai chat default is routinely text-only (e.g. a ``:free`` chat SKU).
         Letting it reach the vision lane means the image goes to a model that
-        cannot accept one and the Portal 404s. Only the Nous network boundary
+        cannot accept one and the Portal 404s. Only the Nunmai network boundary
         is stubbed — the strict vision backend, the provider router, and its
         missing-model pre-fill all run for real, because that pre-fill is where
         the chat model used to clobber the Portal's pick.
@@ -383,7 +383,7 @@ class TestResolveVisionMainFirst:
     def test_nous_text_aux_still_uses_main_chat_model(self):
         """The vision carve-out must not leak into text aux resolution.
 
-        Text auxiliary work on a Nous main deliberately keeps the user's chat
+        Text auxiliary work on a Nunmai main deliberately keeps the user's chat
         model rather than dropping to the Portal's cheap default.
         """
         seen: dict = {}
@@ -494,7 +494,7 @@ class TestResolveVisionCustomProvider:
     Regression: a ``custom:<name>`` main provider resolves to the bare
     runtime provider id ``"custom"``.  ``resolve_provider_client("custom")``
     has no built-in endpoint, so without forwarding the live base_url/api_key
-    it returns ``(None, None)`` and vision falls through to OpenRouter / Nous,
+    it returns ``(None, None)`` and vision falls through to OpenRouter / Nunmai,
     which an offline / aggregator-less user has never configured — breaking
     vision entirely with ``No LLM provider configured for task=vision
     provider=auto``.  The fix recovers the live endpoint that

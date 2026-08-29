@@ -1,7 +1,7 @@
 """Unit tests for scripts/docker_rebootstrap_nous_session.py.
 
 The boot-time re-seed is the load-bearing "does not clobber a healthy session"
-guard: it may overwrite the on-disk Nous provider entry when that entry is
+guard: it may overwrite the on-disk Nunmai provider entry when that entry is
 provably terminal (quarantine marker + no usable tokens), or when an
 orchestrator seed is demonstrably newer. Older/incomparable seeds must no-op.
 These are pure-stdlib tmp_path tests (no container build).

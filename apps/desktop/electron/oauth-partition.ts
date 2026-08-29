@@ -26,7 +26,7 @@
  *     LEGACY shared partition, so existing signed-in users are not signed out
  *     by the upgrade.
  *   - `cloud` entries stay on the legacy partition: the silent per-agent
- *     cascade deliberately shares one jar with the Nous Portal session.
+ *     cascade deliberately shares one jar with the Nunmai Portal session.
  *   - Token-auth remotes, portal URLs, and anything unmatched or malformed
  *     fall back to the legacy partition (cookie-free flows are unaffected).
  *

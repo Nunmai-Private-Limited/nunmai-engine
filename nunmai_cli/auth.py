@@ -1,7 +1,7 @@
 """
 Multi-provider authentication system for Nunmai Engine.
 
-Supports OAuth device code flows (Nous Portal, future: OpenAI Codex) and
+Supports OAuth device code flows (Nunmai Portal, future: OpenAI Codex) and
 traditional API key providers (OpenRouter, custom endpoints). Auth state
 is persisted in ~/.nunmai/auth.json with cross-process file locking.
 
@@ -12,7 +12,7 @@ Architecture:
 - resolve_*_runtime_credentials() handles token refresh and runtime keys
 - logout_command() is the CLI entry point for clearing auth
 
-Nous authentication paths:
+Nunmai authentication paths:
 - Invoke JWT (preferred): use a scoped access_token directly for inference.
 """
 
@@ -109,7 +109,7 @@ except Exception:
 AUTH_STORE_VERSION = 1
 AUTH_LOCK_TIMEOUT_SECONDS = 15.0
 
-# Nous Portal defaults
+# Nunmai Portal defaults
 DEFAULT_NOUS_PORTAL_URL = "https://portal.nousresearch.com"
 DEFAULT_NOUS_INFERENCE_URL = "https://inference-api.nousresearch.com/v1"
 DEFAULT_NOUS_CLIENT_ID = "nunmai-cli"
@@ -249,7 +249,7 @@ class ProviderConfig:
 PROVIDER_REGISTRY: Dict[str, ProviderConfig] = {
     "nous": ProviderConfig(
         id="nous",
-        name="Nous Portal",
+        name="Nunmai Portal",
         auth_type="oauth_device_code",
         portal_base_url=DEFAULT_NOUS_PORTAL_URL,
         inference_base_url=DEFAULT_NOUS_INFERENCE_URL,
@@ -1074,13 +1074,13 @@ def _format_nous_entitlement_auth_error(error: AuthError) -> str:
         account_info = get_nous_portal_account_info(force_fresh=True)
         message = format_nous_portal_entitlement_message(
             account_info,
-            capability="Nous model access",
+            capability="Nunmai model access",
         )
         if message:
             return message
     except Exception:
         pass
-    return f"{error} Check credits or billing in Nous Portal, then retry."
+    return f"{error} Check credits or billing in Nunmai Portal, then retry."
 
 
 def _token_fingerprint(token: Any) -> Optional[str]:
@@ -1256,7 +1256,7 @@ def _file_lock(
     Reentrant per-thread via ``holder.depth``. Falls back to a depth-only
     guard when neither ``fcntl`` nor ``msvcrt`` is available (rare).
     Callers supply their own ``threading.local`` so independent locks
-    (e.g. profile auth.json vs shared Nous store) don't share reentrancy
+    (e.g. profile auth.json vs shared Nunmai store) don't share reentrancy
     state — that would let one lock's reentrant acquisition silently skip
     the other's kernel-level flock.
     """
@@ -1330,7 +1330,7 @@ def _auth_store_lock(
 
     Lock ordering invariant: when this lock is held together with
     ``_nous_shared_store_lock``, acquire ``_auth_store_lock`` FIRST
-    (outer) and the shared Nous lock SECOND (inner). All runtime
+    (outer) and the shared Nunmai lock SECOND (inner). All runtime
     refresh paths follow this order; violating it risks deadlock
     against a concurrent import on the shared store.
     """
@@ -1478,7 +1478,7 @@ def _load_provider_state_with_source(
     Most callers only need the state, but refresh paths that rotate single-use
     OAuth refresh tokens must write the updated token chain back to the same
     store they read. In profile mode ``_load_provider_state`` can read a
-    global-root fallback state; persisting a rotated Nous refresh token only to
+    global-root fallback state; persisting a rotated Nunmai refresh token only to
     the profile would leave the global/root store stale and cause the next
     process to replay an already-consumed refresh token.
     """
@@ -1927,7 +1927,7 @@ def get_provider_auth_state(provider_id: str) -> Optional[Dict[str, Any]]:
     ``read_credential_pool``'s per-provider shadowing semantics so that
     ``_seed_from_singletons`` can reseed a profile's credential pool from
     global-scope provider state (e.g. a globally-authenticated Anthropic
-    OAuth or Nous device-code session). See issue #18594 follow-up.
+    OAuth or Nunmai device-code session). See issue #18594 follow-up.
     """
     auth_store = _load_auth_store()
     return _load_provider_state(auth_store, provider_id)
@@ -2465,7 +2465,7 @@ _NOUS_STALE_PORTAL_HOSTS: FrozenSet[str] = frozenset({
     "api.nousresearch.com",
 })
 
-# Allowlist of valid Nous Portal hosts. A portal_base_url outside this
+# Allowlist of valid Nunmai Portal hosts. A portal_base_url outside this
 # set is treated as a misconfiguration and falls back to the default.
 # "localhost" / "127.0.0.1" are valid for local development and testing.
 _NOUS_PORTAL_ALLOWED_HOSTS: FrozenSet[str] = frozenset({
@@ -2490,7 +2490,7 @@ def _migrate_stale_nous_portal_url(providers: Dict[str, Any]) -> None:
             nous["portal_base_url"] = DEFAULT_NOUS_PORTAL_URL
 
 
-# Allowlist of hosts the Nous Portal proxy is willing to forward inference
+# Allowlist of hosts the Nunmai Portal proxy is willing to forward inference
 # JWTs to. Sending a bearer anywhere else would leak it.
 #
 # This is consulted only for URLs coming from the NETWORK side (Portal
@@ -2568,7 +2568,7 @@ def _nous_portal_env_override() -> Optional[str]:
 
     Mirrors ``_nous_inference_env_override()``: ``NUNMAI_PORTAL_BASE_URL`` /
     ``NOUS_PORTAL_BASE_URL`` are the documented dev/staging escape hatch for
-    pointing Nunmai at a non-production Nous Portal (e.g. a hosted agent
+    pointing Nunmai at a non-production Nunmai Portal (e.g. a hosted agent
     provisioned on nous-account-service's `staging` environment, which stamps
     ``NUNMAI_PORTAL_BASE_URL=https://portal.staging-nousresearch.com`` into
     the container env). The env source is trusted (the OS user/deployment
@@ -2675,7 +2675,7 @@ def _assert_nous_inference_jwt_usable(
     if reason is None:
         return
     raise AuthError(
-        "Nous Portal access token is not a usable inference JWT "
+        "Nunmai Portal access token is not a usable inference JWT "
         f"({reason}). Re-authenticate with: nunmai auth add nous",
         provider="nous",
         code=reason,
@@ -2688,7 +2688,7 @@ def _log_nous_invoke_jwt_selected(
     access_token: Any,
     sequence_id: Optional[str] = None,
 ) -> None:
-    logger.debug("Nous inference auth: using NAS invoke JWT")
+    logger.debug("Nunmai inference auth: using NAS invoke JWT")
     _oauth_trace(
         "nous_invoke_jwt_selected",
         sequence_id=sequence_id,
@@ -3411,7 +3411,7 @@ def resolve_spotify_runtime_credentials(
                 if exc.relogin_required and state.get("refresh_token"):
                     # Terminal refresh failure — clear dead tokens from auth.json
                     # so subsequent calls fail fast without a network retry.
-                    # Mirrors the Nous / xAI-OAuth / Codex-OAuth / MiniMax pattern.
+                    # Mirrors the Nunmai / xAI-OAuth / Codex-OAuth / MiniMax pattern.
                     for _k in ("access_token", "refresh_token", "expires_at", "expires_in", "obtained_at"):
                         state.pop(_k, None)
                     state["last_auth_error"] = {
@@ -5394,7 +5394,7 @@ def _request_device_code(
 
 
 def _nous_device_auth_timeout_message(portal_base_url: str) -> str:
-    """Actionable timeout text for Nous device-code login failures.
+    """Actionable timeout text for Nunmai device-code login failures.
 
     A bare "Timed out waiting for device authorization" gives the user
     nothing to act on. The most common cause is Portal sign-in failing in
@@ -5465,11 +5465,11 @@ def _poll_for_token(
 
 
 # =============================================================================
-# Nous Portal — token refresh and model discovery
+# Nunmai Portal — token refresh and model discovery
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Shared Nous token store — lets OAuth credentials persist across profiles
+# Shared Nunmai token store — lets OAuth credentials persist across profiles
 # so a new `nunmai --profile <name> auth add nous --type oauth` can one-tap
 # import instead of running the full device-code flow every time.
 #
@@ -5492,7 +5492,7 @@ _nous_shared_lock_holder = threading.local()
 
 
 def _nous_shared_auth_dir() -> Path:
-    """Resolve the directory that holds the shared Nous token store.
+    """Resolve the directory that holds the shared Nunmai token store.
 
     Honors ``NUNMAI_SHARED_AUTH_DIR`` so tests can redirect it to a tmp
     path without touching the real user's home. Defaults to
@@ -5530,7 +5530,7 @@ def _nous_shared_store_path() -> Path:
             resolved = path
         if resolved == real_home_shared:
             raise RuntimeError(
-                f"Refusing to touch real user shared Nous auth store during test run: "
+                f"Refusing to touch real user shared Nunmai auth store during test run: "
                 f"{path}. Set NUNMAI_SHARED_AUTH_DIR to a tmp_path in your test fixture."
             )
     return path
@@ -5538,7 +5538,7 @@ def _nous_shared_store_path() -> Path:
 
 @contextmanager
 def _nous_shared_store_lock(timeout_seconds: float = AUTH_LOCK_TIMEOUT_SECONDS):
-    """Cross-profile lock for the shared Nous OAuth store.
+    """Cross-profile lock for the shared Nunmai OAuth store.
 
     Lock ordering invariant: if both this and ``_auth_store_lock`` need
     to be held, acquire ``_auth_store_lock`` FIRST. All runtime refresh
@@ -5559,13 +5559,13 @@ def _nous_shared_store_lock(timeout_seconds: float = AUTH_LOCK_TIMEOUT_SECONDS):
         lock_path,
         _nous_shared_lock_holder,
         timeout_seconds,
-        "Timed out waiting for shared Nous auth lock",
+        "Timed out waiting for shared Nunmai auth lock",
     ):
         yield
 
 
 def _merge_shared_nous_oauth_state(state: Dict[str, Any]) -> bool:
-    """Copy fresher shared OAuth tokens into a profile-local Nous state."""
+    """Copy fresher shared OAuth tokens into a profile-local Nunmai state."""
     shared = _read_shared_nous_state()
     if not shared:
         return False
@@ -5600,7 +5600,7 @@ def _merge_shared_nous_oauth_state(state: Dict[str, Any]) -> bool:
 
 
 def _write_shared_nous_state(state: Dict[str, Any]) -> None:
-    """Persist a minimal copy of the Nous OAuth state to the shared store.
+    """Persist a minimal copy of the Nunmai OAuth state to the shared store.
 
     Best-effort: any failure is swallowed after logging. The shared store
     is a convenience layer; the per-profile auth.json remains the source
@@ -5639,7 +5639,7 @@ def _write_shared_nous_state(state: Dict[str, Any]) -> None:
             secure_parent_dir(path)
             tmp = path.with_name(f"{path.name}.tmp.{os.getpid()}.{uuid.uuid4().hex}")
             # Create with 0o600 atomically via os.open(O_EXCL) — closes the TOCTOU
-            # window where write_text() + post-write chmod briefly exposed Nous
+            # window where write_text() + post-write chmod briefly exposed Nunmai
             # refresh_token at process umask. See #19673, #21148.
             fd = os.open(
                 str(tmp),
@@ -5664,11 +5664,11 @@ def _write_shared_nous_state(state: Dict[str, Any]) -> None:
             refresh_token_fp=_token_fingerprint(refresh_token),
         )
     except Exception as exc:
-        logger.debug("Failed to write shared Nous auth store: %s", exc)
+        logger.debug("Failed to write shared Nunmai auth store: %s", exc)
 
 
 def _read_shared_nous_state() -> Optional[Dict[str, Any]]:
-    """Return the shared Nous OAuth state if present and well-formed.
+    """Return the shared Nunmai OAuth state if present and well-formed.
 
     Returns ``None`` when the file is missing, unreadable, malformed, or
     lacks required fields. Callers should treat ``None`` as "no shared
@@ -5684,7 +5684,7 @@ def _read_shared_nous_state() -> Optional[Dict[str, Any]]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8-sig"))
     except (OSError, ValueError) as exc:
-        logger.debug("Shared Nous auth store at %s is unreadable: %s", path, exc)
+        logger.debug("Shared Nunmai auth store at %s is unreadable: %s", path, exc)
         return None
     if not isinstance(payload, dict):
         return None
@@ -5698,7 +5698,7 @@ def _read_shared_nous_state() -> Optional[Dict[str, Any]]:
 
 
 def _clear_shared_nous_state(reason: str) -> None:
-    """Remove the shared Nous OAuth store after a terminal token failure."""
+    """Remove the shared Nunmai OAuth store after a terminal token failure."""
     try:
         with _nous_shared_store_lock():
             path = _nous_shared_store_path()
@@ -5708,11 +5708,11 @@ def _clear_shared_nous_state(reason: str) -> None:
                 pass
         _oauth_trace("nous_shared_store_cleared", reason=reason)
     except Exception as exc:
-        logger.debug("Failed to clear shared Nous auth store: %s", exc)
+        logger.debug("Failed to clear shared Nunmai auth store: %s", exc)
 
 
 def _is_terminal_nous_refresh_error(exc: Exception) -> bool:
-    """True when retrying the same Nous refresh token cannot succeed."""
+    """True when retrying the same Nunmai refresh token cannot succeed."""
     return (
         isinstance(exc, AuthError)
         and exc.provider == "nous"
@@ -5781,7 +5781,7 @@ def _quarantine_nous_oauth_state(
     forensic: Dict[str, Any] = {
         "reason": reason,
         "error_code": error.code,
-        # No session_id field exists on Nous state; provenance is client_id +
+        # No session_id field exists on Nunmai state; provenance is client_id +
         # agent_key_id (both non-secret routing identifiers).
         "client_id": state.get("client_id"),
         "agent_key_id": state.get("agent_key_id"),
@@ -5816,7 +5816,7 @@ def _quarantine_nous_oauth_state(
     forensic["token_already_expired"] = already_expired
 
     logger.warning(
-        "Nous OAuth state quarantined (terminal auth death): %s",
+        "Nunmai OAuth state quarantined (terminal auth death): %s",
         json.dumps(forensic, sort_keys=True, ensure_ascii=False),
     )
 
@@ -5852,7 +5852,7 @@ def _quarantine_nous_pool_entries(
     *,
     reason: str,
 ) -> bool:
-    """Remove singleton-seeded Nous pool entries that contain dead OAuth state."""
+    """Remove singleton-seeded Nunmai pool entries that contain dead OAuth state."""
     pool = auth_store.get("credential_pool")
     if not isinstance(pool, dict):
         return False
@@ -5883,7 +5883,7 @@ def _try_import_shared_nous_state(
     *,
     timeout_seconds: float = 15.0,
 ) -> Optional[Dict[str, Any]]:
-    """Attempt to rehydrate Nous OAuth state from the shared store.
+    """Attempt to rehydrate Nunmai OAuth state from the shared store.
 
     Reads the shared file (if present), runs a forced refresh using the
     stored refresh_token to produce a fresh inference JWT scoped to this
@@ -5937,14 +5937,14 @@ def _try_import_shared_nous_state(
         )
         if _is_terminal_nous_refresh_error(exc):
             _clear_shared_nous_state("shared_import_terminal_refresh_failure")
-        logger.debug("Shared Nous import failed: %s", exc)
+        logger.debug("Shared Nunmai import failed: %s", exc)
         return None
     except Exception as exc:
         _oauth_trace(
             "nous_shared_import_failed",
             error_type=type(exc).__name__,
         )
-        logger.debug("Shared Nous import failed: %s", exc)
+        logger.debug("Shared Nunmai import failed: %s", exc)
         return None
 
     return refreshed
@@ -5983,7 +5983,7 @@ def _refresh_access_token(
     description = str(error_payload.get("error_description") or "Refresh token exchange failed")
     relogin = code in {"invalid_grant", "invalid_token", "refresh_token_reused"}
 
-    # Detect the OAuth 2.1 "refresh token reuse" signal from the Nous portal
+    # Detect the OAuth 2.1 "refresh token reuse" signal from the Nunmai portal
     # server and surface an actionable message.  This fires when an external
     # process (health-check script, monitoring tool, custom self-heal hook)
     # called POST /api/oauth/token with Nunmai's refresh_token without
@@ -5993,12 +5993,12 @@ def _refresh_access_token(
     lowered = description.lower()
     if code == "refresh_token_reused" or "reuse" in lowered or "reuse detected" in lowered:
         description = (
-            "Nous Portal detected refresh-token reuse and revoked this session.\n"
+            "Nunmai Portal detected refresh-token reuse and revoked this session.\n"
             "This usually means an external process (monitoring script, "
             "custom self-heal hook, or another Nunmai install sharing "
             "~/.nunmai/auth.json) called POST /api/oauth/token with Nunmai's "
             "refresh token without persisting the rotated token back.\n"
-            "Nous refresh tokens are single-use — only Nunmai may call the "
+            "Nunmai refresh tokens are single-use — only Nunmai may call the "
             "refresh endpoint. For health checks, use `nunmai auth status` "
             "instead.\n"
             "Re-authenticate with: nunmai auth add nous"
@@ -6015,7 +6015,7 @@ def fetch_nous_models(
     timeout_seconds: float = 15.0,
     verify: bool | str = True,
 ) -> List[str]:
-    """Fetch available model IDs from the Nous inference API."""
+    """Fetch available model IDs from the Nunmai inference API."""
     timeout = httpx.Timeout(timeout_seconds)
     with httpx.Client(timeout=timeout, headers={"Accept": "application/json"}, verify=verify) as client:
         response = client.get(
@@ -6096,7 +6096,7 @@ def resolve_nous_access_token(
     ca_bundle: Optional[str] = None,
     refresh_skew_seconds: int = ACCESS_TOKEN_REFRESH_SKEW_SECONDS,
 ) -> str:
-    """Resolve a refresh-aware Nous Portal access token for managed tool gateways."""
+    """Resolve a refresh-aware Nunmai Portal access token for managed tool gateways."""
     global _RESOLVE_TOKEN_CACHE
     # Memo: collapse the startup burst of managed-tool check_fns into one
     # network refresh. Only cache a successful, non-forced resolution for a
@@ -6115,7 +6115,7 @@ def resolve_nous_access_token(
 
         if not state:
             raise AuthError(
-                "Nunmai is not logged into Nous Portal.",
+                "Nunmai is not logged into Nunmai Portal.",
                 provider="nous",
                 relogin_required=True,
             )
@@ -6153,7 +6153,7 @@ def resolve_nous_access_token(
             refresh_token = state.get("refresh_token")
             if not isinstance(access_token, str) or not access_token:
                 raise AuthError(
-                    "No access token found for Nous Portal login.",
+                    "No access token found for Nunmai Portal login.",
                     provider="nous",
                     relogin_required=True,
                 )
@@ -6253,7 +6253,7 @@ def refresh_nous_oauth_pure(
     force_refresh: bool = False,
     on_state_update: Optional[Callable[[Dict[str, Any], str], None]] = None,
 ) -> Dict[str, Any]:
-    """Refresh Nous OAuth state without mutating auth.json directly.
+    """Refresh Nunmai OAuth state without mutating auth.json directly.
 
     ``on_state_update`` is called after a successful access-token refresh.
     Callers that own persistent state can use it to save the newly rotated
@@ -6290,7 +6290,7 @@ def refresh_nous_oauth_pure(
             if not isinstance(refresh_token_value, str) or not refresh_token_value:
                 if current_invoke_jwt_status is not None:
                     raise AuthError(
-                        "Nous Portal access token is not a usable inference JWT "
+                        "Nunmai Portal access token is not a usable inference JWT "
                         f"({current_invoke_jwt_status}) and no refresh token is available. "
                         "Re-authenticate with: nunmai auth add nous",
                         provider="nous",
@@ -6298,7 +6298,7 @@ def refresh_nous_oauth_pure(
                         relogin_required=True,
                     )
                 raise AuthError(
-                    "No refresh token is available for Nous Portal.",
+                    "No refresh token is available for Nunmai Portal.",
                     provider="nous",
                     relogin_required=True,
                 )
@@ -6344,7 +6344,7 @@ def refresh_nous_oauth_from_state(
     force_refresh: bool = False,
     on_state_update: Optional[Callable[[Dict[str, Any], str], None]] = None,
 ) -> Dict[str, Any]:
-    """Refresh Nous OAuth from a state dict. Thin wrapper around refresh_nous_oauth_pure."""
+    """Refresh Nunmai OAuth from a state dict. Thin wrapper around refresh_nous_oauth_pure."""
     tls = state.get("tls") or {}
     return refresh_nous_oauth_pure(
         state.get("access_token", ""),
@@ -6371,10 +6371,10 @@ def persist_nous_credentials(
     *,
     label: Optional[str] = None,
 ):
-    """Persist Nous OAuth credentials as the singleton provider state
+    """Persist Nunmai OAuth credentials as the singleton provider state
     and ensure the credential pool is in sync.
 
-    Nous credentials are read at runtime from two independent locations:
+    Nunmai credentials are read at runtime from two independent locations:
 
     - ``providers.nous``: singleton state read by
       ``resolve_nous_runtime_credentials()`` during 401 recovery and by
@@ -6432,7 +6432,7 @@ def _sync_nous_pool_from_auth_store() -> None:
 
         load_pool("nous")
     except Exception as exc:
-        logger.debug("Failed to sync Nous credential pool from auth store: %s", exc)
+        logger.debug("Failed to sync Nunmai credential pool from auth store: %s", exc)
 
 
 def resolve_nous_runtime_credentials(
@@ -6443,7 +6443,7 @@ def resolve_nous_runtime_credentials(
     force_refresh: bool = False,
 ) -> Dict[str, Any]:
     """
-    Resolve Nous inference credentials for runtime use.
+    Resolve Nunmai inference credentials for runtime use.
 
     Ensures access_token is a valid inference-scoped JWT, refreshing it when
     needed. Concurrent processes coordinate through the auth store file lock.
@@ -6460,7 +6460,7 @@ def resolve_nous_runtime_credentials(
     ):
 
         if not state:
-            raise AuthError("Nunmai is not logged into Nous Portal.",
+            raise AuthError("Nunmai is not logged into Nunmai Portal.",
                             provider="nous", relogin_required=True)
 
         persisted_state = dict(state)
@@ -6536,7 +6536,7 @@ def resolve_nous_runtime_credentials(
         def _persist_state(reason: str) -> None:
             nonlocal persisted_state, state_persisted
             # Skip writes where only derived TTL countdowns changed; this keeps
-            # the mtime-keyed Nous auth-status cache warm during read paths.
+            # the mtime-keyed Nunmai auth-status cache warm during read paths.
             if (
                 _nous_effective_provider_state(state)
                 == _nous_effective_provider_state(persisted_state)
@@ -6600,7 +6600,7 @@ def resolve_nous_runtime_credentials(
                         _persist_state("runtime_shared_merge_missing_access_token")
 
             if not isinstance(access_token, str) or not access_token:
-                raise AuthError("No access token found for Nous Portal login.",
+                raise AuthError("No access token found for Nunmai Portal login.",
                                 provider="nous", relogin_required=True)
 
             invoke_jwt_status = _nous_invoke_jwt_status(
@@ -6630,7 +6630,7 @@ def resolve_nous_runtime_credentials(
                         if not isinstance(refresh_token, str) or not refresh_token:
                             reason = invoke_jwt_status or "force_refresh"
                             raise AuthError(
-                                "Nous Portal access token is not a usable inference JWT "
+                                "Nunmai Portal access token is not a usable inference JWT "
                                 f"({reason}) and no refresh token is available. "
                                 "Re-authenticate with: nunmai auth add nous",
                                 provider="nous",
@@ -6734,7 +6734,7 @@ def resolve_nous_runtime_credentials(
 
     api_key = state.get("agent_key")
     if not isinstance(api_key, str) or not api_key:
-        raise AuthError("Failed to resolve a Nous inference API key",
+        raise AuthError("Failed to resolve a Nunmai inference API key",
                         provider="nous", code="server_error")
 
     expires_at = state.get("agent_key_expires_at")
@@ -6872,7 +6872,7 @@ def _auth_file_cache_key() -> Tuple[str, Optional[float]]:
 def invalidate_nous_auth_status_cache() -> None:
     """Clear the get_nous_auth_status() process-level memo.
 
-    Call this from any code path that mutates Nous auth state without going
+    Call this from any code path that mutates Nunmai auth state without going
     through resolve_nous_runtime_credentials() (e.g. tests). Login/logout
     flows touch auth.json, so the mtime check below invalidates them
     automatically — explicit invalidation is the belt-and-braces option.
@@ -6882,7 +6882,7 @@ def invalidate_nous_auth_status_cache() -> None:
 
 
 def get_nous_auth_status() -> Dict[str, Any]:
-    """Status snapshot for Nous auth.
+    """Status snapshot for Nunmai auth.
 
     Prefer the auth-store provider state, because that is the live source of
     truth for refresh operations. When provider state exists, validate it
@@ -6967,7 +6967,7 @@ def _compute_nous_auth_status() -> Dict[str, Any]:
 
 
 def get_nous_auth_status_local() -> Dict[str, Any]:
-    """Refresh-free Nous auth snapshot for read-only display surfaces.
+    """Refresh-free Nunmai auth snapshot for read-only display surfaces.
 
     Unlike :func:`get_nous_auth_status`, this NEVER calls
     ``resolve_nous_runtime_credentials()`` and therefore never performs an
@@ -7039,14 +7039,14 @@ NOUS_SESSION_UNKNOWN = "unknown"
 
 
 def get_nous_session_validity() -> str:
-    """Classify the Nous bootstrap session for the dashboard /api/status probe.
+    """Classify the Nunmai bootstrap session for the dashboard /api/status probe.
 
     Returns one of:
-      - ``"valid"``    — a usable Nous credential is present (login healthy).
-      - ``"terminal"`` — the Nous session has taken a terminal auth failure
+      - ``"valid"``    — a usable Nunmai credential is present (login healthy).
+      - ``"terminal"`` — the Nunmai session has taken a terminal auth failure
         (invalid_grant / quarantined / relogin required). This is the sole
         signal NAS acts on to re-mint a hosted-agent bootstrap session.
-      - ``"unknown"``  — indeterminate (no Nous provider state, or a transient/
+      - ``"unknown"``  — indeterminate (no Nunmai provider state, or a transient/
         non-terminal error). Never triggers a re-mint.
 
     Determinable with NO working token — it reads local auth-store state only,
@@ -7063,7 +7063,7 @@ def get_nous_session_validity() -> str:
     """
     # A persisted quarantine marker is the strongest, most stable terminal
     # signal: the refresh path writes `last_auth_error.relogin_required=True`
-    # into the Nous provider state when it clears dead tokens (the exact path
+    # into the Nunmai provider state when it clears dead tokens (the exact path
     # that produced the incident's "No access token found"). Read it directly
     # so we report "terminal" even after the in-memory AuthError is long gone.
     try:
@@ -7732,7 +7732,7 @@ def _prompt_model_selection(
     )
 
     _unavailable = unavailable_models or []
-    # Sale chrome (★ / -N% / was) is Nous Portal-only — never for OpenRouter
+    # Sale chrome (★ / -N% / was) is Nunmai Portal-only — never for OpenRouter
     # or other providers even if pricing.original is somehow present.
     sale_chrome = (confirm_provider or "").strip().lower() == "nous"
 
@@ -7767,7 +7767,7 @@ def _prompt_model_selection(
 
     # Column-aligned labels when pricing is available
     has_pricing = bool(pricing and any(pricing.get(m) for m in all_models))
-    # Leave room for a leading "★ " on sale rows (Nous only).
+    # Leave room for a leading "★ " on sale rows (Nunmai only).
     name_pad = 3 if sale_chrome else 2
     name_col = (
         max((len(m) for m in all_models), default=0) + name_pad
@@ -8922,7 +8922,7 @@ def _minimax_oauth_quarantine_on_terminal_refresh(state: Dict[str, Any], exc: Au
     """Wipe dead tokens from auth.json after a terminal refresh failure.
 
     Shared by both the eager-resolve path and the lazy per-request token
-    provider. Mirrors the Nous / xAI-OAuth / Codex-OAuth quarantine pattern
+    provider. Mirrors the Nunmai / xAI-OAuth / Codex-OAuth quarantine pattern
     so subsequent calls fail fast without a network retry.
     """
     if not (exc.relogin_required and state.get("refresh_token")):
@@ -9075,7 +9075,7 @@ def _nous_device_code_login(
     ca_bundle: Optional[str] = None,
     on_verification: Optional[Callable[[str, str], None]] = None,
 ) -> Dict[str, Any]:
-    """Run the Nous device-code flow and return full OAuth state without persisting."""
+    """Run the Nunmai device-code flow and return full OAuth state without persisting."""
     pconfig = PROVIDER_REGISTRY["nous"]
     portal_base_url = (
         portal_base_url
@@ -9204,7 +9204,7 @@ def _nous_device_code_login(
 
 
 def nous_token_has_billing_scope() -> bool:
-    """Return True if the currently-held Nous token carries ``billing:manage``.
+    """Return True if the currently-held Nunmai token carries ``billing:manage``.
 
     Reads the persisted ``scope`` string saved at login (``_save_provider_state``
     stores ``token_data.get("scope") or scope``). A space-delimited match. Used by
@@ -9289,7 +9289,7 @@ def step_up_nous_billing_scope(
 
 
 def _login_nous(args, pconfig: ProviderConfig) -> None:
-    """Nous Portal device authorization flow."""
+    """Nunmai Portal device authorization flow."""
     timeout_seconds = getattr(args, "timeout", None) or 15.0
     insecure = bool(getattr(args, "insecure", False))
     ca_bundle = (
@@ -9302,7 +9302,7 @@ def _login_nous(args, pconfig: ProviderConfig) -> None:
         auth_state = None
 
         # Codex-style auto-import: before launching a fresh device-code
-        # flow, check the shared store for an existing Nous credential
+        # flow, check the shared store for an existing Nunmai credential
         # from any other profile. If present, offer to rehydrate it.
         shared = _read_shared_nous_state()
         if shared:
@@ -9312,15 +9312,15 @@ def _login_nous(args, pconfig: ProviderConfig) -> None:
                 shared_path = None
             print()
             if shared_path:
-                print(f"Found existing Nous OAuth credentials at {shared_path}")
+                print(f"Found existing Nunmai OAuth credentials at {shared_path}")
             else:
-                print("Found existing shared Nous OAuth credentials")
+                print("Found existing shared Nunmai OAuth credentials")
             try:
                 do_import = input("Import these credentials? [Y/n]: ").strip().lower()
             except (EOFError, KeyboardInterrupt):
                 do_import = "y"
             if do_import in {"", "y", "yes"}:
-                print("Rehydrating Nous session from shared credentials...")
+                print("Rehydrating Nunmai session from shared credentials...")
                 auth_state = _try_import_shared_nous_state(
                     timeout_seconds=timeout_seconds,
                 )
@@ -9406,7 +9406,7 @@ def _login_nous(args, pconfig: ProviderConfig) -> None:
                         unavailable_message = (
                             format_nous_portal_entitlement_message(
                                 _account_info,
-                                capability="paid Nous models",
+                                capability="paid Nunmai models",
                             )
                             or ""
                         )
@@ -9448,7 +9448,7 @@ def _login_nous(args, pconfig: ProviderConfig) -> None:
                 print("No free models currently available.")
                 print(unavailable_message or f"Upgrade at {_url} to access paid models.")
             else:
-                print("No curated models available for Nous Portal.")
+                print("No curated models available for Nunmai Portal.")
         except Exception as exc:
             message = format_auth_error(exc) if isinstance(exc, AuthError) else str(exc)
             print()
@@ -9458,7 +9458,7 @@ def _login_nous(args, pconfig: ProviderConfig) -> None:
         # If no model was selected (user picked "Skip (keep current)",
         # model list fetch failed, or no curated models were available),
         # preserve the user's previous provider — don't silently switch
-        # them to Nous with a mismatched model.  The Nous OAuth tokens
+        # them to Nunmai with a mismatched model.  The Nunmai OAuth tokens
         # stay saved for future use.
         if not selected_model:
             # Restore the prior active_provider that _save_provider_state
@@ -9472,8 +9472,8 @@ def _login_nous(args, pconfig: ProviderConfig) -> None:
                     auth_store.pop("active_provider", None)
                 _save_auth_store(auth_store)
             print()
-            print("No provider change. Nous credentials saved for future use.")
-            print("  Run `nunmai model` again to switch to Nous Portal.")
+            print("No provider change. Nunmai credentials saved for future use.")
+            print("  Run `nunmai model` again to switch to Nunmai Portal.")
             return
 
         config_path = _update_config_for_provider(

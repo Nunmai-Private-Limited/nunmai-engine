@@ -296,7 +296,7 @@ async def get_toolset_config(name: str, profile: Optional[str] = None):
                         "is_active": is_active,
                         # Honest server-side readiness. The GUI's old client-side
                         # heuristic showed "Ready" for every zero-env-var row —
-                        # including logged-out Nous Subscription rows and never-run
+                        # including logged-out Nunmai Subscription rows and never-run
                         # post_setup installs (see provider_readiness_status).
                         "status": provider_readiness_status(
                             prov, config, features=features, is_active=is_active
@@ -484,14 +484,14 @@ async def select_toolset_provider(
     extract backend). Omitting ``capability`` keeps the legacy whole-provider
     behavior (writes ``web.backend``).
 
-    Managed Nous rows (``managed_nous_feature``) additionally report the
+    Managed Nunmai rows (``managed_nous_feature``) additionally report the
     Portal entitlement state: the CLI flow gates these selections on
     ``ensure_nous_portal_access`` (inline login), but the GUI has no inline
     prompt, so selecting one while logged out / unentitled used to write the
     config keys and then never activate (``_is_provider_active`` requires
     ``managed_by_nous``). The response now carries an additive
     ``needs_nous_auth: true`` + ``feature`` so the client can drive the
-    existing Nous Portal OAuth flow (``POST /api/providers/oauth/nous/start``)
+    existing Nunmai Portal OAuth flow (``POST /api/providers/oauth/nous/start``)
     and refetch.
     """
     from nunmai_cli.tools_config import (
@@ -565,7 +565,7 @@ async def select_toolset_provider(
                 if body.capability is not None:
                     response["capability"] = body.capability
 
-            # Entitlement check for managed Nous rows — mirrors the gate the CLI
+            # Entitlement check for managed Nunmai rows — mirrors the gate the CLI
             # applies via ensure_nous_portal_access at selection time. This hits
             # the network (Portal), so it runs AFTER releasing the mutation lock:
             # holding a process-wide config-write lock across a network fetch

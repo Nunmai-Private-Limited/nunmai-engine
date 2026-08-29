@@ -1,4 +1,4 @@
-"""Tests for Nous subscription feature detection."""
+"""Tests for Nunmai subscription feature detection."""
 
 import shutil
 import sys
@@ -253,7 +253,7 @@ def test_get_gateway_eligible_tools_treats_browser_use_selection_as_explicit(mon
 
 
 def test_get_gateway_eligible_tools_not_entitled_returns_four_empty_lists(monkeypatch):
-    """A logged-in Nous account with no paid access and no free tool pool
+    """A logged-in Nunmai account with no paid access and no free tool pool
     must fail closed with a 4-tuple, not a 3-tuple — regression for a crash
     where the early 'not entitled' return still had the pre-refactor arity
     while the happy path and every caller had moved to 4 values."""
@@ -267,7 +267,7 @@ def test_get_gateway_eligible_tools_not_entitled_returns_four_empty_lists(monkey
 
 def test_prompt_enable_tool_gateway_not_entitled_does_not_crash(monkeypatch):
     """The unconditional call site in model_setup_flows (no try/except) must
-    not raise when a Nous account is logged in but not entitled to the Tool
+    not raise when a Nunmai account is logged in but not entitled to the Tool
     Gateway (i.e. an ordinary non-paid, non-pool account)."""
     monkeypatch.setattr(ns, "get_nous_portal_account_info", lambda **kw: _account(logged_in=True, paid=False))
 
@@ -377,7 +377,7 @@ def test_prompt_enable_tool_gateway_choosing_declined_tool_clears_decline(monkey
 
 def test_apply_nous_managed_defaults_writes_video_gen_config(monkeypatch):
     """apply_nous_managed_defaults must store the managed 'nous' selection
-    when a Nous subscriber selects video_gen without a direct FAL_KEY."""
+    when a Nunmai subscriber selects video_gen without a direct FAL_KEY."""
     monkeypatch.setattr(ns, "managed_nous_tools_enabled", lambda **kw: True)
     monkeypatch.delenv("FAL_KEY", raising=False)
     monkeypatch.setattr(ns, "fal_key_is_configured", lambda: False)
@@ -406,7 +406,7 @@ def test_apply_nous_managed_defaults_writes_video_gen_config(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# STT — managed-by-Nous detection (Phase 4 follow-up)
+# STT — managed-by-Nunmai detection (Phase 4 follow-up)
 # ---------------------------------------------------------------------------
 
 

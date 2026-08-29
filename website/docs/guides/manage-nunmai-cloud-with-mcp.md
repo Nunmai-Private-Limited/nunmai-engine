@@ -1,12 +1,12 @@
 ---
 sidebar_position: 16
 title: "Manage Nunmai Cloud with MCP"
-description: "Connect Nunmai Engine to the Nous Portal MCP server so your local agent can list, start, stop, and manage your Nunmai Cloud instances conversationally"
+description: "Connect Nunmai Engine to the Nunmai Portal MCP server so your local agent can list, start, stop, and manage your Nunmai Cloud instances conversationally"
 ---
 
 # Manage Nunmai Cloud with MCP
 
-[Nunmai Cloud](https://portal.nousresearch.com/cloud) runs hosted Nunmai Engine instances for you. Normally you manage them from the `/agents` page in the [Nous Portal](/integrations/nous-portal). This guide connects your **local** Nunmai Engine to the Portal's MCP server so you can manage those cloud instances by just asking — "list my cloud agents", "restart the stopped one", "what's it costing me" — without leaving your terminal.
+[Nunmai Cloud](https://portal.nousresearch.com/cloud) runs hosted Nunmai Engine instances for you. Normally you manage them from the `/agents` page in the [Nunmai Portal](/integrations/nous-portal). This guide connects your **local** Nunmai Engine to the Portal's MCP server so you can manage those cloud instances by just asking — "list my cloud agents", "restart the stopped one", "what's it costing me" — without leaving your terminal.
 
 It's a standard [MCP](/user-guide/features/mcp) server hosted by Nunmai Research, gated by the same OAuth login you already use for the Portal. Once connected, Nunmai gets two tools it can call on your behalf.
 
@@ -28,7 +28,7 @@ Every call runs against **your** org with your Portal identity, and membership i
 
 ## Prerequisites
 
-- A [Nous Portal](/integrations/nous-portal) account with [Nunmai Cloud](https://portal.nousresearch.com/cloud) access (at least one instance, or the ability to create one).
+- A [Nunmai Portal](/integrations/nous-portal) account with [Nunmai Cloud](https://portal.nousresearch.com/cloud) access (at least one instance, or the ability to create one).
 - MCP support installed. If you used the standard install script it's already there; otherwise:
 
   ```bash
@@ -169,7 +169,7 @@ The OAuth browser callback runs on the machine where Nunmai is running. On a rem
 
 ## See also
 
-- **[Nous Portal](/integrations/nous-portal)** — the subscription, models, and Tool Gateway behind the same login
+- **[Nunmai Portal](/integrations/nous-portal)** — the subscription, models, and Tool Gateway behind the same login
 - **[Use MCP with Nunmai](/guides/use-mcp-with-nunmai)** — connecting and filtering MCP servers in general
 - **[MCP feature overview](/user-guide/features/mcp)** — what MCP is and how Nunmai uses it
 - **[MCP configuration reference](/reference/mcp-config-reference)** — every `mcp_servers` field, including `auth: oauth`

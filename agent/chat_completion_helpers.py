@@ -594,7 +594,7 @@ def _prompt_cache_scope_for_agent(agent) -> "str | None":
 def _merge_nous_portal_messages_extra_body(agent, anthropic_kwargs: dict) -> dict:
     """Merge Portal ``tags`` / ``session_id`` onto an Anthropic Messages kwargs dict.
 
-    The Nous provider profile is only consulted by the OpenAI-wire transport;
+    The Nunmai provider profile is only consulted by the OpenAI-wire transport;
     anthropic_messages callers must merge it themselves. Passes ``session_id``
     only — not ``provider_preferences`` (those become a top-level ``provider``
     routing object on the OpenAI wire). Never blocks a turn on tagging.
@@ -612,7 +612,7 @@ def _merge_nous_portal_messages_extra_body(agent, anthropic_kwargs: dict) -> dic
                 )
             )
     except Exception as exc:  # noqa: BLE001 — never block a turn on tagging
-        logger.debug("Nous Portal extra_body merge failed: %s", exc)
+        logger.debug("Nunmai Portal extra_body merge failed: %s", exc)
     return anthropic_kwargs
 
 
@@ -1852,7 +1852,7 @@ def build_api_kwargs(agent, api_messages: list, tools_for_api: list | None = Non
             fast_mode=(agent.request_overrides or {}).get("speed") == "fast",
             drop_context_1m_beta=bool(getattr(agent, "_oauth_1m_beta_disabled", False)),
         )
-        # Nous Portal reads ``tags`` and ``session_id`` as top-level body fields
+        # Nunmai Portal reads ``tags`` and ``session_id`` as top-level body fields
         # on its Messages route the same way it does on /chat/completions, but
         # the profile hook that produces them is only consulted by the
         # OpenAI-wire transport. Merge them here so Messages traffic keeps
@@ -1995,7 +1995,7 @@ def build_api_kwargs(agent, api_messages: list, tools_for_api: list | None = Non
     # Anthropic Messages API treats it as mandatory and proxies that omit it
     # (AWS Bedrock, NVIDIA, LiteLLM, vLLM, corporate gateways) default as low
     # as 4096 output tokens — easily exhausted by thinking + large tool calls
-    # like write_file/patch.  OpenRouter/Nous were the only routes covered
+    # like write_file/patch.  OpenRouter/Nunmai were the only routes covered
     # before; gating on _ANTHROPIC_OUTPUT_LIMITS membership covers them all.
     _ant_max = None
     try:
@@ -2637,7 +2637,7 @@ def try_activate_fallback(agent, reason: "FailoverReason | None" = None) -> bool
             elif fb_provider in {"nous", "nous-portal", "nousresearch"}:
                 # Portal is dual-wire: anthropic/* must land on /v1/messages.
                 # resolve_provider_client still returns an OpenAI client for
-                # Nous; the anthropic_messages branch below rebuilds the native
+                # Nunmai; the anthropic_messages branch below rebuilds the native
                 # client from that credential + base_url.
                 from nunmai_cli.providers import nous_api_mode
 
@@ -4450,7 +4450,7 @@ def interruptible_streaming_api_call(agent, api_kwargs: dict, *, on_first_delta=
         #      upstream dropped/stalled the connection mid tool-call.  This
         #      is NOT an output cap — the model never reported hitting one.
         #      Some dedicated endpoints (e.g. NVIDIA Nemotron Ultra on the
-        #      Nous dedicated endpoint) stall for minutes during large
+        #      Nunmai dedicated endpoint) stall for minutes during large
         #      tool-arg generation, then close the stream cleanly without a
         #      finish_reason.  Stamping "length" here sends it down the
         #      max_tokens-boost truncation path, which retries 3× to no

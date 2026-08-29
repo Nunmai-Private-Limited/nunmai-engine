@@ -490,7 +490,7 @@ def _print_setup_summary(config: dict, nunmai_home):
         print_warning("No inference provider is configured — Nunmai cannot chat yet.")
         print_info("  Finish this one step with either of:")
         print_info("    nunmai model            (pick any provider/model)")
-        print_info("    nunmai setup --portal   (Nous Portal OAuth, no API key)")
+        print_info("    nunmai setup --portal   (Nunmai Portal OAuth, no API key)")
 
     # Tool availability summary
     print()
@@ -515,7 +515,7 @@ def _print_setup_summary(config: dict, nunmai_home):
 
     # Web tools (Exa, Parallel, Firecrawl, or Tavily)
     if subscription_features.web.managed_by_nous:
-        tool_status.append(("Web Search & Extract (Nous subscription)", True, None))
+        tool_status.append(("Web Search & Extract (Nunmai subscription)", True, None))
     elif subscription_features.web.available:
         label = "Web Search & Extract"
         if subscription_features.web.current_provider:
@@ -527,7 +527,7 @@ def _print_setup_summary(config: dict, nunmai_home):
     # Browser tools (local Chromium, Camofox, Browserbase, Browser Use, or Firecrawl)
     browser_provider = subscription_features.browser.current_provider
     if subscription_features.browser.managed_by_nous:
-        tool_status.append(("Browser Automation (Nous Browser Use)", True, None))
+        tool_status.append(("Browser Automation (Nunmai Browser Use)", True, None))
     elif subscription_features.browser.available:
         label = "Browser Automation"
         if browser_provider:
@@ -554,10 +554,10 @@ def _print_setup_summary(config: dict, nunmai_home):
             ("Browser Automation", False, missing_browser_hint)
         )
 
-    # Image generation — FAL (direct or via Nous), or any plugin-registered
+    # Image generation — FAL (direct or via Nunmai), or any plugin-registered
     # provider (OpenAI, etc.)
     if subscription_features.image_gen.managed_by_nous:
-        tool_status.append(("Image Generation (Nous subscription)", True, None))
+        tool_status.append(("Image Generation (Nunmai subscription)", True, None))
     elif subscription_features.image_gen.available:
         tool_status.append(("Image Generation", True, None))
     else:
@@ -589,7 +589,7 @@ def _print_setup_summary(config: dict, nunmai_home):
     # Only show the row when a plugin reports available so we don't badger
     # users who don't care about video gen with a "missing" status line.
     if subscription_features.video_gen.managed_by_nous:
-        tool_status.append(("Video Generation (FAL via Nous subscription)", True, None))
+        tool_status.append(("Video Generation (FAL via Nunmai subscription)", True, None))
     else:
         try:
             from agent.video_gen_registry import list_providers as _list_video_providers
@@ -611,7 +611,7 @@ def _print_setup_summary(config: dict, nunmai_home):
     # TTS — show configured provider
     tts_provider = cfg_get(config, "tts", "provider", default="edge")
     if subscription_features.tts.managed_by_nous:
-        tool_status.append(("Text-to-Speech (OpenAI via Nous subscription)", True, None))
+        tool_status.append(("Text-to-Speech (OpenAI via Nunmai subscription)", True, None))
     elif tts_provider == "elevenlabs" and get_env_value("ELEVENLABS_API_KEY"):
         tool_status.append(("Text-to-Speech (ElevenLabs)", True, None))
     elif tts_provider == "openai" and (
@@ -649,7 +649,7 @@ def _print_setup_summary(config: dict, nunmai_home):
     stt_provider = cfg_get(config, "stt", "provider", default="local") or "local"
     _stt_feature = subscription_features.features.get("stt")
     if _stt_feature is not None and _stt_feature.managed_by_nous:
-        tool_status.append(("Speech-to-Text (OpenAI via Nous subscription)", True, None))
+        tool_status.append(("Speech-to-Text (OpenAI via Nunmai subscription)", True, None))
     elif stt_provider == "openai" and (
         get_env_value("VOICE_TOOLS_OPENAI_KEY") or get_env_value("OPENAI_API_KEY")
     ):
@@ -675,14 +675,14 @@ def _print_setup_summary(config: dict, nunmai_home):
             )
 
     if subscription_features.modal.managed_by_nous:
-        tool_status.append(("Modal Execution (Nous subscription)", True, None))
+        tool_status.append(("Modal Execution (Nunmai subscription)", True, None))
     elif cfg_get(config, "terminal", "backend") == "modal":
         if subscription_features.modal.direct_override:
             tool_status.append(("Modal Execution (direct Modal)", True, None))
         else:
             tool_status.append(("Modal Execution", False, "run 'nunmai setup terminal'"))
     elif managed_nous_tools_enabled() and subscription_features.nous_auth_present:
-        tool_status.append(("Modal Execution (optional via Nous subscription)", True, None))
+        tool_status.append(("Modal Execution (optional via Nunmai subscription)", True, None))
 
     # Home Assistant
     if get_env_value("HASS_TOKEN"):
@@ -1179,7 +1179,7 @@ def _setup_tts_provider(config: dict):
     choices = []
     providers = []
     if managed_nous_tools_enabled() and subscription_features.nous_auth_present:
-        choices.append("Nous Subscription (managed OpenAI TTS, billed to your subscription)")
+        choices.append("Nunmai Subscription (managed OpenAI TTS, billed to your subscription)")
         providers.append("nous-openai")
     choices.extend(
         [
@@ -1206,7 +1206,7 @@ def _setup_tts_provider(config: dict):
     selected_via_nous = selected == "nous-openai"
     if selected == "nous-openai":
         selected = "openai"
-        print_info("OpenAI TTS will use the managed Nous gateway and bill to your subscription.")
+        print_info("OpenAI TTS will use the managed Nunmai gateway and bill to your subscription.")
         if get_env_value("VOICE_TOOLS_OPENAI_KEY") or get_env_value("OPENAI_API_KEY"):
             print_warning(
                 "Direct OpenAI credentials are still configured and may take precedence until removed from ~/.nunmai/.env."
@@ -1546,7 +1546,7 @@ def setup_terminal_backend(config: dict):
         use_managed_modal = False
         if managed_modal_available:
             modal_choices = [
-                "Use my Nous subscription",
+                "Use my Nunmai subscription",
                 "Use my own Modal account",
             ]
             if modal_mode == "managed":
@@ -1564,7 +1564,7 @@ def setup_terminal_backend(config: dict):
 
         if use_managed_modal:
             config["terminal"]["modal_mode"] = "managed"
-            print_info("Modal execution will use the managed Nous gateway and bill to your subscription.")
+            print_info("Modal execution will use the managed Nunmai gateway and bill to your subscription.")
             if get_env_value("MODAL_TOKEN_ID") or get_env_value("MODAL_TOKEN_SECRET"):
                 print_info(
                     "Direct Modal credentials are still configured, but this backend is pinned to managed mode."
@@ -2465,7 +2465,7 @@ def _model_section_has_credentials(config: dict) -> bool:
       * ``PROVIDER_REGISTRY`` in ``nunmai_cli.auth`` — lists every supported
         provider along with its ``api_key_env_vars``.
       * ``active_provider`` in the auth store — covers OAuth device-code /
-        external-OAuth providers (Nous, Codex, Qwen, Gemini CLI, ...).
+        external-OAuth providers (Nunmai, Codex, Qwen, Gemini CLI, ...).
       * The legacy OpenRouter aggregator env vars, which route generic
         ``OPENAI_API_KEY`` / ``OPENROUTER_API_KEY`` values through OpenRouter.
     """
@@ -2867,7 +2867,7 @@ SETUP_SECTIONS = [
 
 
 def _run_portal_one_shot(config: dict) -> None:
-    """One-shot Nous Portal setup — OAuth + model pick + provider + Tool Gateway.
+    """One-shot Nunmai Portal setup — OAuth + model pick + provider + Tool Gateway.
 
     Wired into ``nunmai setup --portal`` and ``nunmai portal``. This is the
     Nous-Portal slice of the first-time quick setup, collapsed into a single
@@ -2879,9 +2879,9 @@ def _run_portal_one_shot(config: dict) -> None:
     The login + model selection + provider switch + Tool Gateway opt-in are all
     delegated to ``_model_flow_nous`` — the exact same flow quick setup uses
     (``_run_first_time_quick_setup``) and the same one ``nunmai model`` runs
-    when you pick Nous. Routing through it (instead of hand-rolling the auth +
+    when you pick Nunmai. Routing through it (instead of hand-rolling the auth +
     provider write here) means ``nunmai portal`` always offers a model picker,
-    and there is a single source of truth for the Nous onboarding steps.
+    and there is a single source of truth for the Nunmai onboarding steps.
     """
     from nunmai_cli.config import load_config
 
@@ -2892,7 +2892,7 @@ def _run_portal_one_shot(config: dict) -> None:
             Colors.MAGENTA,
         )
     )
-    print(color("│     ◆ Nunmai Setup — Nous Portal (one-shot)             │", Colors.MAGENTA))
+    print(color("│     ◆ Nunmai Setup — Nunmai Portal (one-shot)             │", Colors.MAGENTA))
     print(
         color(
             "└─────────────────────────────────────────────────────────┘",
@@ -2902,16 +2902,16 @@ def _run_portal_one_shot(config: dict) -> None:
     print()
     print_info("  One subscription, 300+ models, plus the Tool Gateway:")
     print_info("    web search, image generation, TTS, browser automation")
-    print_info("    — all routed through your Nous Portal sub.")
+    print_info("    — all routed through your Nunmai Portal sub.")
     print()
     print_info("  Sign up: https://portal.nousresearch.com/manage-subscription")
     print()
 
     # _model_flow_nous handles BOTH the logged-out path (device-code OAuth,
     # which selects a model internally) and the already-logged-in path (curated
-    # Nous model picker), then offers the Tool Gateway opt-in and sets
+    # Nunmai model picker), then offers the Tool Gateway opt-in and sets
     # provider=nous via the login/model save. This is the same routine quick
-    # setup calls, so `nunmai portal` == quick setup's Nous step.
+    # setup calls, so `nunmai portal` == quick setup's Nunmai step.
     try:
         from nunmai_cli.main import _model_flow_nous
 
@@ -2929,7 +2929,7 @@ def _run_portal_one_shot(config: dict) -> None:
     except Exception as exc:
         logger.debug("_model_flow_nous error during `nunmai portal`: %s", exc)
         print()
-        print_error(f"  Nous Portal setup encountered an error: {exc}")
+        print_error(f"  Nunmai Portal setup encountered an error: {exc}")
         print_info("  You can retry later with `nunmai portal`.")
         return
 
@@ -3121,7 +3121,7 @@ def _run_setup_wizard_impl(args):
         )
         return
 
-    # --portal: one-shot Nous Portal setup. Skips the rest of the wizard.
+    # --portal: one-shot Nunmai Portal setup. Skips the rest of the wizard.
     if bool(getattr(args, "portal", False)):
         _run_portal_one_shot(config)
         return

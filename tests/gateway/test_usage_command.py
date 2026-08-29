@@ -132,7 +132,7 @@ class TestUsageAccountSection:
 
         async def _fake_to_thread(fn, *args, **kwargs):
             # /usage dispatches BOTH the account fetch (fetch_account_usage, called
-            # with the provider positionally) and the Nous credits fetch
+            # with the provider positionally) and the Nunmai credits fetch
             # (nous_credits_lines, markdown-only) through to_thread — record every
             # call rather than last-wins so we can pick out the account fetch.
             calls.append({"args": args, "kwargs": kwargs})

@@ -1022,7 +1022,7 @@ test('cookiesHaveLiveSession is false for unrelated cookies and non-arrays', () 
   assert.equal(cookiesHaveLiveSession([]), false)
 })
 
-// --- cookiesHavePrivySession (Nous portal / Privy auth, NOT gateway cookies) ---
+// --- cookiesHavePrivySession (Nunmai portal / Privy auth, NOT gateway cookies) ---
 
 test('cookiesHavePrivySession detects the privy-token access cookie', () => {
   assert.equal(cookiesHavePrivySession([{ name: 'privy-token', value: 'jwt' }]), true)
@@ -1303,7 +1303,7 @@ test('gatewayTicketFailure only copies an integer statusCode, not a message pref
 
 // OAuth integration regression (#85373): the WS-ticket mint boundary runs
 // BEFORE waitForNunmaiReady. This mirrors main.ts buildRemoteConnection's
-// catch — classify a Nous Cloud server fault via the shared factory, else
+// catch — classify a Nunmai Cloud server fault via the shared factory, else
 // fall through to gatewayTicketFailure. Proves the production composition:
 //   1. Cloud + OAuth ticket mint + 503  -> actionable Cloud-down error
 //   2. Cloud + OAuth ticket mint + 401  -> reauth (never Cloud-down)
@@ -1318,7 +1318,7 @@ test('OAuth ticket-mint 503 surfaces the Cloud-down error (startup boundary)', (
   if (cloudError !== null) {
     assert.equal((cloudError as any).isCloudBackendDown, true)
     assert.equal((cloudError as any).statusCode, 503)
-    assert.ok(cloudError.message.includes('Nous Cloud agent ares-3009.agents.nousresearch.com is down'))
+    assert.ok(cloudError.message.includes('Nunmai Cloud agent ares-3009.agents.nousresearch.com is down'))
 
     return
   }

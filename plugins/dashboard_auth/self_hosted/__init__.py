@@ -1,7 +1,7 @@
 """SelfHostedOIDCProvider — generic self-hosted OpenID Connect dashboard auth.
 
 A standards-compliant OpenID Connect Relying Party for the ``nunmai dashboard``
-OAuth gate. Unlike the bundled ``nous`` provider (which encodes Nous Portal's
+OAuth gate. Unlike the bundled ``nous`` provider (which encodes Nunmai Portal's
 bespoke contract — ``agent:{instance_id}`` client ids, a custom access-token
 JWT, the ``x-nous-refresh-token`` header, an ``oauth_contract_version`` claim),
 this provider speaks **plain OIDC** so it works against any conformant
@@ -29,7 +29,7 @@ signed JWT carrying identity claims — that is its entire purpose. The access
 token's format is opaque to the client per the spec; many IDPs issue random
 opaque strings the client cannot verify locally. Verifying the ID token is the
 only choice that is universally correct across self-hosted IDPs. (The ``nous``
-provider verifies its *access* token because Nous Portal mints a custom JWT
+provider verifies its *access* token because Nunmai Portal mints a custom JWT
 access token with the dashboard claims baked in — a non-OIDC shortcut.)
 
 Both **public** (PKCE-only) and **confidential** (PKCE + ``client_secret``)

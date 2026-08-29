@@ -503,8 +503,8 @@ DEFAULT_CONTEXT_LENGTHS = {
     "inkling": 1_048_576,
     # Qwen — specific model families before the catch-all.
     # Official docs: https://help.aliyun.com/zh/model-studio/developer-reference/
-    "qwen3.8-max": 1_000_000,     # 1M context (OpenRouter & Nous portal, verified 2026-08-03)
-    "qwen3.8-flash": 1_000_000,   # 1M context (OpenRouter & Nous portal, verified 2026-08-28)
+    "qwen3.8-max": 1_000_000,     # 1M context (OpenRouter & Nunmai portal, verified 2026-08-03)
+    "qwen3.8-flash": 1_000_000,   # 1M context (OpenRouter & Nunmai portal, verified 2026-08-28)
     "qwen3.6-plus": 1048576,      # 1M context (DashScope/Alibaba & OpenRouter)
     "qwen3.7-plus": 1048576,      # 1M context (DashScope/Alibaba)
     "qwen3-coder-plus": 1000000,  # 1M context
@@ -514,7 +514,7 @@ DEFAULT_CONTEXT_LENGTHS = {
     # MiniMax — M3 is 1M context (max output 512K); M2.x series is 204,800.
     # Keys use substring matching (longest-first), so "minimax-m3" wins over
     # the generic "minimax" catch-all for the M3 slug on every surface
-    # (native MiniMax-M3, OpenRouter/Nous minimax/minimax-m3).
+    # (native MiniMax-M3, OpenRouter/Nunmai minimax/minimax-m3).
     # https://platform.minimax.io/docs/api-reference/text-chat-openai
     "minimax-m3": 1000000,
     "minimax": 204800,
@@ -1537,7 +1537,7 @@ def _resolve_endpoint_context_length(
             # Substring fuzzy match — only meaningful with a non-empty model
             # name.  An empty string is a substring of EVERY key, which would
             # "match" whatever model the endpoint happens to list first (e.g.
-            # a 32K embedding model on the Nous portal) and poison the
+            # a 32K embedding model on the Nunmai portal) and poison the
             # resolved context length for the whole agent.
             for key, entry in endpoint_metadata.items():
                 if model in key or key in model:
@@ -1744,7 +1744,7 @@ def parse_available_output_tokens_from_error(error_msg: str) -> Optional[int]:
         "max_tokens" in error_lower
         and ("available_tokens" in error_lower or "available tokens" in error_lower)
     ) or (
-        # OpenRouter/Nous phrasing of the same condition.
+        # OpenRouter/Nunmai phrasing of the same condition.
         "in the output" in error_lower
         and "maximum context length" in error_lower
     ) or (
@@ -1813,7 +1813,7 @@ def parse_available_output_tokens_from_error(error_msg: str) -> Optional[int]:
             if tokens >= 1:
                 return tokens
 
-    # OpenRouter/Nous format: "maximum context length is N … (A of text input,
+    # OpenRouter/Nunmai format: "maximum context length is N … (A of text input,
     # B of tool input, C in the output)". Available output = ctx - text - tool.
     _m_ctx = re.search(r'maximum context length is (\d+)', error_lower)
     _m_parts = re.search(
@@ -1916,7 +1916,7 @@ def is_output_cap_error(error_msg: str) -> bool:
         "range of max_tokens should be" in error_lower      # DashScope / Alibaba
         or "available_tokens" in error_lower                # Anthropic
         or "available tokens" in error_lower
-        or ("in the output" in error_lower                  # OpenRouter / Nous
+        or ("in the output" in error_lower                  # OpenRouter / Nunmai
             and "maximum context length" in error_lower)
         or ("requested" in error_lower                      # LM Studio / llama.cpp
             and "output tokens" in error_lower)
@@ -2438,7 +2438,7 @@ def _query_local_context_length_uncached(model: str, base_url: str, api_key: str
 def _normalize_model_version(model: str) -> str:
     """Normalize version separators for matching.
 
-    Nous uses dashes: claude-opus-4-6, claude-sonnet-4-5
+    Nunmai uses dashes: claude-opus-4-6, claude-sonnet-4-5
     OpenRouter uses dots: claude-opus-4.6, claude-sonnet-4.5
     Normalize both to dashes for comparison.
     """
@@ -2853,12 +2853,12 @@ def _resolve_nous_context_length(
     base_url: str = "",
     api_key: str = "",
 ) -> Tuple[Optional[int], str]:
-    """Resolve Nous Portal model context length.
+    """Resolve Nunmai Portal model context length.
 
-    Tries the live Nous inference endpoint first (authoritative), then falls
+    Tries the live Nunmai inference endpoint first (authoritative), then falls
     back to OpenRouter metadata with suffix/version matching.
 
-    Nous model IDs are bare after prefix-stripping (e.g. 'qwen3.6-plus',
+    Nunmai model IDs are bare after prefix-stripping (e.g. 'qwen3.6-plus',
     'claude-opus-4-6') while OpenRouter uses prefixed IDs (e.g.
     'qwen/qwen3.6-plus', 'anthropic/claude-opus-4.6').  Version
     normalization (dot↔dash) is applied to handle name drifts.
@@ -2870,7 +2870,7 @@ def _resolve_nous_context_length(
         portal blip will freeze the wrong value in forever)
       - ``""``           — could not resolve
     """
-    # Portal first — the Nous /models endpoint is authoritative for what our
+    # Portal first — the Nunmai /models endpoint is authoritative for what our
     # infrastructure enforces and may differ from OR (e.g. OR reports 1M for
     # qwen3.6-plus; the portal correctly says 262144).  Fall back to the OR
     # catalog only if the portal doesn't list the model.
@@ -2885,7 +2885,7 @@ def _resolve_nous_context_length(
         """Return context length, but reject known stale 32K underreports.
 
         Apply the same guard used for the generic OpenRouter path (step 6 in
-        resolve_context_length) so the Nous portal path does not short-circuit it.
+        resolve_context_length) so the Nunmai portal path does not short-circuit it.
         """
         ctx = entry.get("context_length")
         if ctx is None:
@@ -2893,7 +2893,7 @@ def _resolve_nous_context_length(
         if ctx <= 32768 and _model_name_suggests_stale_32k_underreport(or_id):
             logger.info(
                 "Rejecting OpenRouter metadata context=%s for %r "
-                "(known 32K underreport, Nous path); falling through to hardcoded defaults",
+                "(known 32K underreport, Nunmai path); falling through to hardcoded defaults",
                 ctx, or_id,
             )
             return None
@@ -2941,7 +2941,7 @@ def get_model_context_length(
     0. Explicit config override (model.context_length or custom_providers per-model)
     0b. model_overrides config (per-provider+model context_window override)
     0c. Endpoint-scoped metadata for models validated on one multiplexed endpoint
-    1. Persistent cache (previously discovered via probing).  Nous URLs,
+    1. Persistent cache (previously discovered via probing).  Nunmai URLs,
        LM Studio, and Codex OAuth bypass the cache here so their provider
        metadata can be reconciled against the authoritative live source.
     1b. AWS Bedrock static table (must precede custom-endpoint probe)
@@ -2950,7 +2950,7 @@ def get_model_context_length(
     4. Anthropic /v1/models API (API-key users only, not OAuth)
     5. Provider-aware lookups (before generic OpenRouter cache):
        a. Copilot live /models API
-       b. Nous: live /v1/models probe first (authoritative), then OR
+       b. Nunmai: live /v1/models probe first (authoritative), then OR
           cache fallback with suffix/version normalisation.  Only
           portal-derived values are persisted to disk.
        c. Codex OAuth /models probe
@@ -3117,7 +3117,7 @@ def get_model_context_length(
                     model, base_url, f"{cached:,}",
                 )
                 _invalidate_cached_context_length(model, base_url)
-            # Nous Portal: the portal /v1/models endpoint is authoritative.
+            # Nunmai Portal: the portal /v1/models endpoint is authoritative.
             # Bypass the persistent cache so step 5b can always reconcile
             # against it — this corrects pre-fix entries seeded from the
             # OR catalog (the same OR underreport class that the Kimi/Qwen
@@ -3127,7 +3127,7 @@ def get_model_context_length(
             # cost amortise to ~0 within a process.
             elif _infer_provider_from_url(base_url) == "nous":
                 logger.debug(
-                    "Bypassing persistent cache for %s@%s (Nous portal authoritative)",
+                    "Bypassing persistent cache for %s@%s (Nunmai portal authoritative)",
                     model, base_url,
                 )
                 # Fall through; step 5b reconciles and overwrites if portal responds.
@@ -3324,7 +3324,7 @@ def get_model_context_length(
             # blip / auth glitch and step-1 would short-circuit it forever.
             # OR's catalog is community-maintained and is precisely why the
             # Kimi/Qwen DEFAULT_CONTEXT_LENGTHS overrides exist — we don't
-            # want it leaking into the persistent cache for Nous URLs.
+            # want it leaking into the persistent cache for Nunmai URLs.
             if base_url and source == "portal":
                 save_context_length(model, base_url, ctx)
             return ctx
@@ -3380,7 +3380,7 @@ def get_model_context_length(
     # brand-new slugs and (b) skipped the step-6 OR fallback (gated on `not
     # effective_provider`), so a fresh slug like claude-fable-5 fell through to
     # the generic "claude": 200K entry and under-reported a 1M window. Mirrors
-    # the dedicated Nous/Copilot/GMI branches above.
+    # the dedicated Nunmai/Copilot/GMI branches above.
     if effective_provider == "openrouter":
         metadata = fetch_model_metadata()
         entry = metadata.get(model)

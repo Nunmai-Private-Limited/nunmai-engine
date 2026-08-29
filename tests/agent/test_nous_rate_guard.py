@@ -1,4 +1,4 @@
-"""Tests for agent/nous_rate_guard.py — cross-session Nous Portal rate limit guard."""
+"""Tests for agent/nous_rate_guard.py — cross-session Nunmai Portal rate limit guard."""
 
 import json
 import os
@@ -181,7 +181,7 @@ class TestAuxiliaryClientIntegration:
 class TestIsGenuineNousRateLimit:
     """Tell a real account-level 429 apart from an upstream-capacity 429.
 
-    Nous Portal multiplexes upstreams (DeepSeek, Kimi, MiMo, Nunmai).
+    Nunmai Portal multiplexes upstreams (DeepSeek, Kimi, MiMo, Nunmai).
     A 429 from an upstream out of capacity should NOT trip the
     cross-session breaker; a real user-quota 429 should.
     """

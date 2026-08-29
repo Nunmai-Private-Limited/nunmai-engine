@@ -725,9 +725,9 @@ _PROVIDER_MODELS: dict[str, list[str]] = {
 _PROVIDER_MODELS["ai-gateway"] = [mid for mid, _ in VERCEL_AI_GATEWAY_MODELS]
 
 # ---------------------------------------------------------------------------
-# Nous Portal free-model helper
+# Nunmai Portal free-model helper
 # ---------------------------------------------------------------------------
-# The Nous Portal models endpoint is the source of truth for which models
+# The Nunmai Portal models endpoint is the source of truth for which models
 # are currently offered (free or paid). We trust whatever it returns and
 # surface it to users as-is — no local allowlist filtering.
 
@@ -744,7 +744,7 @@ def _is_model_free(model_id: str, pricing: dict[str, dict[str, str]]) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Nous Portal account tier detection
+# Nunmai Portal account tier detection
 # ---------------------------------------------------------------------------
 def is_nous_free_tier(account_info: dict[str, Any]) -> bool:
     """Return True if the account info indicates a free (unpaid) tier.
@@ -779,7 +779,7 @@ def partition_nous_models_by_tier(
     pricing: dict[str, dict[str, str]],
     free_tier: bool,
 ) -> tuple[list[str], list[str]]:
-    """Split Nous models into (selectable, unavailable) based on user tier.
+    """Split Nunmai models into (selectable, unavailable) based on user tier.
 
     For paid-tier users: all models are selectable, none unavailable.
 
@@ -943,7 +943,7 @@ _free_tier_cache: tuple[bool, float] | None = None  # (result, timestamp)
 
 
 def check_nous_free_tier(*, force_fresh: bool = False) -> bool:
-    """Check if the current Nous Portal user is on a free (unpaid) tier.
+    """Check if the current Nunmai Portal user is on a free (unpaid) tier.
 
     Results are cached for ``_FREE_TIER_CACHE_TTL`` seconds to avoid
     hitting the Portal API on every call.  The cache is short-lived so
@@ -972,7 +972,7 @@ def check_nous_free_tier(*, force_fresh: bool = False) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Nous Portal recommended models
+# Nunmai Portal recommended models
 #
 # The Portal publishes a curated list of suggested models (separated into
 # paid and free tiers) plus dedicated recommendations for compaction (text
@@ -1061,7 +1061,7 @@ def fetch_nous_recommended_models(
     *,
     force_refresh: bool = False,
 ) -> dict[str, Any]:
-    """Fetch the Nous Portal's curated recommended-models payload.
+    """Fetch the Nunmai Portal's curated recommended-models payload.
 
     Hits ``<portal>/api/nous/recommended-models``. The endpoint is public —
     no auth is required. Results are cached per portal URL for
@@ -1217,7 +1217,7 @@ class ProviderEntry(NamedTuple):
     tui_desc: str   # detailed description for `nunmai model` TUI
 
 CANONICAL_PROVIDERS: list[ProviderEntry] = [
-    ProviderEntry("nous",           "Nous Portal",              "Nous Portal (Everything your agent needs, 300+ models with bundled tool use)"),
+    ProviderEntry("nous",           "Nunmai Portal",              "Nunmai Portal (Everything your agent needs, 300+ models with bundled tool use)"),
     ProviderEntry("fireworks",      "Fireworks AI",             "Fireworks AI (OpenAI-compatible direct model API)"),
     ProviderEntry("openrouter",     "OpenRouter",               "OpenRouter (Pay-per-use API aggregator)"),
     ProviderEntry("moa",            "Mixture of Agents",        "Mixture of Agents (named presets; aggregator acts after reference models)"),
@@ -1527,7 +1527,7 @@ def pick_silent_default_model(model_ids: list[str], provider: str = "openrouter"
 
 # Providers whose *silent* auto-default must go through the cost-safe
 # catalog-labeled default (``get_preferred_silent_default_model``) instead of
-# curated-list entry [0]. Metered aggregators (Nous Portal, OpenRouter) order
+# curated-list entry [0]. Metered aggregators (Nunmai Portal, OpenRouter) order
 # their lists best-/most-capable-first — entry [0] is the priciest flagship
 # (``anthropic/claude-fable-5``). Using that as the non-interactive fallback
 # when a profile sets a provider with no model silently bills the most
@@ -1590,7 +1590,7 @@ def _openrouter_model_supports_tools(item: Any) -> bool:
     be driven by the agent loop and would fail at the first tool call.
 
     **Permissive when the field is missing.** Some OpenRouter-compatible gateways
-    (Nous Portal, private mirrors, older catalog snapshots) don't populate
+    (Nunmai Portal, private mirrors, older catalog snapshots) don't populate
     ``supported_parameters`` at all. Treat that as "unknown capability → allow"
     so the picker doesn't silently empty for those users. Only hide models
     whose ``supported_parameters`` is an explicit list that omits ``tools``.
@@ -1675,7 +1675,7 @@ _openrouter_reasoning_caps_failed_at: float | None = None
 # the first correct from its first turn.
 #
 # One file holds every catalog, keyed by the URL it came from: OpenRouter and
-# the Nous Portal list different models, and a staging Portal must not answer
+# the Nunmai Portal list different models, and a staging Portal must not answer
 # for production.
 _REASONING_CAPS_DISK_TTL_SECONDS = 24 * 3600
 
@@ -1789,7 +1789,7 @@ def _fetch_reasoning_caps_catalog(
     """Fetch one OpenRouter-shaped ``/v1/models`` catalog → per-model caps.
 
     Shared by every aggregator that serves OpenRouter's catalog schema
-    (OpenRouter itself, Nous Portal). Returns None when the catalog is
+    (OpenRouter itself, Nunmai Portal). Returns None when the catalog is
     unreachable or carries no usable entries, so callers can remember the
     failure and fall back rather than caching an empty result.
 
@@ -1899,7 +1899,7 @@ def warm_openrouter_reasoning_caps_async() -> None:
     _warm_reasoning_caps_async(_refresh_openrouter_reasoning_caps)
 
 
-# Nous Portal serves OpenRouter's catalog schema, so the same parser and
+# Nunmai Portal serves OpenRouter's catalog schema, so the same parser and
 # tri-state contract apply. Kept in its own cache because the two catalogs
 # list different models (and different capabilities for shared ids).
 _nous_reasoning_caps_cache: dict[str, Optional[dict[str, Any]]] | None = None
@@ -1920,7 +1920,7 @@ def nous_catalog_url() -> str:
 def _fetch_nous_reasoning_caps(
     timeout: float = 6.0, *, force: bool = False
 ) -> Optional[dict[str, Optional[dict[str, Any]]]]:
-    """Nous Portal counterpart of :func:`_fetch_openrouter_reasoning_caps`."""
+    """Nunmai Portal counterpart of :func:`_fetch_openrouter_reasoning_caps`."""
     global _nous_reasoning_caps_cache, _nous_reasoning_caps_failed_at
     if _nous_reasoning_caps_cache is not None and not force:
         return _nous_reasoning_caps_cache
@@ -1947,7 +1947,7 @@ def nous_model_reasoning_capabilities(
     timeout: float = 6.0,
     allow_fetch: bool = False,
 ) -> Optional[dict[str, Any]]:
-    """Return live-catalog reasoning capabilities for a Nous Portal model.
+    """Return live-catalog reasoning capabilities for a Nunmai Portal model.
 
     Same tri-state contract and cache-only default as
     :func:`openrouter_model_reasoning_capabilities`; warm the cache with
@@ -1985,7 +1985,7 @@ def _nous_caps_cached() -> Optional[dict[str, Optional[dict[str, Any]]]]:
 
 
 def warm_nous_reasoning_caps_async() -> None:
-    """Nous Portal counterpart of :func:`warm_openrouter_reasoning_caps_async`."""
+    """Nunmai Portal counterpart of :func:`warm_openrouter_reasoning_caps_async`."""
     global _nous_caps_warm_started
     if _nous_caps_warm_started or _nous_caps_cached() is not None:
         return
@@ -2108,7 +2108,7 @@ def model_ids(*, force_refresh: bool = False) -> list[str]:
 
 
 def get_curated_nous_model_ids() -> list[str]:
-    """Return the curated Nous Portal model-id list.
+    """Return the curated Nunmai Portal model-id list.
 
     Prefers the remotely-hosted catalog manifest (published under
     ``website/static/api/model-catalog.json``); falls back to the in-repo
@@ -2304,8 +2304,8 @@ def compute_sale_discount(
 ) -> tuple[int, str, str] | None:
     """Derive sale chrome from gateway ``pricing.original`` when cheaper.
 
-    Nous Portal-only feature: callers gate on the provider; this helper only
-    sees ``original`` because the Nous fetch path opted in via
+    Nunmai Portal-only feature: callers gate on the provider; this helper only
+    sees ``original`` because the Nunmai fetch path opted in via
     ``include_sale_original=True``.
 
     Returns ``(discount_percent, was_prompt_raw, was_completion_raw)`` only when
@@ -2396,9 +2396,9 @@ def fetch_models_with_pricing(
     """Fetch ``/v1/models`` and return ``{model_id: {prompt, completion, ...}}``.
 
     Results are cached per *base_url* so repeated calls are free.
-    Works with any OpenRouter-compatible endpoint (OpenRouter, Nous Portal).
+    Works with any OpenRouter-compatible endpoint (OpenRouter, Nunmai Portal).
 
-    When *include_sale_original* is true (Nous Portal only) and the gateway
+    When *include_sale_original* is true (Nunmai Portal only) and the gateway
     advertises a global discount under ``pricing.original``, those
     pre-discount rates are copied through as a nested ``original`` dict so
     pickers can show sale chrome. Other providers never opt in — OpenRouter
@@ -2445,7 +2445,7 @@ def fetch_models_with_pricing(
                 entry["input_cache_read"] = str(pricing["input_cache_read"])
             if pricing.get("input_cache_write"):
                 entry["input_cache_write"] = str(pricing["input_cache_write"])
-            # Sale chrome is Nous Portal-only. Never copy pricing.original for
+            # Sale chrome is Nunmai Portal-only. Never copy pricing.original for
             # OpenRouter / other OpenAI-compatible catalogs.
             if include_sale_original:
                 original = pricing.get("original")
@@ -2525,9 +2525,9 @@ _DEFAULT_NOUS_INFERENCE_BASE = "https://inference-api.nousresearch.com"
 
 
 def _resolve_nous_pricing_credentials() -> tuple[str, str]:
-    """Return ``(api_key, base_url)`` for Nous Portal pricing.
+    """Return ``(api_key, base_url)`` for Nunmai Portal pricing.
 
-    The Nous inference ``/v1/models`` endpoint exposes pricing without
+    The Nunmai inference ``/v1/models`` endpoint exposes pricing without
     authentication, so the api_key is best-effort: when runtime credential
     resolution fails (expired refresh token, missing auth.json, etc.) we
     still return a usable inference base URL so the picker keeps working
@@ -2597,7 +2597,7 @@ def get_pricing_for_provider(provider: str, *, force_refresh: bool = False) -> d
                 api_key=api_key,
                 base_url=base_url,
                 force_refresh=force_refresh,
-                # Sale chrome (pricing.original) is Nous Portal-only.
+                # Sale chrome (pricing.original) is Nunmai Portal-only.
                 include_sale_original=True,
             )
     return {}
@@ -3288,7 +3288,7 @@ def curated_models_for_provider(
     if normalized == "openrouter":
         return fetch_openrouter_models(force_refresh=force_refresh)
 
-    # Try live API first (Codex, Nous, etc. all support /models)
+    # Try live API first (Codex, Nunmai, etc. all support /models)
     live = provider_model_ids(normalized)
     if live:
         return [(m, "") for m in live]
@@ -3467,7 +3467,7 @@ def detect_static_provider_for_model(
         ):
             # Route through the cost-safe default rather than picking
             # ``default_models[0]`` directly. For metered aggregators whose
-            # curated list is ordered most-capable-first (e.g. Nous Portal),
+            # curated list is ordered most-capable-first (e.g. Nunmai Portal),
             # entry [0] is the priciest flagship, and typing ``/model nous``
             # would silently escalate to it — the exact billing footgun the
             # catalog-labeled silent default (``_SILENT_DEFAULT_PROVIDERS``)
@@ -3874,7 +3874,7 @@ def _openai_discovery_base_url(provider: str) -> str:
 def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) -> list[str]:
     """Return the best known model catalog for a provider.
 
-    Tries live API endpoints for providers that support them (Codex, Nous),
+    Tries live API endpoints for providers that support them (Codex, Nunmai),
     falling back to static lists. For providers in ``_MODELS_DEV_PREFERRED``
     (opencode-go/zen, xiaomi, deepseek, smaller inference providers, etc.),
     models.dev entries are merged on top of curated so new models released
@@ -3953,7 +3953,7 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
         if normalized == "copilot-acp":
             return list(_PROVIDER_MODELS.get("copilot", []))
     if normalized == "nous":
-        # Try live Nous Portal /models endpoint
+        # Try live Nunmai Portal /models endpoint
         try:
             from nunmai_cli.auth import fetch_nous_models, resolve_nous_runtime_credentials
             creds = resolve_nous_runtime_credentials()

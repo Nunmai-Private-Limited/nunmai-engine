@@ -1,4 +1,4 @@
-"""Generic managed-tool gateway helpers for Nous-hosted vendor passthroughs."""
+"""Generic managed-tool gateway helpers for Nunmai-hosted vendor passthroughs."""
 
 from __future__ import annotations
 
@@ -96,7 +96,7 @@ def _read_user_token_override() -> Optional[str]:
 
 
 def peek_nous_access_token() -> Optional[str]:
-    """Cheap probe for a Nous gateway token without triggering refresh.
+    """Cheap probe for a Nunmai gateway token without triggering refresh.
 
     Availability scans (`nunmai tools`, banner/status paint, provider
     `is_available()` checks) must stay off the synchronous OAuth refresh path.
@@ -117,7 +117,7 @@ def peek_nous_access_token() -> Optional[str]:
 
 
 def read_nous_access_token() -> Optional[str]:
-    """Read a Nous Subscriber OAuth access token from auth store or env override."""
+    """Read a Nunmai Subscriber OAuth access token from auth store or env override."""
     explicit = _read_user_token_override()
     if explicit:
         return explicit
@@ -139,7 +139,7 @@ def read_nous_access_token() -> Optional[str]:
         if isinstance(refreshed_token, str) and refreshed_token.strip():
             return refreshed_token.strip()
     except Exception as exc:
-        logger.debug("Nous access token refresh failed: %s", exc)
+        logger.debug("Nunmai access token refresh failed: %s", exc)
 
     return cached_token
 
@@ -201,7 +201,7 @@ def is_managed_tool_gateway_ready(
     gateway_builder: Optional[Callable[[str], str]] = None,
     token_reader: Optional[Callable[[], Optional[str]]] = None,
 ) -> bool:
-    """Return True when gateway URL and a likely-usable Nous token are present.
+    """Return True when gateway URL and a likely-usable Nunmai token are present.
 
     Defaults to :func:`peek_nous_access_token` so read-only availability scans
     avoid synchronous OAuth refresh. Callers that are about to make a real
@@ -227,7 +227,7 @@ def is_managed_tool_gateway_ready(
 # endpoint that can add tools to every entitled install is a bigger trust
 # surface than a code diff.
 #
-# The gateway exposes a Nous-owned REST contract per vendor; it names the
+# The gateway exposes a Nunmai-owned REST contract per vendor; it names the
 # vendor but not the vendor's own API, so nothing here needs to know the
 # upstream's endpoint or field names.
 
@@ -279,7 +279,7 @@ def is_managed_nous_gateway_url(
     url: object,
     gateway_builder: Optional[Callable[[str], str]] = None,
 ) -> bool:
-    """True when ``url`` is on the Nous tool-gateway origin this client builds.
+    """True when ``url`` is on the Nunmai tool-gateway origin this client builds.
 
     Anything granting a URL extra trust — our bearer, reading files off disk to
     upload — must gate on this rather than on a name, so an arbitrary URL can
@@ -305,7 +305,7 @@ def managed_gateway_auth_headers(
 ) -> dict:
     """Live auth headers for a managed gateway URL, or ``{}`` when not managed.
 
-    Read fresh on every call rather than cached: a Nous access token expires
+    Read fresh on every call rather than cached: a Nunmai access token expires
     within the hour, and a long session would otherwise keep presenting a dead
     bearer. Returns ``{}`` rather than raising when no token is available, so a
     caller can report "sign in" instead of sending an unauthenticated request.
@@ -336,7 +336,7 @@ def managed_gateway_auth_headers(
 # the tool argument carries an opaque `nous-upload:<token>` reference instead.
 #
 # The protocol lives HERE rather than in a vendor tool module: the presign
-# request shape, the response contract, and the `nous-upload:` scheme are Nous
+# request shape, the response contract, and the `nous-upload:` scheme are Nunmai
 # gateway specifics shared by every managed vendor that takes media.
 
 _MEDIA_UPLOAD_PRESIGN_TIMEOUT_SECONDS = 15.0
@@ -372,7 +372,7 @@ def build_managed_media_uploader(
     """Async ``(data, mime) -> argument value`` uploader for one managed vendor.
 
     Returns ``None`` when there is no usable upload endpoint (not a managed
-    Nous URL, or no ``upload_path``); callers then refuse local paths with a
+    Nunmai URL, or no ``upload_path``); callers then refuse local paths with a
     clear message instead of silently forwarding them.
 
     The three steps of the protocol:
@@ -384,7 +384,7 @@ def build_managed_media_uploader(
     2. PUT the bytes to that URL. This goes directly to storage — never
        through the gateway — which is what removes the request-size ceiling.
     3. Return ``nous-upload:<token>`` for the tool argument. The token is
-       bound to this Nous principal and is redeemable only through the
+       bound to this Nunmai principal and is redeemable only through the
        gateway, so it is inert anywhere else it might end up.
     """
     if not is_managed_nous_gateway_url(server_url, gateway_builder):
@@ -403,7 +403,7 @@ def build_managed_media_uploader(
 
         headers = managed_gateway_auth_headers(server_url, gateway_builder, token_reader)
         if not headers:
-            raise RuntimeError("no Nous credential is available for the upload")
+            raise RuntimeError("no Nunmai credential is available for the upload")
 
         # Two clients on purpose, split by whose address we are trusting.
         #

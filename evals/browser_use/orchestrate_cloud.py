@@ -1,7 +1,7 @@
 """Cloud-backend battery: pr arm attached to a provisioned cloud browser per cell.
 
 Backends:
-    nous-cloud   - Nous Portal-provisioned Browser Use cloud browser
+    nous-cloud   - Nunmai Portal-provisioned Browser Use cloud browser
                    (plugins.browser.browser_use provider; needs gateway access)
     browserbase  - fresh Browserbase session per cell
                    (needs BROWSERBASE_API_KEY + BROWSERBASE_PROJECT_ID)

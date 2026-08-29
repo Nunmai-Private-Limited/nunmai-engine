@@ -3801,7 +3801,7 @@ class CLICommandsMixin:
         Accepts optional destination words after the command:
 
         - ``/debug``        → upload to the public paste service (default)
-        - ``/debug nous``   → upload to Nous-internal storage (private, staff-only)
+        - ``/debug nous``   → upload to Nunmai-internal storage (private, staff-only)
         - ``/debug local``  → render the report to stdout, no upload
 
         ``nous`` and ``local`` are mutually exclusive; if both are given,

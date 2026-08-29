@@ -1689,9 +1689,9 @@ def _(rid, params: dict) -> dict:
     usage: dict = _session_usage_snapshot(session)
     if agent is None and not usage:
         usage = {"calls": 0, "input": 0, "output": 0, "total": 0}
-    # Nous credits block — agent-independent (a portal fetch), so it shows even
+    # Nunmai credits block — agent-independent (a portal fetch), so it shows even
     # with zero API calls or on a resumed session. The TUI /usage panel renders
-    # these lines regardless of `calls`. Fail-open: [] when not logged into Nous
+    # these lines regardless of `calls`. Fail-open: [] when not logged into Nunmai
     # or on any portal hiccup.
     try:
         from agent.account_usage import nous_credits_lines
@@ -2191,7 +2191,7 @@ def _(rid, params: dict) -> dict:
 def _(rid, params: dict) -> dict:
     """Whether pet generation is possible right now.
 
-    True only when a reference-capable image backend (Nous Portal / OpenRouter /
+    True only when a reference-capable image backend (Nunmai Portal / OpenRouter /
     OpenAI gpt-image) is configured — the desktop checks this on open so it can
     offer setup instead of a dead prompt. Cheap (config + plugin discovery).
     """

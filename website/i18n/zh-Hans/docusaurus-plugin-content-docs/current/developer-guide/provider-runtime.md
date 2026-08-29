@@ -44,7 +44,7 @@ Nunmai 拥有一个共享的 provider 运行时解析器，用于以下场景：
 
 - AI Gateway（Vercel）
 - OpenRouter
-- Nous Portal
+- Nunmai Portal
 - OpenAI Codex
 - Copilot / Copilot ACP
 - Anthropic（原生）

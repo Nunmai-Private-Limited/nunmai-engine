@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Boot-time re-seed of a terminally-dead Nous bootstrap session.
+"""Boot-time re-seed of a terminally-dead Nunmai bootstrap session.
 
 Background
 ----------
-A Nous bootstrap session (client_id ``nunmai-cli-vps``) can take a terminal
+A Nunmai bootstrap session (client_id ``nunmai-cli-vps``) can take a terminal
 ``invalid_grant`` and be quarantined locally — the refresh path clears the dead
 tokens from ``auth.json`` and stamps
 ``providers.nous.last_auth_error.relogin_required = true``. From then on every
@@ -18,7 +18,7 @@ already has an auth.json.
 
 This script is the narrow, safe exception. An orchestrator that manages the
 container can supply a freshly-issued bootstrap session via
-``NUNMAI_AUTH_JSON_REBOOTSTRAP`` (plus a restart). On boot we re-seed the Nous
+``NUNMAI_AUTH_JSON_REBOOTSTRAP`` (plus a restart). On boot we re-seed the Nunmai
 provider entry from that env when the on-disk entry is provably terminal, or
 when the orchestrator seed's ``obtained_at`` is newer than the local session.
 The latter matters because an orchestrator may revoke the previous session
@@ -45,13 +45,13 @@ from typing import Any, Optional
 # Env var the orchestrator sets to the re-seed payload. Deliberately DISTINCT
 # from NUNMAI_AUTH_JSON_BOOTSTRAP (create-only, blank-volume seed) so the two
 # paths can never be confused: BOOTSTRAP seeds a fresh volume; REBOOTSTRAP
-# overwrites a terminally-dead Nous entry on an existing volume.
+# overwrites a terminally-dead Nunmai entry on an existing volume.
 REBOOTSTRAP_ENV = "NUNMAI_AUTH_JSON_REBOOTSTRAP"
 BOOTSTRAP_CLIENT_ID = "nunmai-cli-vps"
 
 
 def _nous_entry_is_terminal(nous_state: Any) -> bool:
-    """True iff the on-disk Nous provider entry is in the terminal/quarantined
+    """True iff the on-disk Nunmai provider entry is in the terminal/quarantined
     state AND holds no usable credential.
 
     Mirrors the ``terminal`` predicate in ``nunmai_cli.auth.get_nous_session_validity``:
@@ -212,10 +212,10 @@ def main() -> int:
         return 0
 
     if result == "reseeded":
-        print("[rebootstrap] Nous bootstrap session was terminal; re-seeded auth.json from "
+        print("[rebootstrap] Nunmai bootstrap session was terminal; re-seeded auth.json from "
               f"{REBOOTSTRAP_ENV}")
     elif result == "reseeded_newer":
-        print("[rebootstrap] Applied newer orchestrator-issued Nous bootstrap session from "
+        print("[rebootstrap] Applied newer orchestrator-issued Nunmai bootstrap session from "
               f"{REBOOTSTRAP_ENV}")
     else:
         # Quiet by default for the common no-op cases; still emit a breadcrumb.

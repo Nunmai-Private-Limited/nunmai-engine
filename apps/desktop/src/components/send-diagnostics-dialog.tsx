@@ -7,7 +7,7 @@
 //               with an explicit Upload button; nothing is sent before it.
 //   uploading — spinner while the backend collects, redacts and uploads.
 //   done      — the private view link (copyable) + where to pick up the
-//               discussion: GitHub Issues · Nous Portal Support · Discord.
+//               discussion: GitHub Issues · Nunmai Portal Support · Discord.
 import { useStore } from '@nanostores/react'
 
 import { Button } from '@/components/ui/button'

@@ -18,7 +18,7 @@ FIXTURE_NO_PROVIDER = (
     "agent init failed: No LLM provider configured. Run `nunmai model` to select "
     "a provider, or run `nunmai setup` for first-time configuration."
 )
-FIXTURE_NO_TOKEN = "agent init failed: No access token found for Nous Portal login."
+FIXTURE_NO_TOKEN = "agent init failed: No access token found for Nunmai Portal login."
 
 
 def test_closed_vocabulary_contains_every_code():

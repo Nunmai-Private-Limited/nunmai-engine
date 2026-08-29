@@ -21,7 +21,7 @@ create/update/pause/resume/remove a cron job (agent side)
   │
   ▼
 ChronosCronScheduler.reconcile()        ── agent computes next_run_at
-  │  POST {portal}/api/agent-cron/provision   (auth: agent's Nous access token)
+  │  POST {portal}/api/agent-cron/provision   (auth: agent's Nunmai access token)
   ▼
 NAS arms a one-shot for fire_at         ── NAS owns the scheduler + its creds
   │
@@ -40,7 +40,7 @@ agent verifies the NAS JWT → store CAS claim → run_one_job → re-arm next o
 
 | Hop | Who calls whom | Auth mechanism | Verified by |
 |---|---|---|---|
-| 1 | agent → NAS (`provision`/`cancel`/`list`) | the agent's existing **Nous Portal access token** (Bearer) — for a hosted agent this is the **bootstrap-session token** NAS planted in `auth.json` (client `nunmai-cli-vps`), NOT an `agent:*` client token | NAS (its normal agent-token path) |
+| 1 | agent → NAS (`provision`/`cancel`/`list`) | the agent's existing **Nunmai Portal access token** (Bearer) — for a hosted agent this is the **bootstrap-session token** NAS planted in `auth.json` (client `nunmai-cli-vps`), NOT an `agent:*` client token | NAS (its normal agent-token path) |
 | 2 | scheduler → NAS (`relay`) | the scheduler's request **signature** | NAS (the signature path it already has) |
 | 3 | NAS → agent (`/api/cron/fire`) | a **short-lived NAS-minted JWT** (`aud=agent:{instance_id}`, `purpose=cron_fire`) | agent (PyJWT against NAS JWKS) |
 
@@ -71,7 +71,7 @@ already performs.
 
 Arm (or re-arm, idempotently) exactly one one-shot for a job.
 
-- **Auth:** `Authorization: Bearer <agent Nous access token>`. NAS validates via
+- **Auth:** `Authorization: Bearer <agent Nunmai access token>`. NAS validates via
   its normal agent-token path and scopes the row to the calling agent/org.
 - **Request body:**
   ```json
@@ -210,7 +210,7 @@ credentials. For hosted agents NAS sets these at provision time:
 | `cron.chronos.expected_audience` | this agent's JWT `aud` (`agent:{instance_id}`) |
 | `cron.chronos.nas_jwks_url` | NAS JWKS for verifying the fire JWT |
 
-If `callback_url` / `portal_url` is blank or the agent has no Nous login,
+If `callback_url` / `portal_url` is blank or the agent has no Nunmai login,
 `is_available()` returns False and the resolver falls back to the built-in
 in-process ticker — cron never loses its trigger.
 

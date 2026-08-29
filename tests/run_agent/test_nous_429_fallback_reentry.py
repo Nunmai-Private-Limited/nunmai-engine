@@ -1,5 +1,5 @@
-"""Regression guard: a genuine Nous 429 must re-enter the retry loop so the
-top-of-loop Nous rate-limit guard can activate the fallback chain.
+"""Regression guard: a genuine Nunmai 429 must re-enter the retry loop so the
+top-of-loop Nunmai rate-limit guard can activate the fallback chain.
 
 Bug (found in the #44061 audit): the genuine-rate-limit branch in
 ``agent/conversation_loop.py`` set ``retry_count = max_retries`` then

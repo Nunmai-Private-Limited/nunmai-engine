@@ -42,6 +42,14 @@ PROTECT_RE = re.compile("|".join(f"(?:{p})" for p in PROTECT), re.IGNORECASE)
 # tool-gateway., staging) and github.com/NousResearch are deliberately kept
 # so login, inference, update-check and skills-hub keep working.
 POST_REPLACEMENTS = [
+    # Display text: any capitalised "Nous" (Nous Portal, Nous DS, Nous Research split
+    # across markup, bare "Nous") becomes Nunmai. Lower-case identifiers ("nous"
+    # provider id), NOUS_* env vars and *.nousresearch.com hosts are untouched.
+    (re.compile(r'Nous<span class="dot"></span>Research'), 'Nunmai<span class="dot"></span>Research'),
+    (re.compile(r"\bNous\b(?![-_./@])"), "Nunmai"),
+    (re.compile(r"(?<![\w-])Nous-(?=[a-z])"), "Nunmai-"),   # Nous-managed / Nous-hosted prose; keeps X-Nous-* headers
+    (re.compile(r"\bNous\.(?=\s|$)"), "Nunmai."),          # sentence-final "Nous."
+    (re.compile(r"\bNous(?=/[A-Z])"), "Nunmai"),            # "Nous/Codex/Anthropic" prose lists
     # Dockerfile SQLite FTS5 self-test: trigram 'erm' is a substring of 'hermes'; after the
     # row becomes 'nunmai' the probe must search a substring of 'nunmai'.
     (re.compile(r"MATCH 'erm'"), "MATCH 'unm'"),

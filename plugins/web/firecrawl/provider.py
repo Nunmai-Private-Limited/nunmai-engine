@@ -37,7 +37,7 @@ Env vars::
 
     FIRECRAWL_API_KEY=...            # direct cloud auth
     FIRECRAWL_API_URL=...            # self-hosted Firecrawl
-    FIRECRAWL_GATEWAY_URL=...        # Nous tool-gateway (subscribers)
+    FIRECRAWL_GATEWAY_URL=...        # Nunmai tool-gateway (subscribers)
     TOOL_GATEWAY_DOMAIN=...          # alternate gateway env
     TOOL_GATEWAY_SCHEME=...
     TOOL_GATEWAY_USER_TOKEN=...
@@ -171,7 +171,7 @@ def _use_keyless_ring() -> bool:
     """True when Firecrawl calls should route via the keyless ring.
 
     Ring dispatch applies when there are no direct credentials, the
-    managed Nous gateway isn't the selected path, and the keyless tier
+    managed Nunmai gateway isn't the selected path, and the keyless tier
     isn't disabled or pinned paid. Keyed/self-hosted/gateway setups never
     reach the ring.
     """
@@ -235,7 +235,7 @@ def _get_firecrawl_gateway_url() -> str:
 
 
 def _is_tool_gateway_ready() -> bool:
-    """Return True when gateway URL + Nous Subscriber token are available.
+    """Return True when gateway URL + Nunmai Subscriber token are available.
 
     Reads ``peek_nous_access_token`` and ``resolve_managed_tool_gateway``
     via :mod:`tools.web_tools` rather than direct imports, so unit tests
@@ -282,7 +282,7 @@ def _firecrawl_backend_help_suffix() -> str:
     if not _wt.managed_nous_tools_enabled():
         return ""
     return (
-        ", or use the Nous Tool Gateway via your subscription "
+        ", or use the Nunmai Tool Gateway via your subscription "
         "(FIRECRAWL_GATEWAY_URL or TOOL_GATEWAY_DOMAIN)"
     )
 
@@ -298,8 +298,8 @@ def _raise_web_backend_configuration_error() -> "NoReturn":
     )
     if _wt.managed_nous_tools_enabled():
         message += (
-            " With your Nous subscription you can also use the Tool Gateway. "
-            "run `nunmai tools` and select Nous Subscription as the web provider."
+            " With your Nunmai subscription you can also use the Tool Gateway. "
+            "run `nunmai tools` and select Nunmai Subscription as the web provider."
         )
     else:
         message += " " + _wt.nous_tool_gateway_unavailable_message(
@@ -317,7 +317,7 @@ def _get_firecrawl_client() -> Any:
       FIRECRAWL_API_KEY does not reroute).
     - any other stored web backend → direct Firecrawl ONLY; missing config
       is a selection-naming error — never a silent managed fallback billed
-      to Nous.
+      to Nunmai.
     - never-configured web section → legacy behavior: direct config when
       present, else the managed gateway.
 
@@ -363,14 +363,14 @@ def _get_firecrawl_client() -> Any:
         managed = _managed_kwargs()
         if managed is None:
             logger.error(
-                "Firecrawl client initialization failed: the Nous "
+                "Firecrawl client initialization failed: the Nunmai "
                 "Subscription web selection is stored but the tool gateway "
                 "is unavailable."
             )
             raise ValueError(selection_error(
                 "web",
                 NOUS_MANAGED_PROVIDER,
-                "the Nous Tool Gateway is not available (not entitled or "
+                "the Nunmai Tool Gateway is not available (not entitled or "
                 "unreachable)",
             ))
         kwargs, client_config = managed
@@ -792,7 +792,7 @@ class FirecrawlWebSearchProvider(WebSearchProvider):
             "badge": "keyless/paid · optional gateway",
             "tag": (
                 "Full search + extract; supports keyless cloud, direct API, "
-                "and Nous tool-gateway routing."
+                "and Nunmai tool-gateway routing."
             ),
             "env_vars": [
                 {

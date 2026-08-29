@@ -60,7 +60,7 @@ beforeEach(() => {
   getGlobalModelOptions.mockResolvedValue({
     providers: [
       {
-        name: 'Nous',
+        name: 'Nunmai',
         slug: 'nous',
         models: ['hermes-4', 'hermes-4-mini'],
         authenticated: true,
@@ -136,8 +136,8 @@ describe('ModelSettings', () => {
     const triggers = await screen.findAllByRole('combobox')
     fireEvent.click(triggers[0])
 
-    // "Nous" shows in both the trigger and the open list.
-    expect((await screen.findAllByText('Nous')).length).toBeGreaterThan(0)
+    // "Nunmai" shows in both the trigger and the open list.
+    expect((await screen.findAllByText('Nunmai')).length).toBeGreaterThan(0)
     expect(screen.queryByText(/DeepSeek/)).toBeNull()
   })
 
@@ -217,7 +217,7 @@ describe('ModelSettings', () => {
       .mockResolvedValueOnce({
         providers: [
           {
-            name: 'Nous',
+            name: 'Nunmai',
             slug: 'nous',
             models: ['hermes-4'],
             authenticated: true,
@@ -234,7 +234,7 @@ describe('ModelSettings', () => {
     })
 
     await waitFor(() => expect(getGlobalModelInfo).toHaveBeenCalledTimes(2))
-    await waitFor(() => expect(screen.getAllByRole('combobox')[0].textContent).toContain('Nous'))
+    await waitFor(() => expect(screen.getAllByRole('combobox')[0].textContent).toContain('Nunmai'))
     expect(screen.queryByRole('button', { name: 'Set up provider' })).toBeNull()
   })
 
@@ -242,7 +242,7 @@ describe('ModelSettings', () => {
     getGlobalModelOptions.mockResolvedValueOnce({
       providers: [
         {
-          name: 'Nous',
+          name: 'Nunmai',
           slug: 'nous',
           models: ['hermes-4'],
           authenticated: true
@@ -304,7 +304,7 @@ describe('ModelSettings', () => {
     getGlobalModelOptions.mockResolvedValueOnce({
       providers: [
         {
-          name: 'Nous',
+          name: 'Nunmai',
           slug: 'nous',
           models: ['hermes-4'],
           authenticated: true,
@@ -443,7 +443,7 @@ describe('ModelSettings MoA preset editor', () => {
     getGlobalModelOptions.mockResolvedValue({
       providers: [
         {
-          name: 'Nous',
+          name: 'Nunmai',
           slug: 'nous',
           models: ['hermes-4', 'hermes-4-mini'],
           authenticated: true,
@@ -534,7 +534,7 @@ describe('ModelSettings MoA preset editor', () => {
       await openReferenceEditor()
 
       fireEvent.click(slotSelects().ref1Provider)
-      fireEvent.click(await screen.findByRole('option', { name: 'Nous' }))
+      fireEvent.click(await screen.findByRole('option', { name: 'Nunmai' }))
       await vi.advanceTimersByTimeAsync(700)
 
       // Radix treats re-picking the current value as a no-op (no

@@ -14,7 +14,7 @@ import nunmai_cli.models as models_mod
 
 
 def _patch_catalog(monkeypatch, caps_by_model, *, provider="nous"):
-    """Point the Nous/OpenRouter catalog readers at a fixed capability map."""
+    """Point the Nunmai/OpenRouter catalog readers at a fixed capability map."""
     monkeypatch.setattr(models_mod, "model_supports_fast_mode", lambda model: False)
     monkeypatch.setattr(models_mod, "warm_nous_reasoning_caps_async", lambda: None)
     monkeypatch.setattr(models_mod, "warm_openrouter_reasoning_caps_async", lambda: None)

@@ -38,7 +38,7 @@ def _raise_import():
 # managed_nous_tools_enabled
 # ---------------------------------------------------------------------------
 class TestManagedNousToolsEnabled:
-    """Subscription-based gate: True for paid Nous subscribers."""
+    """Subscription-based gate: True for paid Nunmai subscribers."""
 
     def test_disabled_when_not_logged_in(self, monkeypatch):
         monkeypatch.setattr(

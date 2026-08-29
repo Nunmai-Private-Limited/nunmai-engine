@@ -305,7 +305,7 @@ class _UnreachableProvider(StubAuthProvider):
     """A provider whose IDP is unreachable: verify_session always raises.
 
     Models the real-world bug — a self-hosted-OIDC session hits the ``nous``
-    provider first, which tries to reach Nous Portal's JWKS; if that's
+    provider first, which tries to reach Nunmai Portal's JWKS; if that's
     unreachable ``nous`` raises ProviderError. The gate must keep trying the
     remaining providers rather than 503-ing the whole request.
     """

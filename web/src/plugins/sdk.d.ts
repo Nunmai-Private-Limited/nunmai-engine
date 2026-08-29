@@ -149,7 +149,7 @@ export interface NunmaiPluginSDK {
   buildWsAuthParam: BuildWsAuthParam;
 
   /**
-   * Shared UI primitives (Nous DS / shadcn). Typed permissively at the
+   * Shared UI primitives (Nunmai DS / shadcn). Typed permissively at the
    * boundary: the host's concrete components (some of which require props like
    * ``active``/``value``/``name``) must be assignable here, and external plugin
    * authors render them dynamically without the host's internal prop types.

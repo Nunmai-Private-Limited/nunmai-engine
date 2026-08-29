@@ -3,7 +3,7 @@
 Covers, against the frozen contract (~/src/specs/collective-wisdom/
 the sync wire contract):
   * content addressing (full 64-hex) + canonical JSON (§2.1, §2.5)
-  * the access gate (Nous admin) making sync inert
+  * the access gate (Nunmai admin) making sync inert
   * the M1-D opt-in default (nothing syncs without the sync flag)
   * object building (blob/tree/commit, exec mode, size limit)
   * push (upload + CAS), pull (materialize), and the three-way merge / 409
@@ -296,7 +296,7 @@ class TestAddressing:
 
 
 # ---------------------------------------------------------------------------
-# Access gate (Nous admin) + per-skill opt-in
+# Access gate (Nunmai admin) + per-skill opt-in
 # ---------------------------------------------------------------------------
 
 class TestDevGate:

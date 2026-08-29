@@ -1,4 +1,4 @@
-"""Regression tests for the Nous Portal env-override bypassing the host
+"""Regression tests for the Nunmai Portal env-override bypassing the host
 allowlist, mirroring the existing NOUS_INFERENCE_BASE_URL /
 _ALLOWED_NOUS_INFERENCE_HOSTS treatment.
 

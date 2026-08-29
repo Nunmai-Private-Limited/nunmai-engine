@@ -178,7 +178,7 @@ MODEL_STRATEGIES = {
             ),
         },
     },
-    # Nous/Nunmai models — already uncensored, just needs clean prompt
+    # Nunmai/Nunmai models — already uncensored, just needs clean prompt
     "nunmai": {
         "order": ["prefill_only"],
         "system_templates": {},

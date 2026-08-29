@@ -204,7 +204,7 @@ def test_save_platform_tools_preserves_mcp_server_names():
 
 
 def test_first_install_nous_auto_configures_video_gen(monkeypatch):
-    """When a Nous subscriber checks video_gen in the toolset checklist,
+    """When a Nunmai subscriber checks video_gen in the toolset checklist,
     apply_nous_managed_defaults must write video_gen.provider and
     video_gen.use_gateway so the FAL plugin can route through the gateway
     at runtime.  Regression test for the bug where video_gen was marked as
@@ -697,7 +697,7 @@ class TestImagegenBackendRegistry:
         assert "fal-ai/flux-2-pro" in catalog
 
     def test_image_gen_providers_tagged_with_fal_backend(self):
-        """Both Nous Subscription and FAL.ai providers must carry the
+        """Both Nunmai Subscription and FAL.ai providers must carry the
         imagegen_backend tag so _configure_provider fires the picker."""
         from nunmai_cli.tools_config import TOOL_CATEGORIES
         providers = TOOL_CATEGORIES["image_gen"]["providers"]
@@ -811,7 +811,7 @@ def test_get_effective_configurable_toolsets_dedupes_bundled_plugins():
 
 
 # ---------------------------------------------------------------------------
-# Inline Nous Portal login gate on managed-provider selection
+# Inline Nunmai Portal login gate on managed-provider selection
 # ---------------------------------------------------------------------------
 
 
@@ -884,7 +884,7 @@ def test_vision_picker_custom_endpoint(tmp_path, monkeypatch):
 # ─── provider_readiness_status ────────────────────────────────────────────────
 #
 # Server-side truth for the GUI "Ready" pill (issue: Capabilities tab showed
-# Ready for every zero-env-var provider row, including logged-out Nous
+# Ready for every zero-env-var provider row, including logged-out Nunmai
 # Subscription rows and never-installed KittenTTS/Piper).
 
 

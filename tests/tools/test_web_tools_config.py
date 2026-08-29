@@ -331,9 +331,9 @@ class TestBackendSelection:
             assert _get_backend() == "firecrawl"
 
     def test_managed_gateway_does_not_preempt_explicit_tavily(self):
-        """Regression: a Nous OAuth token (managed gateway "ready") must NOT
+        """Regression: a Nunmai OAuth token (managed gateway "ready") must NOT
         beat an explicitly configured TAVILY_API_KEY in the fallback path.
-        Free Nous tiers don't include web search, so the user's deliberate
+        Free Nunmai tiers don't include web search, so the user's deliberate
         Tavily setup would fail at runtime with "no subscription" if the
         gateway pre-empted it."""
         from tools.web_tools import _get_backend
@@ -343,7 +343,7 @@ class TestBackendSelection:
             assert _get_backend() == "tavily"
 
     def test_managed_gateway_only_falls_through_to_firecrawl(self):
-        """When no explicit-credential backend is configured, a Nous-managed
+        """When no explicit-credential backend is configured, a Nunmai-managed
         gateway token still selects firecrawl — the convenience path is
         preserved, just no longer pre-empts."""
         from tools.web_tools import _get_backend

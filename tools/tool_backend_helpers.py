@@ -18,9 +18,9 @@ _VALID_MODAL_MODES = {"auto", "direct", "managed"}
 
 
 def managed_nous_tools_enabled(*, force_fresh: bool = False) -> bool:
-    """Return True when the user is entitled to the Nous Tool Gateway.
+    """Return True when the user is entitled to the Nunmai Tool Gateway.
 
-    Entitlement is paid Nous Portal service access OR a live free tool pool
+    Entitlement is paid Nunmai Portal service access OR a live free tool pool
     (``tool_gateway_entitled``). Per-category coverage (the pool funds image but
     not video, etc.) is narrowed by callers via ``tool_gateway_entitled_for``;
     this coarse gate only answers "is any managed tool usable at all".
@@ -45,11 +45,11 @@ def managed_nous_tools_enabled(*, force_fresh: bool = False) -> bool:
 
 
 def nous_tool_gateway_unavailable_message(
-    capability: str = "the Nous Tool Gateway",
+    capability: str = "the Nunmai Tool Gateway",
     *,
     force_fresh: bool = False,
 ) -> str:
-    """Return account-aware guidance for an unavailable Nous Tool Gateway path."""
+    """Return account-aware guidance for an unavailable Nunmai Tool Gateway path."""
     try:
         from nunmai_cli.nous_account import (
             format_nous_portal_entitlement_message,
@@ -67,7 +67,7 @@ def nous_tool_gateway_unavailable_message(
         pass
     return (
         f"{capability} is unavailable. Run `nunmai model` to refresh your "
-        "Nous Portal login and billing status."
+        "Nunmai Portal login and billing status."
     )
 
 
@@ -290,7 +290,7 @@ def prefers_gateway(config_section: str) -> bool:
     return False
 
 
-# The provider value the managed "Nous Subscription" picker rows write for
+# The provider value the managed "Nunmai Subscription" picker rows write for
 # every category (image_gen.provider: nous, web.backend: nous,
 # browser.cloud_provider: nous, ...). Runtime dispatch is a plain switch on
 # the stored string: "nous" → managed gateway client; any vendor name → that
@@ -317,7 +317,7 @@ def read_selection(section: str) -> str | None:
     """Return the stored `nunmai tools` provider string for a config section.
 
     THE single runtime read of the persisted selection. Returns:
-    - ``"nous"`` — the managed Nous Tool Gateway row was selected,
+    - ``"nous"`` — the managed Nunmai Tool Gateway row was selected,
     - a vendor name (``"fal"``, ``"openai"``, ``"firecrawl"``, ...) — that
       vendor, direct, with the user's own credentials,
     - ``None`` — the category has NEVER been configured; the legacy
@@ -329,7 +329,7 @@ def read_selection(section: str) -> str | None:
 
     Legacy interpretation (read-time only — nothing is migrated on disk):
     older picker versions wrote ``<section>.use_gateway`` beside the name
-    key. ``use_gateway: true`` was only ever written by the managed "Nous
+    key. ``use_gateway: true`` was only ever written by the managed "Nunmai
     Subscription" row, so it maps to ``"nous"`` regardless of the name key;
     ``use_gateway: false`` beside a name key maps to that name.
     """

@@ -1,4 +1,4 @@
-"""Nous Portal provider profile."""
+"""Nunmai Portal provider profile."""
 
 from typing import Any
 
@@ -9,14 +9,14 @@ from providers.base import ProviderProfile
 
 
 class NousProfile(ProviderProfile):
-    """Nous Portal — product tags, reasoning with Nous-specific omission."""
+    """Nunmai Portal — product tags, reasoning with Nunmai-specific omission."""
 
     def resolve_aux_model(self, *, vision: bool = False) -> str:
         """Ask the Portal which cheap model it currently recommends.
 
         ``/api/nous/recommended-models`` is the authoritative, tier-aware
         source (free vs paid), so the auxiliary fast tier tracks the live
-        catalog instead of a hardcoded id that 404s the day Nous retires it.
+        catalog instead of a hardcoded id that 404s the day Nunmai retires it.
         The underlying fetch is memory- and disk-cached with a last-known-good
         fallback, so this is cheap to call and safe offline.
         """
@@ -103,7 +103,7 @@ class NousProfile(ProviderProfile):
         model: str | None = None,
         **context,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        """Nous: passes the full reasoning_config, disable included.
+        """Nunmai: passes the full reasoning_config, disable included.
 
         The Portal honors ``reasoning: {enabled: false}`` — it is the only
         wire shape that does. Sending nothing means the *upstream* default,

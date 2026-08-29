@@ -57,12 +57,12 @@ export function getGlobalModelOptions(
 export interface RecommendedDefaultModel {
   provider: string
   model: string
-  /** True/false for Nous (free vs paid tier); null for other providers. */
+  /** True/false for Nunmai (free vs paid tier); null for other providers. */
   free_tier: boolean | null
 }
 
 // Recommended default model for a freshly-authenticated provider. Mirrors the
-// curation `nunmai model` does — for Nous it honors the free/paid tier so a
+// curation `nunmai model` does — for Nunmai it honors the free/paid tier so a
 // free user gets a free model instead of a paid default.
 export function getRecommendedDefaultModel(
   provider: string,

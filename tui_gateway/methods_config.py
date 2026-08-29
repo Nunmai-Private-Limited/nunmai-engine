@@ -463,7 +463,7 @@ def _(rid, params: dict) -> dict:
 
 @method("diagnostics.share_nous")
 def _(rid, params: dict) -> dict:
-    """Upload a redacted debug bundle to Nous-internal diagnostics storage.
+    """Upload a redacted debug bundle to Nunmai-internal diagnostics storage.
 
     Desktop's "Send Diagnostics" action (error card / diagnostics UI). Same
     collection + force-redaction pipeline as ``nunmai debug share --nous``

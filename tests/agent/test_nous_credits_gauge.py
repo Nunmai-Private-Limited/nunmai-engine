@@ -1,4 +1,4 @@
-"""Tests for the Nous-credits subscription % gauge in build_nous_credits_snapshot.
+"""Tests for the Nunmai-credits subscription % gauge in build_nous_credits_snapshot.
 
 Covers the monthly_credits denominator path added when the portal /api/oauth/account
 subscription block began carrying `monthly_credits`. Magnitudes-only fallback, clamp,

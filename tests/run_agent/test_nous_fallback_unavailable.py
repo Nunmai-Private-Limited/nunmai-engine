@@ -1,7 +1,7 @@
-"""Tests for Nous fallback local-availability suppression.
+"""Tests for Nunmai fallback local-availability suppression.
 
-Blocker if Nous token material is missing locally: the fallback chain
-should not repeatedly attempt Nous resolution; it must skip and continue
+Blocker if Nunmai token material is missing locally: the fallback chain
+should not repeatedly attempt Nunmai resolution; it must skip and continue
 to the next provider.
 """
 
@@ -43,7 +43,7 @@ def _mock_client(base_url="https://chatgpt.com/backend-api/codex", api_key="fb-k
 
 class TestNousFallbackLocalAvailability:
     def test_missing_nous_token_is_skipped_once(self):
-        """Nous fallback is skipped when no access/refresh token is stored."""
+        """Nunmai fallback is skipped when no access/refresh token is stored."""
         agent = _make_agent(
             fallback_model=[
                 {"provider": "nous", "model": "anthropic/claude-sonnet-4.6"},
@@ -62,7 +62,7 @@ class TestNousFallbackLocalAvailability:
         assert agent.model == "gpt-5.5"
 
     def test_nous_unavailable_not_retried_in_same_session(self):
-        """After Nous is skipped once, subsequent activations continue further."""
+        """After Nunmai is skipped once, subsequent activations continue further."""
         agent = _make_agent(
             fallback_model=[
                 {"provider": "nous", "model": "anthropic/claude-sonnet-4.6"},
@@ -82,7 +82,7 @@ class TestNousFallbackLocalAvailability:
         assert key in getattr(agent, "_unavailable_fallback_keys", set())
 
     def test_present_nous_token_allows_activation(self):
-        """Nous is considered when token material exists."""
+        """Nunmai is considered when token material exists."""
         agent = _make_agent(
             fallback_model=[
                 {"provider": "nous", "model": "anthropic/claude-sonnet-4.6"},

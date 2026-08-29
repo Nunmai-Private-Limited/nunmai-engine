@@ -18,7 +18,7 @@ def test_free_model_gets_flat_100_percent_discount():
     assert compute_sale_discount(
         "0", "0", {"prompt": "0.000002", "completion": "0.00001"}
     ) == (100, "0.000002", "0.00001")
-    # "0.0000000000" strings (Nous portal shape) count as free too.
+    # "0.0000000000" strings (Nunmai portal shape) count as free too.
     assert compute_sale_discount("0.0000000000", "0.0000000000", None) == (100, "", "")
 
 
@@ -65,7 +65,7 @@ def test_fetch_models_with_pricing_copies_nested_original(monkeypatch):
         lambda req, timeout=8.0: resp,
     )
 
-    # Nous Portal opts in via include_sale_original=True.
+    # Nunmai Portal opts in via include_sale_original=True.
     result = fetch_models_with_pricing(
         api_key="sk-test",
         base_url="https://example.test",

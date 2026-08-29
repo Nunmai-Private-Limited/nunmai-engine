@@ -268,11 +268,11 @@ def show_status(args):
     if nous_logged_in:
         nous_label = "logged in"
     elif nous_inference_present:
-        nous_label = "not logged in (Nous inference key configured)"
+        nous_label = "not logged in (Nunmai inference key configured)"
     else:
         nous_label = "not logged in (run: nunmai portal)"
     print(
-        f"  {'Nous Portal':<12}  {check_mark(nous_logged_in)} "
+        f"  {'Nunmai Portal':<12}  {check_mark(nous_logged_in)} "
         f"{nous_label}"
     )
     portal_url = nous_status.get("portal_base_url") or "(unknown)"
@@ -340,7 +340,7 @@ def show_status(args):
         print(f"    Error:      {minimax_status.get('error')}")
 
     # xAI OAuth — separate try/except so an import failure here cannot
-    # disrupt the already-printed Nous/Codex/Qwen/MiniMax rows above.
+    # disrupt the already-printed Nunmai/Codex/Qwen/MiniMax rows above.
     try:
         from nunmai_cli.auth import get_xai_oauth_auth_status
         xai_oauth_status = get_xai_oauth_auth_status() or {}
@@ -361,19 +361,19 @@ def show_status(args):
         print(f"    Error:      {xai_oauth_status.get('error')}")
 
     # =========================================================================
-    # Nous Subscription Features
+    # Nunmai Subscription Features
     # =========================================================================
     if managed_nous_tools_enabled():
         features = get_nous_subscription_features(config)
         print()
-        print(color("◆ Nous Tool Gateway", Colors.CYAN, Colors.BOLD))
+        print(color("◆ Nunmai Tool Gateway", Colors.CYAN, Colors.BOLD))
         if not features.nous_auth_present:
-            print("  Nous Portal   ✗ not logged in")
+            print("  Nunmai Portal   ✗ not logged in")
         else:
-            print("  Nous Portal   ✓ managed tools available")
+            print("  Nunmai Portal   ✓ managed tools available")
         for feature in features.items():
             if feature.managed_by_nous:
-                state = "active via Nous subscription"
+                state = "active via Nunmai subscription"
             elif feature.active:
                 current = feature.current_provider or "configured provider"
                 state = f"active via {current}"
@@ -385,10 +385,10 @@ def show_status(args):
                 state = "not configured"
             print(f"  {feature.label:<15} {check_mark(feature.available or feature.active or feature.managed_by_nous)} {state}")
     elif nous_logged_in or nous_inference_present:
-        # Nous OAuth without entitlement, or an opaque inference key without
+        # Nunmai OAuth without entitlement, or an opaque inference key without
         # Portal account information, cannot enable the Tool Gateway.
         print()
-        print(color("◆ Nous Tool Gateway", Colors.CYAN, Colors.BOLD))
+        print(color("◆ Nunmai Tool Gateway", Colors.CYAN, Colors.BOLD))
         message = format_nous_portal_entitlement_message(
             nous_account_info,
             capability="managed web, image, TTS, STT, browser, and Modal tools",

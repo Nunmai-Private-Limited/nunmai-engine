@@ -1,4 +1,4 @@
-"""Regression tests for Nous OAuth refresh and inference JWT interactions."""
+"""Regression tests for Nunmai OAuth refresh and inference JWT interactions."""
 
 import base64
 import json
@@ -396,8 +396,8 @@ def test_nous_inference_auth_logs_do_not_include_secret_values(
 
 
 def test_get_nous_auth_status_checks_credential_pool(tmp_path, monkeypatch):
-    """get_nous_auth_status() should find Nous credentials in the pool
-    even when the auth store has no Nous provider entry — this is the
+    """get_nous_auth_status() should find Nunmai credentials in the pool
+    even when the auth store has no Nunmai provider entry — this is the
     case when login happened via the dashboard device-code flow which
     saves to the pool only.
     """
@@ -405,13 +405,13 @@ def test_get_nous_auth_status_checks_credential_pool(tmp_path, monkeypatch):
 
     nunmai_home = tmp_path / "nunmai"
     nunmai_home.mkdir(parents=True, exist_ok=True)
-    # Empty auth store — no Nous provider entry
+    # Empty auth store — no Nunmai provider entry
     (nunmai_home / "auth.json").write_text(json.dumps({
         "version": 1, "providers": {},
     }))
     monkeypatch.setenv("NUNMAI_HOME", str(nunmai_home))
 
-    # Seed the credential pool with a Nous entry
+    # Seed the credential pool with a Nunmai entry
     from agent.credential_pool import PooledCredential, load_pool
     pool = load_pool("nous")
     token = _invoke_jwt(seconds=3600)
@@ -465,7 +465,7 @@ def test_get_nous_auth_status_empty_returns_not_logged_in(tmp_path, monkeypatch)
 
 
 class TestLoginNousSkipKeepsCurrent:
-    """When a user runs `nunmai model` → Nous Portal → Skip (keep current) after
+    """When a user runs `nunmai model` → Nunmai Portal → Skip (keep current) after
     a successful OAuth login, the prior provider and model MUST be preserved.
 
     Regression: previously, _update_config_for_provider was called
@@ -534,7 +534,7 @@ class TestLoginNousSkipKeepsCurrent:
         return free_tier_calls
 
     def test_skip_keep_current_preserves_provider_and_model(self, tmp_path, monkeypatch):
-        """User picks Skip → config.yaml untouched, Nous creds still saved."""
+        """User picks Skip → config.yaml untouched, Nunmai creds still saved."""
         import argparse
         import yaml
         from nunmai_cli.auth import PROVIDER_REGISTRY, _login_nous
@@ -556,7 +556,7 @@ class TestLoginNousSkipKeepsCurrent:
         assert cfg_after["model"]["default"] == "anthropic/claude-opus-4.6"
         assert "base_url" not in cfg_after["model"]
 
-        # auth.json: active_provider restored to openrouter, but Nous creds saved
+        # auth.json: active_provider restored to openrouter, but Nunmai creds saved
         auth_after = json.loads(auth_path.read_text())
         assert auth_after["active_provider"] == "openrouter"
         assert "nous" in auth_after["providers"]
@@ -565,7 +565,7 @@ class TestLoginNousSkipKeepsCurrent:
         assert auth_after["providers"]["openrouter"]["api_key"] == "sk-or-fake"
 
     def test_picking_model_switches_to_nous(self, tmp_path, monkeypatch):
-        """User picks a Nous model → provider flips to nous with that model."""
+        """User picks a Nunmai model → provider flips to nous with that model."""
         import argparse
         import yaml
         from nunmai_cli.auth import PROVIDER_REGISTRY, _login_nous
@@ -618,7 +618,7 @@ class TestLoginNousSkipKeepsCurrent:
         auth_after = json.loads(auth_path.read_text())
         # active_provider should NOT be set to "nous" after Skip
         assert auth_after.get("active_provider") in {None, ""}
-        # But Nous creds are still saved
+        # But Nunmai creds are still saved
         assert "nous" in auth_after.get("providers", {})
 
 
@@ -657,7 +657,7 @@ def test_persist_nous_credentials_writes_both_pool_and_providers(tmp_path, monke
     """Helper must populate BOTH credential_pool.nous AND providers.nous.
 
     Regression guard: before this helper existed, `nunmai auth add nous`
-    wrote only the pool. After the Nous agent_key's 24h TTL expired, the
+    wrote only the pool. After the Nunmai agent_key's 24h TTL expired, the
     401-recovery path in run_agent.py called resolve_nous_runtime_credentials
     which reads providers.nous, found it empty, raised AuthError, and the
     agent failed with "Non-retryable client error". Both stores must stay
@@ -772,7 +772,7 @@ def test_persist_nous_credentials_no_label_uses_auto_derived(tmp_path, monkeypat
 def test_refresh_token_reuse_detection_surfaces_actionable_message():
     """Regression for #15099.
 
-    When the Nous Portal server returns ``invalid_grant`` with
+    When the Nunmai Portal server returns ``invalid_grant`` with
     ``error_description`` containing "reuse detected", Nunmai must surface an
     actionable message explaining that an external process consumed the
     refresh token.  The default opaque "Refresh token reuse detected; please
@@ -814,7 +814,7 @@ def test_refresh_token_reuse_detection_surfaces_actionable_message():
 
 
 def test_refresh_token_exchange_sends_refresh_token_header():
-    """Nous refresh tokens must be sent in a header so sandbox proxies can
+    """Nunmai refresh tokens must be sent in a header so sandbox proxies can
     substitute placeholder credentials without parsing form bodies.
     """
     from nunmai_cli.auth import _refresh_access_token
@@ -856,7 +856,7 @@ def test_refresh_token_exchange_sends_refresh_token_header():
 
 
 # =============================================================================
-# Shared Nous token store — cross-profile persistence (Codex-style auto-import)
+# Shared Nunmai token store — cross-profile persistence (Codex-style auto-import)
 # =============================================================================
 
 
@@ -864,7 +864,7 @@ def test_refresh_token_exchange_sends_refresh_token_header():
 def shared_store_env(tmp_path, monkeypatch):
     """Redirect NUNMAI_SHARED_AUTH_DIR to a tmp_path.
 
-    Required for every test that exercises the shared Nous store — the
+    Required for every test that exercises the shared Nunmai store — the
     in-auth.py seat belt refuses to touch the real user's shared store
     under pytest, so tests that forget this fixture fail loudly instead
     of corrupting real state.
@@ -885,7 +885,7 @@ def test_shared_store_seat_belt_refuses_real_home_under_pytest(monkeypatch):
 
     monkeypatch.delenv("NUNMAI_SHARED_AUTH_DIR", raising=False)
 
-    with pytest.raises(RuntimeError, match="shared Nous auth store"):
+    with pytest.raises(RuntimeError, match="shared Nunmai auth store"):
         _nous_shared_store_path()
 
 

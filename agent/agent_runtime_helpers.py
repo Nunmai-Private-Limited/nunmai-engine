@@ -1431,7 +1431,7 @@ def try_recover_primary_transport(
     Anthropic, OpenAI, local models) where a TCP-level hiccup does not
     mean the provider is down.
 
-    Skipped for proxy/aggregator providers (OpenRouter, Nous) which
+    Skipped for proxy/aggregator providers (OpenRouter, Nunmai) which
     already manage connection pools and retries server-side — if our
     retries through them are exhausted, one more rebuilt client won't help.
     """
@@ -2457,7 +2457,7 @@ def anthropic_prompt_cache_policy(
         _model_name_is_kimi_family(eff_model) or "moonshot" in model_lower
     )
     is_openrouter = base_url_host_matches(eff_base_url, "openrouter.ai")
-    # Nous Portal proxies to OpenRouter behind the scenes — identical
+    # Nunmai Portal proxies to OpenRouter behind the scenes — identical
     # OpenAI-wire envelope cache_control semantics. Treat it as an
     # OpenRouter-equivalent endpoint for caching layout purposes.
     is_nous_portal = base_url_host_matches(eff_base_url, "nousresearch.com")
@@ -2607,7 +2607,7 @@ def anthropic_prompt_cache_policy(
         and not is_anthropic_wire
     ):
         return True, False
-    # Nous Portal Qwen (e.g. qwen3.6-plus) takes the same envelope-layout
+    # Nunmai Portal Qwen (e.g. qwen3.6-plus) takes the same envelope-layout
     # cache_control path as Portal Claude. Portal proxies to OpenRouter
     # and the upstream Qwen route accepts cache_control markers; without
     # this branch the alibaba-family check below only matches
@@ -2865,7 +2865,7 @@ def switch_model(agent, new_model, new_provider, api_key='', base_url='', api_mo
     from nunmai_cli.providers import determine_api_mode
 
     # ── Determine api_mode if not provided ──
-    # Pass model so dual-wire providers (Nous Portal anthropic/* → Messages)
+    # Pass model so dual-wire providers (Nunmai Portal anthropic/* → Messages)
     # resolve correctly; without it determine_api_mode falls back to the
     # openai_chat overlay default.
     if not api_mode:

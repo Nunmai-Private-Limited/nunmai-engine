@@ -3961,8 +3961,8 @@ async def get_status(profile: Optional[str] = None):
             # Module not importable yet (early startup) — leave as [].
             pass
 
-        # Nous bootstrap-session validity for the NAS health sweep. A hosted
-        # agent whose Nous auth dies terminally (invalid_grant / quarantine)
+        # Nunmai bootstrap-session validity for the NAS health sweep. A hosted
+        # agent whose Nunmai auth dies terminally (invalid_grant / quarantine)
         # looks HEALTHY to every liveness/connectivity probe — the machine,
         # relay, and this dashboard all stay up — yet every inference turn
         # fails. This is the ONLY signal that surfaces that condition, and it
@@ -4399,7 +4399,7 @@ def _safe_call(mod, fn_name: str, default):
 
 
 # ---------------------------------------------------------------------------
-# Portal endpoint — Nous Portal auth + Tool Gateway routing status (read-only).
+# Portal endpoint — Nunmai Portal auth + Tool Gateway routing status (read-only).
 # ---------------------------------------------------------------------------
 
 
@@ -4433,7 +4433,7 @@ def _get_portal_status_sync():
         if feats is not None:
             for feat in feats.items():
                 if getattr(feat, "managed_by_nous", False):
-                    state = "via Nous Portal"
+                    state = "via Nunmai Portal"
                 elif getattr(feat, "active", False) and getattr(feat, "current_provider", None):
                     state = feat.current_provider
                 elif getattr(feat, "active", False):
@@ -7476,12 +7476,12 @@ def get_recommended_default_model(provider: str = ""):
 
     Mirrors the model-curation `nunmai model` does so GUI onboarding lands on a
     sensible default instead of blindly taking the first curated entry. For
-    Nous this honors the user's free/paid tier: free users get a free model,
+    Nunmai this honors the user's free/paid tier: free users get a free model,
     paid users get the full curated default. For any other provider it falls
     back to the first curated model (same as before).
 
     Response: {"provider": str, "model": str, "free_tier": bool | None}
-    where free_tier is True/False for Nous and None otherwise. `model` may be
+    where free_tier is True/False for Nunmai and None otherwise. `model` may be
     empty if nothing could be resolved (caller degrades gracefully).
     """
     slug = (provider or "").strip().lower()
@@ -7528,7 +7528,7 @@ def get_recommended_default_model(provider: str = ""):
             _log.exception("GET /api/model/recommended-default (nous) failed")
             return {"provider": "nous", "model": "", "free_tier": None}
 
-    # Non-Nous: preferred silent default when the provider's curated list
+    # Non-Nunmai: preferred silent default when the provider's curated list
     # carries it, else the first curated model. Aggregator lists lead with the
     # priciest Anthropic flagship (claude-fable-5), which must never be the
     # model a user lands on without explicitly picking it.
@@ -7775,10 +7775,10 @@ def _apply_model_assignment_sync(
             model_cfg["api_key"] = provider_entry["api_key"]
         cfg["model"] = model_cfg
 
-        # When switching the main provider to Nous, mirror the CLI's
+        # When switching the main provider to Nunmai, mirror the CLI's
         # post-model-selection behaviour (nunmai_cli/main.py
         # prompt_enable_tool_gateway / tools_config apply_nous_managed_defaults):
-        # auto-route any *unconfigured* tools through the Nous Tool Gateway.
+        # auto-route any *unconfigured* tools through the Nunmai Tool Gateway.
         # This is purely additive — apply_nous_managed_defaults skips every
         # tool where the user already has a direct key (FIRECRAWL_API_KEY,
         # FAL_KEY, etc.) or an explicit backend/provider in config, so it
@@ -10778,7 +10778,7 @@ async def test_messaging_platform(platform_id: str, profile: Optional[str] = Non
 #
 # Phase 1 surfaces *which OAuth providers exist* and whether each is
 # connected, plus a disconnect button. The actual login flow (PKCE for
-# Anthropic, device-code for Nous/Codex) still runs in the CLI for now;
+# Anthropic, device-code for Nunmai/Codex) still runs in the CLI for now;
 # Phase 2 will add in-browser flows. For unconnected providers we return
 # the canonical ``nunmai auth add <provider>`` command so the dashboard
 # can surface a one-click copy.
@@ -10940,7 +10940,7 @@ def _copilot_acp_status() -> Dict[str, Any]:
 _OAUTH_PROVIDER_CATALOG: tuple[Dict[str, Any], ...] = (
     {
         "id": "nous",
-        "name": "Nous Portal",
+        "name": "Nunmai Portal",
         "flow": "device_code",
         "cli_command": "nunmai auth add nous",
         "docs_url": "https://portal.nousresearch.com",
@@ -10968,7 +10968,7 @@ _OAUTH_PROVIDER_CATALOG: tuple[Dict[str, Any], ...] = (
         # MiniMax's flow is structurally device-code (verification URI +
         # user code, backend polls the token endpoint) with a PKCE
         # extension for code-binding. The dashboard renders the same UX
-        # as Nous's device-code flow; the PKCE bit is a security
+        # as Nunmai's device-code flow; the PKCE bit is a security
         # extension that doesn't change the operator experience.
         "flow": "device_code",
         "cli_command": "nunmai auth add minimax-oauth",
@@ -11032,7 +11032,7 @@ def _resolve_provider_status(provider_id: str, status_fn) -> Dict[str, Any]:
             return {
                 "logged_in": bool(raw.get("logged_in")),
                 "source": "nous_portal",
-                "source_label": raw.get("portal_base_url") or "Nous Portal",
+                "source_label": raw.get("portal_base_url") or "Nunmai Portal",
                 "token_preview": _truncate_token(raw.get("access_token")),
                 "expires_at": raw.get("access_expires_at"),
                 "has_refresh_token": bool(raw.get("has_refresh_token")),
@@ -11334,7 +11334,7 @@ async def disconnect_oauth_provider(
 #          → persists to ~/.nunmai/.anthropic_oauth.json AND credential pool
 #          → returns { ok: true, status: "approved" }
 #
-#   Device code (Nous, OpenAI Codex):
+#   Device code (Nunmai, OpenAI Codex):
 #     1. POST /api/providers/oauth/{nous|openai-codex}/start
 #          → server hits provider's device-auth endpoint
 #          → gets { user_code, verification_url, device_code, interval, expires_in }
@@ -11598,7 +11598,7 @@ async def _start_device_code_flow(
     provider_id: str,
     profile: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Initiate a device-code flow (Nous, OpenAI Codex, MiniMax, or xAI).
+    """Initiate a device-code flow (Nunmai, OpenAI Codex, MiniMax, or xAI).
 
     Calls the provider's device-auth endpoint via the existing CLI helpers,
     then spawns a background poller. Returns the user-facing display fields
@@ -11694,7 +11694,7 @@ async def _start_device_code_flow(
     if provider_id == "minimax-oauth":
         # MiniMax uses a device-code-style flow (verification URI + user
         # code + background poll) with a PKCE extension on top. From the
-        # operator's perspective it's identical to Nous's device-code
+        # operator's perspective it's identical to Nunmai's device-code
         # flow; the PKCE bit (verifier + challenge from
         # _minimax_pkce_pair) is a security extension that binds the
         # token exchange to the original session.
@@ -11807,7 +11807,7 @@ async def _start_device_code_flow(
 
 
 def _nous_poller(session_id: str) -> None:
-    """Background poller that drives a Nous device-code flow to completion."""
+    """Background poller that drives a Nunmai device-code flow to completion."""
     from nunmai_cli.auth import (
         _poll_for_token,
         refresh_nous_oauth_from_state,
@@ -11875,7 +11875,7 @@ def _minimax_poller(session_id: str) -> None:
 
     Mirrors `_nous_poller` but calls the MiniMax-specific token endpoint,
     which uses a PKCE-style ``code_verifier`` + ``user_code`` rather than
-    the ``device_code`` field used by Nous. On success, builds the same
+    the ``device_code`` field used by Nunmai. On success, builds the same
     auth_state dict that ``_minimax_oauth_login`` (the CLI flow) builds
     and persists via ``_minimax_save_auth_state`` — so the dashboard
     path leaves the system in the same state as
@@ -12278,7 +12278,7 @@ async def poll_oauth_session(
 ):
     """Poll a session's status (no auth — read-only state).
 
-    Shared by the device-code flows (Nous, OpenAI Codex, MiniMax, xAI).
+    Shared by the device-code flows (Nunmai, OpenAI Codex, MiniMax, xAI).
     Each surfaces progress through the same background-worker-updated
     ``status`` field, so a single poll endpoint serves them all.
     """
@@ -14933,7 +14933,7 @@ from nunmai_cli.web_routers.skills import (  # noqa: E402,F401 — legacy re-exp
 # Human-readable labels for each hub source id (matches `nunmai skills search`
 # provenance).  Keep in sync with create_source_router()'s source list.
 _SKILL_HUB_SOURCE_LABELS = {
-    "official": "Official (Nous)",
+    "official": "Official (Nunmai)",
     "nunmai-index": "Nunmai Index",
     "skills-sh": "skills.sh",
     "well-known": "Well-Known",
@@ -15435,7 +15435,7 @@ def _resolve_toolset_model_plugin(ts_key: str, provider_row: dict) -> Optional[s
     """Map a provider picker row to its model-catalog plugin name.
 
     Plugin-backed rows carry ``image_gen_plugin_name`` / ``video_gen_plugin_name``;
-    the managed "Nous Subscription" image row instead carries the legacy
+    the managed "Nunmai Subscription" image row instead carries the legacy
     ``imagegen_backend: "fal"`` marker (same underlying FAL catalog).
     """
     if ts_key == "image_gen":
@@ -18117,7 +18117,7 @@ def mount_spa(application: FastAPI):
 _BUILTIN_DASHBOARD_THEMES = [
     {"name": "default",       "label": "Nunmai Teal",         "description": "Classic dark teal — the canonical Nunmai look"},
     {"name": "default-large", "label": "Nunmai Teal (Large)", "description": "Nunmai Teal with bigger fonts and roomier spacing"},
-    {"name": "nous-blue",     "label": "Nous Blue",           "description": "Light mode — vivid Nous-blue accents on cream canvas"},
+    {"name": "nous-blue",     "label": "Nunmai Blue",           "description": "Light mode — vivid Nunmai-blue accents on cream canvas"},
     {"name": "midnight",      "label": "Midnight",            "description": "Deep blue-violet with cool accents"},
     {"name": "ember",     "label": "Ember",          "description": "Warm crimson and bronze — forge vibes"},
     {"name": "mono",      "label": "Mono",           "description": "Clean grayscale — minimal and focused"},
@@ -19667,7 +19667,7 @@ def start_server(
 
         start_nous_auth_keepalive()
     except Exception as exc:
-        _log.debug("Nous auth keepalive did not start: %s", exc)
+        _log.debug("Nunmai auth keepalive did not start: %s", exc)
 
     # A configured browser-facing URL is also the exact Host/Origin trust
     # declaration for reverse-proxy deployments. Resolve it once at startup so
@@ -19759,7 +19759,7 @@ def start_server(
                 "    (hash with: python -c \"from "
                 "plugins.dashboard_auth.basic import hash_password; "
                 "print(hash_password('your-password'))\")\n"
-                "  • OAuth: run `nunmai dashboard register` (Nous Portal) or "
+                "  • OAuth: run `nunmai dashboard register` (Nunmai Portal) or "
                 "install a DashboardAuthProvider plugin.\n"
                 "There is no unauthenticated public-dashboard option. For "
                 "local-only use, bind 127.0.0.1 and leave dashboard.public_url "

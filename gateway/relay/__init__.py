@@ -525,7 +525,7 @@ def _resolve_relay_identity_token() -> str:
     ``nunmai gateway enroll`` CLI. Three modes, in precedence order:
 
       1. **Generic OIDC client-credentials** (air-gapped / self-hosted-IdP, NO
-         Nous Portal): when ``gateway.idp.token_url`` (or
+         Nunmai Portal): when ``gateway.idp.token_url`` (or
          ``GATEWAY_RELAY_IDP_TOKEN_URL``) is configured together with a client
          id/secret, obtain a workload access token via the OAuth2
          ``client_credentials`` grant against the operator's own IdP (Entra;
@@ -538,7 +538,7 @@ def _resolve_relay_identity_token() -> str:
          IS the token — either a raw JWT string or a JSON envelope with an
          ``access_token`` field. No client registration involved; possession
          of the (typically loopback) endpoint is the credential.
-      2. **Nous Portal** (default): ``resolve_nous_access_token()`` — existing
+      2. **Nunmai Portal** (default): ``resolve_nous_access_token()`` — existing
          managed/hosted behaviour.
 
     Raises on failure; callers decide whether that's fatal (enroll CLI) or a
@@ -561,7 +561,7 @@ def _resolve_relay_identity_token() -> str:
             token_url = token_url or ""
 
     if not token_url:
-        # Mode 2 — Nous Portal (default, unchanged behaviour).
+        # Mode 2 — Nunmai Portal (default, unchanged behaviour).
         from nunmai_cli.auth import resolve_nous_access_token
 
         return resolve_nous_access_token()
@@ -644,8 +644,8 @@ def self_provision_relay() -> bool:
     """Boot-time relay self-provision: mint relay creds in-process, no human, no disk.
 
     Fires when relay is configured (``relay_url()`` set) and NO per-gateway secret
-    is already present, AND the agent can resolve its own Nous access token. In
-    that case the runtime resolves the agent's own Nous access token (the same
+    is already present, AND the agent can resolve its own Nunmai access token. In
+    that case the runtime resolves the agent's own Nunmai access token (the same
     ``resolve_nous_access_token()`` the enroll CLI / dashboard register use),
     POSTs ``/relay/provision`` asserting its own endpoint + route keys, and sets
     ``GATEWAY_RELAY_ID`` / ``GATEWAY_RELAY_SECRET`` / ``GATEWAY_RELAY_DELIVERY_KEY``

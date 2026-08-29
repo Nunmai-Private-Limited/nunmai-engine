@@ -184,7 +184,7 @@ def _hosted_ocr_config() -> tuple:
     """Resolve hosted-OCR settings: (enabled, api_key, api_url).
 
     Maintainer decision: the ONLY route is a direct ``FIRECRAWL_API_KEY``
-    (anydoc defaults api_url to https://api.firecrawl.dev). The Nous
+    (anydoc defaults api_url to https://api.firecrawl.dev). The Nunmai
     managed gateway is NOT used — its Parse proxy was live-probed broken
     (uniform HTTP 500, 2026-08-28) while scrape/search worked; revisit
     when the gateway grows Parse support. ``file_tools.hosted_ocr``:
@@ -210,7 +210,7 @@ def hosted_ocr_available() -> bool:
 
     Maintainer decision: ONE gate — a direct ``FIRECRAWL_API_KEY`` in the
     environment. Nothing else unlocks the "PDF (scanned or text)" wording
-    (not the Nous gateway — Parse proxy live-probed broken 2026-08-28 —
+    (not the Nunmai gateway — Parse proxy live-probed broken 2026-08-28 —
     and not config assertions). ``file_tools.hosted_ocr: false`` still
     disables. Env probe only — no network at schema-build time; a key
     that fails at conversion time lands in the NEEDS-OCR warning.

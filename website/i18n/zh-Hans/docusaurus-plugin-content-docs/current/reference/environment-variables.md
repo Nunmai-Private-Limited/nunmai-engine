@@ -16,8 +16,8 @@ description: "Nunmai Engine 使用的所有环境变量完整参考"
 | `OPENROUTER_BASE_URL` | 覆盖 OpenRouter 兼容的 base URL |
 | `NUNMAI_OPENROUTER_CACHE` | 启用 OpenRouter 响应缓存（`1`/`true`/`yes`/`on`）。覆盖 config.yaml 中的 `openrouter.response_cache`。参见 [Response Caching](https://openrouter.ai/docs/guides/features/response-caching)。 |
 | `NUNMAI_OPENROUTER_CACHE_TTL` | 缓存 TTL（秒，1-86400）。覆盖 config.yaml 中的 `openrouter.response_cache_ttl`。 |
-| `NOUS_BASE_URL` | 覆盖 Nous Portal base URL（极少使用；仅用于开发/测试） |
-| `NOUS_INFERENCE_BASE_URL` | 直接覆盖 Nous 推理端点 |
+| `NOUS_BASE_URL` | 覆盖 Nunmai Portal base URL（极少使用；仅用于开发/测试） |
+| `NOUS_INFERENCE_BASE_URL` | 直接覆盖 Nunmai 推理端点 |
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway API 密钥（[ai-gateway.vercel.sh](https://ai-gateway.vercel.sh)） |
 | `AI_GATEWAY_BASE_URL` | 覆盖 AI Gateway base URL（默认：`https://ai-gateway.vercel.sh/v1`） |
 | `OPENAI_API_KEY` | 自定义 OpenAI 兼容端点的 API 密钥（与 `OPENAI_BASE_URL` 配合使用） |
@@ -110,10 +110,10 @@ description: "Nunmai Engine 使用的所有环境变量完整参考"
 
 | 变量 | 描述 |
 |----------|-------------|
-| `NUNMAI_PORTAL_BASE_URL` | 覆盖 Nous Portal URL（用于开发/测试） |
-| `NOUS_INFERENCE_BASE_URL` | 覆盖 Nous 推理 API URL |
+| `NUNMAI_PORTAL_BASE_URL` | 覆盖 Nunmai Portal URL（用于开发/测试） |
+| `NOUS_INFERENCE_BASE_URL` | 覆盖 Nunmai 推理 API URL |
 | `NUNMAI_NOUS_MIN_KEY_TTL_SECONDS` | 重新铸造前的最小 agent 密钥 TTL（默认：1800 = 30 分钟） |
-| `NUNMAI_NOUS_TIMEOUT_SECONDS` | Nous 凭证/token 流程的 HTTP 超时 |
+| `NUNMAI_NOUS_TIMEOUT_SECONDS` | Nunmai 凭证/token 流程的 HTTP 超时 |
 | `NUNMAI_DUMP_REQUESTS` | 将 API 请求载荷转储到日志文件（`true`/`false`） |
 | `NUNMAI_PREFILL_MESSAGES_FILE` | 包含在 API 调用时注入的临时预填消息的 JSON 文件路径 |
 | `NUNMAI_TIMEZONE` | IANA 时区覆盖（例如 `America/New_York`） |
@@ -174,15 +174,15 @@ description: "Nunmai Engine 使用的所有环境变量完整参考"
 | `NUNMAI_LANGFUSE_DEBUG` | `true` 可将详细插件日志输出到 `agent.log` |
 | `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_BASE_URL` | 标准 Langfuse SDK 变量名。当对应的 `NUNMAI_LANGFUSE_*` 未设置时作为回退。 |
 
-### Nous Tool Gateway
+### Nunmai Tool Gateway
 
-这些变量为付费 Nous 订阅者或自托管 gateway 部署配置 [Tool Gateway](/user-guide/features/tool-gateway)。大多数用户无需设置——gateway 通过 `nunmai model` 或 `nunmai tools` 自动配置。
+这些变量为付费 Nunmai 订阅者或自托管 gateway 部署配置 [Tool Gateway](/user-guide/features/tool-gateway)。大多数用户无需设置——gateway 通过 `nunmai model` 或 `nunmai tools` 自动配置。
 
 | 变量 | 描述 |
 |----------|-------------|
 | `TOOL_GATEWAY_DOMAIN` | Tool Gateway 路由的基础域名（默认：`nousresearch.com`） |
 | `TOOL_GATEWAY_SCHEME` | gateway URL 的 HTTP 或 HTTPS 协议（默认：`https`） |
-| `TOOL_GATEWAY_USER_TOKEN` | Tool Gateway 的认证 token（通常由 Nous 认证自动填充） |
+| `TOOL_GATEWAY_USER_TOKEN` | Tool Gateway 的认证 token（通常由 Nunmai 认证自动填充） |
 | `FIRECRAWL_GATEWAY_URL` | 专门覆盖 Firecrawl gateway 端点的 URL |
 
 ## 终端后端

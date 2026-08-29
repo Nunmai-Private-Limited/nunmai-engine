@@ -1,12 +1,12 @@
 """``nunmai dashboard register`` — register a self-hosted dashboard OAuth client.
 
-Automates what a user otherwise does by hand: open the Nous Portal
+Automates what a user otherwise does by hand: open the Nunmai Portal
 ``/local-dashboards`` page in a browser, click "register", copy the
 resulting ``agent:{id}`` OAuth client ID, and paste it into ``~/.nunmai/.env``
 as ``NUNMAI_DASHBOARD_OAUTH_CLIENT_ID``.
 
 This command:
-  1. Resolves a fresh Nous Portal access token from the existing login
+  1. Resolves a fresh Nunmai Portal access token from the existing login
      (``~/.nunmai/auth.json``), refreshing it if needed. Fails fast with a
      "run `nunmai setup`" hint when the user isn't logged in.
   2. POSTs to ``{portal}/api/oauth/self-hosted-client`` with that bearer
@@ -72,7 +72,7 @@ def _resolve_portal_base_url(override: Optional[str] = None) -> str:
          this portal — it's minted by whatever portal you logged into, so an
          override only works if the token's issuer matches (e.g. you logged
          into the same staging/preview portal).
-      2. The ``portal_base_url`` stored on the Nous login — this is the
+      2. The ``portal_base_url`` stored on the Nunmai login — this is the
          portal that issued the token, so it's the correct default target.
       3. The production default.
     """
@@ -154,7 +154,7 @@ def _register_self_hosted_client(
             pass
         if exc.code == 401:
             raise RuntimeError(
-                "Nous Portal rejected the access token (401). "
+                "Nunmai Portal rejected the access token (401). "
                 "Try `nunmai auth add nous` to re-authenticate."
             ) from exc
         if exc.code == 403:
@@ -168,7 +168,7 @@ def _register_self_hosted_client(
         ) from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(
-            f"Could not reach Nous Portal at {portal_base_url}: {exc.reason}"
+            f"Could not reach Nunmai Portal at {portal_base_url}: {exc.reason}"
         ) from exc
 
     if not isinstance(payload, dict) or not payload.get("client_id"):
@@ -198,7 +198,7 @@ def _print_post_register_hint(
         print("    NUNMAI_DASHBOARD_PUBLIC_URL=" + str(public_url))
     print()
     print(
-        "  Heads up — Nous login only *engages* on a non-loopback bind. A plain\n"
+        "  Heads up — Nunmai login only *engages* on a non-loopback bind. A plain\n"
         "  `nunmai dashboard` (localhost) leaves the gate off and serves locally\n"
         "  without auth, which is fine for your own machine."
     )
@@ -211,11 +211,11 @@ def _print_post_register_hint(
             host = urlparse(custom_redirect_uri).hostname or "your-host"
         except Exception:
             host = "your-host"
-        print("  To require Nous login on your registered host, run the dashboard")
+        print("  To require Nunmai login on your registered host, run the dashboard")
         print(f"  bound publicly (it must be reachable at https://{host}) and log in")
         print("  at its /login page.")
     else:
-        print("  To require Nous login (e.g. exposing on your LAN or a public host):")
+        print("  To require Nunmai login (e.g. exposing on your LAN or a public host):")
         print("    nunmai dashboard --host 0.0.0.0")
         print("  …then log in at the dashboard's /login page.")
     print()
@@ -228,7 +228,7 @@ def _print_post_register_hint(
 
 
 def cmd_dashboard_register(args) -> None:
-    """Register a self-hosted dashboard OAuth client with Nous Portal."""
+    """Register a self-hosted dashboard OAuth client with Nunmai Portal."""
     from nunmai_cli.auth import AuthError, resolve_nous_access_token
     from nunmai_cli.config import get_env_value, is_managed, save_env_value
 
@@ -244,19 +244,19 @@ def cmd_dashboard_register(args) -> None:
         )
         sys.exit(1)
 
-    # 1. Resolve a fresh Nous access token (refreshes if near expiry). Fail fast
+    # 1. Resolve a fresh Nunmai access token (refreshes if near expiry). Fail fast
     #    with a setup hint when the user isn't logged in.
     try:
         access_token = resolve_nous_access_token()
     except AuthError as exc:
         if getattr(exc, "relogin_required", False):
-            print("✗ You're not logged into Nous Portal.")
+            print("✗ You're not logged into Nunmai Portal.")
             print("  Run `nunmai setup` (or `nunmai auth add nous`) first, then retry.")
         else:
-            print(f"✗ Could not resolve a Nous Portal access token: {exc}")
+            print(f"✗ Could not resolve a Nunmai Portal access token: {exc}")
         sys.exit(1)
     except Exception as exc:
-        print(f"✗ Could not resolve a Nous Portal access token: {exc}")
+        print(f"✗ Could not resolve a Nunmai Portal access token: {exc}")
         sys.exit(1)
 
     # Portal override: explicit --portal-url flag wins, else the

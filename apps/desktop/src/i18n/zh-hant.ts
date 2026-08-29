@@ -102,10 +102,10 @@ export const zhHant = defineLocale({
         `先登出已儲存的遠端瀏覽器工作階段，然後開啟${signInLabel}。使用本機閘道可切換至內建後端。`,
       signOutAndSignIn: '登出並重新登入',
       remoteFailureHint: '在「閘道設定」中檢查閘道 URL 與登入，或切換至本機閘道。',
-      cloudDownTitle: 'Nous Cloud 代理已停機',
+      cloudDownTitle: 'Nunmai Cloud 代理已停機',
       cloudDownDescription:
-        '此閘道連線的 Nous 託管雲端代理正在回傳伺服器錯誤。無法在此處重新啟動——請檢查其狀態、切換至本機閘道，或取得支援。',
-      cloudDownHint: '使用下方按鈕開啟 Nous Portal（檢視執行個體狀態與操作）或加入 Discord 取得支援。',
+        '此閘道連線的 Nunmai 託管雲端代理正在回傳伺服器錯誤。無法在此處重新啟動——請檢查其狀態、切換至本機閘道，或取得支援。',
+      cloudDownHint: '使用下方按鈕開啟 Nunmai Portal（檢視執行個體狀態與操作）或加入 Discord 取得支援。',
       cloudDownCheckPortal: '查看 Portal 狀態',
       cloudDownDiscord: '在 Discord 取得協助',
       hideRecentLogs: '隱藏最近記錄',
@@ -198,7 +198,7 @@ export const zhHant = defineLocale({
   },
 
   billingBlock: {
-    titleNous: 'Nous 額度已用盡',
+    titleNous: 'Nunmai 額度已用盡',
     titleProvider: provider => `額度已用盡 — ${provider}`,
     fallbackMessage: '您的帳戶額度已用盡。請儲值以繼續使用。',
     openBilling: '開啟帳單',
@@ -207,9 +207,9 @@ export const zhHant = defineLocale({
   },
 
   sendDiagnostics: {
-    title: '向 Nous 傳送診斷資訊',
+    title: '向 Nunmai 傳送診斷資訊',
     privacyNotice:
-      '這會將偵錯套件上傳到 Nous 內部儲存空間（並非公開貼上板）。內容包括系統資訊（作業系統、版本、服務商、已設定的 API 金鑰種類 — 絕不包含金鑰本身）以及完整的 agent、gateway 與桌面端日誌（每個最多 512 KB，很可能包含對話內容、工具輸出與檔案路徑）。上傳前會先遮罩機密資訊。僅 Nous 員工與獲准的 Discord 版主可檢視，14 天後自動刪除。',
+      '這會將偵錯套件上傳到 Nunmai 內部儲存空間（並非公開貼上板）。內容包括系統資訊（作業系統、版本、服務商、已設定的 API 金鑰種類 — 絕不包含金鑰本身）以及完整的 agent、gateway 與桌面端日誌（每個最多 512 KB，很可能包含對話內容、工具輸出與檔案路徑）。上傳前會先遮罩機密資訊。僅 Nunmai 員工與獲准的 Discord 版主可檢視，14 天後自動刪除。',
     upload: '上傳',
     uploading: '上傳中…',
     cancel: '取消',
@@ -224,7 +224,7 @@ export const zhHant = defineLocale({
     handoffLead: '在以下位置繼續討論:',
     links: {
       github: 'GitHub Issues',
-      portal: 'Nous Portal 支援',
+      portal: 'Nunmai Portal 支援',
       discord: 'Discord'
     }
   },
@@ -1057,13 +1057,13 @@ export const zhHant = defineLocale({
       activeBackend: '目前後端',
       activeBackendHint: '這是你目前使用的後端',
       useBackend: '使用此後端',
-      nousIncluded: '包含在 Nous 訂閱中；登入 Nous Portal 即可啟用。',
-      nousAuthNeededTitle: '登入 Nous Portal',
-      nousAuthNeededMessage: provider => `已儲存 ${provider}，但在登入 Nous Portal 之前不會啟用。`,
+      nousIncluded: '包含在 Nunmai 訂閱中；登入 Nunmai Portal 即可啟用。',
+      nousAuthNeededTitle: '登入 Nunmai Portal',
+      nousAuthNeededMessage: provider => `已儲存 ${provider}，但在登入 Nunmai Portal 之前不會啟用。`,
       nousAuthSignIn: '登入',
-      nousAuthDoneTitle: '已連接 Nous Portal',
+      nousAuthDoneTitle: '已連接 Nunmai Portal',
       nousAuthDoneMessage: '訂閱後端現已啟用。',
-      nousAuthFailed: 'Nous Portal 登入未完成',
+      nousAuthFailed: 'Nunmai Portal 登入未完成',
       noApiKeyRequired: '不需要 API 金鑰。',
       postSetupHint: step => `此後端需要一次性安裝 (${step})。將在此機器上執行，可能需要幾分鐘。`,
       postSetupInstalledHint: '已安裝。僅在出現問題時才需要重新執行安裝。',
@@ -2359,7 +2359,7 @@ export const zhHant = defineLocale({
     loadFailed: '無法載入模型',
     noAuthenticatedProviders: '沒有已驗證的提供方。',
     pro: 'Pro',
-    proNeedsSubscription: 'Pro 模型需要付費 Nous 訂閱。',
+    proNeedsSubscription: 'Pro 模型需要付費 Nunmai 訂閱。',
     free: '免費',
     freeTier: '免費層',
     priceTitle: '每百萬 Token 的輸入/輸出價格',

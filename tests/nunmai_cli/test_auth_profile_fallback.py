@@ -144,7 +144,7 @@ def test_provider_auth_state_returns_none_when_neither_has_it(profile_env):
 # a profile-loaded auth store rather than going through
 # ``get_provider_auth_state``. Without the fallback wired into
 # ``_load_provider_state`` itself, those helpers raise ``"Nunmai is not
-# logged into Nous Portal"`` even though the user has a valid global Nous
+# logged into Nunmai Portal"`` even though the user has a valid global Nunmai
 # login. These tests pin the per-provider shadowing into the helper.
 # ---------------------------------------------------------------------------
 

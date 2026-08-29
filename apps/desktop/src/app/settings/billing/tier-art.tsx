@@ -5,8 +5,8 @@ import sandboxArt from '@/assets/tiers/feature-sandbox.webp'
 import { cn } from '@/lib/utils'
 
 // Reproduces the portal's tier-card hero treatment at thumbnail size: each webp sits
-// over a solid Nous-blue well and blends into it. This blue well is the ONLY place
-// Nous blue appears in the billing page — everything else stays on the app's own tokens.
+// over a solid Nunmai-blue well and blends into it. This blue well is the ONLY place
+// Nunmai blue appears in the billing page — everything else stays on the app's own tokens.
 const NOUS_BLUE = '#0000f2'
 
 const BLEND_CLASS = {
@@ -42,7 +42,7 @@ export function resolveTierArt(tierName?: null | string): null | TierArtSpec {
 }
 
 /**
- * Small rounded thumbnail (~40px) rendering the tier art over a Nous-blue well.
+ * Small rounded thumbnail (~40px) rendering the tier art over a Nunmai-blue well.
  * Returns null for unknown tiers so the caller lays out a text-only card without
  * reserving empty art space. Imported via vite static imports so the URLs resolve
  * under a packaged `file://` origin with webSecurity on.

@@ -151,7 +151,7 @@ The `secrets` transform swaps the proxy token wherever it appears in a matched l
 
 | Provider | Env var | Swapped in |
 |---|---|---|
-| OpenRouter, OpenAI, Groq, Together, DeepSeek, Mistral, xAI, Nous | `*_API_KEY` | `Authorization` header |
+| OpenRouter, OpenAI, Groq, Together, DeepSeek, Mistral, xAI, Nunmai | `*_API_KEY` | `Authorization` header |
 | Anthropic native | `ANTHROPIC_API_KEY` | `x-api-key` + `Authorization` |
 | Azure OpenAI | `AZURE_OPENAI_API_KEY` | `api-key` + `Authorization` (`*.openai.azure.com`, `*.cognitiveservices.azure.com`, `*.services.ai.azure.com`) |
 | Google AI Studio (Gemini) | `GEMINI_API_KEY` / `GOOGLE_API_KEY` | `x-goog-api-key` header or `?key=` query param |

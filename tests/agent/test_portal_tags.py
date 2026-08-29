@@ -1,4 +1,4 @@
-"""Tests for agent.portal_tags — Nous Portal request tag contract."""
+"""Tests for agent.portal_tags — Nunmai Portal request tag contract."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 
 def test_nous_portal_tags_contains_product_and_client():
-    """Every Nous Portal request gets BOTH the product tag and the version tag."""
+    """Every Nunmai Portal request gets BOTH the product tag and the version tag."""
     from agent.portal_tags import nunmai_client_tag, nous_portal_tags
 
     tags = nous_portal_tags()

@@ -117,7 +117,7 @@ def _resolve_stt_client_config() -> Dict[str, Any]:
         }
 
     if provider == "openai":
-        # Handles the Nous-managed selection too: the resolver returns the
+        # Handles the Nunmai-managed selection too: the resolver returns the
         # user's own gateway token + managed base URL, which is exactly the
         # credential the client should use.
         try:
@@ -228,7 +228,7 @@ def _resolve_tts_client_config() -> Dict[str, Any]:
         return _relay("command/plugin provider")
 
     if provider == "openai":
-        # Covers the direct-key, custom-base_url, and Nous-managed selections.
+        # Covers the direct-key, custom-base_url, and Nunmai-managed selections.
         try:
             api_key, base_url, is_managed = tts._resolve_openai_audio_client_config()
         except ValueError as exc:

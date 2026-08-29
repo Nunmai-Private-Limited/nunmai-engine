@@ -102,10 +102,10 @@ export const zh: Translations = {
         `先退出已保存的远程浏览器会话，然后打开${signInLabel}。也可以使用本地网关切换到随应用提供的后端。`,
       signOutAndSignIn: '退出并重新登录',
       remoteFailureHint: '在“网关设置”中检查网关 URL 和登录，或切换到本地网关。',
-      cloudDownTitle: 'Nous Cloud 代理已宕机',
+      cloudDownTitle: 'Nunmai Cloud 代理已宕机',
       cloudDownDescription:
-        '此网关连接的 Nous 托管云代理正在返回服务器错误。无法在此处重启——请检查其状态、切换到本地网关或获取支持。',
-      cloudDownHint: '使用下方按钮打开 Nous Portal（查看实例状态与操作）或加入 Discord 获取支持。',
+        '此网关连接的 Nunmai 托管云代理正在返回服务器错误。无法在此处重启——请检查其状态、切换到本地网关或获取支持。',
+      cloudDownHint: '使用下方按钮打开 Nunmai Portal（查看实例状态与操作）或加入 Discord 获取支持。',
       cloudDownCheckPortal: '查看 Portal 状态',
       cloudDownDiscord: '在 Discord 获取帮助',
       hideRecentLogs: '隐藏最近日志',
@@ -198,7 +198,7 @@ export const zh: Translations = {
   },
 
   billingBlock: {
-    titleNous: 'Nous 额度已用尽',
+    titleNous: 'Nunmai 额度已用尽',
     titleProvider: provider => `额度已用尽 — ${provider}`,
     fallbackMessage: '您的账户额度已用尽。请充值以继续使用。',
     openBilling: '打开账单',
@@ -207,9 +207,9 @@ export const zh: Translations = {
   },
 
   sendDiagnostics: {
-    title: '向 Nous 发送诊断信息',
+    title: '向 Nunmai 发送诊断信息',
     privacyNotice:
-      '这会将调试包上传到 Nous 内部存储（并非公开粘贴板）。内容包括系统信息（操作系统、版本、服务商、已配置的 API 密钥种类 — 绝不包含密钥本身）以及完整的 agent、gateway 和桌面端日志（每个最多 512 KB，很可能包含对话内容、工具输出与文件路径）。上传前会先脱敏。仅 Nous 员工与获准的 Discord 版主可查看，14 天后自动删除。',
+      '这会将调试包上传到 Nunmai 内部存储（并非公开粘贴板）。内容包括系统信息（操作系统、版本、服务商、已配置的 API 密钥种类 — 绝不包含密钥本身）以及完整的 agent、gateway 和桌面端日志（每个最多 512 KB，很可能包含对话内容、工具输出与文件路径）。上传前会先脱敏。仅 Nunmai 员工与获准的 Discord 版主可查看，14 天后自动删除。',
     upload: '上传',
     uploading: '上传中…',
     cancel: '取消',
@@ -224,7 +224,7 @@ export const zh: Translations = {
     handoffLead: '在以下位置继续讨论:',
     links: {
       github: 'GitHub Issues',
-      portal: 'Nous Portal 支持',
+      portal: 'Nunmai Portal 支持',
       discord: 'Discord'
     }
   },
@@ -1067,7 +1067,7 @@ export const zh: Translations = {
       cloudLoadingAgents: '正在加载你的智能体…',
       cloudNoAgents: {
         before: '此账户下未找到智能体。请在',
-        linkText: 'Nous 门户',
+        linkText: 'Nunmai 门户',
         after: '中创建一个，然后刷新。'
       },
       cloudRefresh: '刷新',
@@ -1387,13 +1387,13 @@ export const zh: Translations = {
       activeBackend: '当前后端',
       activeBackendHint: '这是你当前使用的后端',
       useBackend: '使用此后端',
-      nousIncluded: '包含在 Nous 订阅中；登录 Nous Portal 即可激活。',
-      nousAuthNeededTitle: '登录 Nous Portal',
-      nousAuthNeededMessage: provider => `已保存 ${provider}，但在登录 Nous Portal 之前不会激活。`,
+      nousIncluded: '包含在 Nunmai 订阅中；登录 Nunmai Portal 即可激活。',
+      nousAuthNeededTitle: '登录 Nunmai Portal',
+      nousAuthNeededMessage: provider => `已保存 ${provider}，但在登录 Nunmai Portal 之前不会激活。`,
       nousAuthSignIn: '登录',
-      nousAuthDoneTitle: '已连接 Nous Portal',
+      nousAuthDoneTitle: '已连接 Nunmai Portal',
       nousAuthDoneMessage: '订阅后端现已激活。',
-      nousAuthFailed: 'Nous Portal 登录未完成',
+      nousAuthFailed: 'Nunmai Portal 登录未完成',
       noApiKeyRequired: '不需要 API 密钥。',
       postSetupHint: step => `此后端需要一次性安装 (${step})。将在此机器上执行，可能需要几分钟。`,
       postSetupInstalledHint: '已安装。仅在出现问题时才需要重新运行安装。',
@@ -2970,7 +2970,7 @@ export const zh: Translations = {
     loadFailed: '无法加载模型',
     noAuthenticatedProviders: '没有已认证的提供方。',
     pro: 'Pro',
-    proNeedsSubscription: 'Pro 模型需要付费 Nous 订阅。',
+    proNeedsSubscription: 'Pro 模型需要付费 Nunmai 订阅。',
     free: '免费',
     freeTier: '免费层',
     priceTitle: '每百万 token 的输入/输出价格',
@@ -3439,7 +3439,7 @@ export const zh: Translations = {
       unanswered: '未响应',
       toolCount: count => `${count} 个工具`,
       notInCatalog: server => `“${server}”不在 MCP 目录中`,
-      catalogSource: '来自 Nous 认证目录',
+      catalogSource: '来自 Nunmai 认证目录',
       envRequired: '请先填写所需凭据',
       sendFailed: '无法发送 MCP 设置响应',
       reloadFailed: '服务器已保存，但重新加载 MCP 工具失败 — 将在下个会话加载',

@@ -35,7 +35,7 @@ const SYSTEM_MONO = 'Menlo, Monaco, "SF Mono", "Courier Prime", monospace, ' + E
 export const DEFAULT_TYPOGRAPHY: DesktopThemeTypography = { fontSans: SYSTEM_SANS, fontMono: SYSTEM_MONO }
 
 /**
- * Nous — the canonical Nunmai desktop identity, forked from the GitHub VS Code
+ * Nunmai — the canonical Nunmai desktop identity, forked from the GitHub VS Code
  * theme (github.github-vscode-theme). Light is GitHub Light Default, dark is
  * GitHub Dark Default, both converted through the same path a Marketplace
  * install takes, so the palette here is byte-identical to importing the
@@ -161,7 +161,7 @@ export const githubTheme: DesktopTheme = {
 /** Catppuccin — Latte in light, Mocha in dark (Catppuccin.catppuccin-vsc). */
 
 /**
- * Nous — the canonical Nunmai desktop identity: GitHub's chrome carrying Nous
+ * Nunmai — the canonical Nunmai desktop identity: GitHub's chrome carrying Nunmai
  * blue. Forked from github.github-vscode-theme (Light Default / Dark Default),
  * with only the accent family re-seeded; every neutral is upstream's.
  *
@@ -173,8 +173,8 @@ export const githubTheme: DesktopTheme = {
  */
 export const nousTheme: DesktopTheme = {
   name: 'nous',
-  label: 'Nous',
-  description: 'GitHub chrome, Nous blue accent',
+  label: 'Nunmai',
+  description: 'GitHub chrome, Nunmai blue accent',
   colors: {
     background: '#ffffff',
     foreground: '#1f2328',
@@ -595,12 +595,12 @@ const nousAltTint = (pct: number) => `color-mix(in srgb, ${NOUS_ALT_BLUE} ${pct}
 const nousAltTintTransparent = (pct: number) => `color-mix(in srgb, ${NOUS_ALT_BLUE} ${pct}%, transparent)`
 
 /**
- * Nous Alt — the hand-authored Nous from before the GitHub fork. Light is
+ * Nunmai Alt — the hand-authored Nunmai from before the GitHub fork. Light is
  * glass neutrals with brand blue; dark is cream on mission-blue.
  */
 export const nousAltTheme: DesktopTheme = {
   name: 'nous-alt',
-  label: 'Nous Alt',
+  label: 'Nunmai Alt',
   description: 'Glass neutrals, cream on mission-blue',
   colors: {
     background: '#F8FAFF',

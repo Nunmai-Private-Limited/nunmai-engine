@@ -2,9 +2,9 @@
 
 NunmaiCLI.__init__ seeds ``self.api_key`` from OPENAI_API_KEY /
 OPENROUTER_API_KEY env vars before provider resolution runs. On any
-non-OpenAI provider (Nous, Anthropic, ...) the constructor value is a
+non-OpenAI provider (Nunmai, Anthropic, ...) the constructor value is a
 different vendor's key than the one actually used for requests, so
-``/config`` displayed e.g. an ``sk-proj-...`` OpenAI key next to a Nous
+``/config`` displayed e.g. an ``sk-proj-...`` OpenAI key next to a Nunmai
 base URL. ``show_config`` must prefer ``self.agent.api_key`` when an
 agent exists.
 """

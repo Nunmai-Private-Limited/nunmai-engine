@@ -39,7 +39,7 @@ def test_healthy():
     assert snap.available is True
     assert snap.plan == "Pro"
     assert snap.provider == "nous"
-    assert snap.title == "Nous credits"
+    assert snap.title == "Nunmai credits"
     blob = "\n".join(_all_lines(snap))
     assert "$18.00" in blob
     assert "$12.34" in blob

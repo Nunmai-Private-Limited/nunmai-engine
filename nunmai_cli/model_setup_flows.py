@@ -397,7 +397,7 @@ def _model_flow_moa(config, current_model=""):
 
 
 def _model_flow_nous(config, current_model="", args=None):
-    """Nous Portal provider: ensure logged in, then pick model."""
+    """Nunmai Portal provider: ensure logged in, then pick model."""
     from nunmai_cli.auth import (
         get_provider_auth_state,
         _prompt_model_selection,
@@ -419,7 +419,7 @@ def _model_flow_nous(config, current_model="", args=None):
 
     state = get_provider_auth_state("nous")
     if not state or not state.get("access_token"):
-        print("Not logged into Nous Portal. Starting login...")
+        print("Not logged into Nunmai Portal. Starting login...")
         print()
         try:
             mock_args = argparse.Namespace(
@@ -462,7 +462,7 @@ def _model_flow_nous(config, current_model="", args=None):
 
     model_ids = get_curated_nous_model_ids()
     if not model_ids:
-        print("No curated models available for Nous Portal.")
+        print("No curated models available for Nunmai Portal.")
         return
 
     # Verify credentials are still valid (catches expired sessions early)
@@ -473,7 +473,7 @@ def _model_flow_nous(config, current_model="", args=None):
         msg = format_auth_error(exc) if isinstance(exc, AuthError) else str(exc)
         if relogin:
             print(f"Session expired: {msg}")
-            print("Re-authenticating with Nous Portal...\n")
+            print("Re-authenticating with Nunmai Portal...\n")
             try:
                 mock_args = argparse.Namespace(
                     portal_url=None,
@@ -542,7 +542,7 @@ def _model_flow_nous(config, current_model="", args=None):
             unavailable_message = (
                 format_nous_portal_entitlement_message(
                     _account_info,
-                    capability="paid Nous models",
+                    capability="paid Nunmai models",
                 )
                 or ""
             )
@@ -560,7 +560,7 @@ def _model_flow_nous(config, current_model="", args=None):
         )
 
     if not model_ids and not unavailable_models:
-        print("No models available for Nous Portal after filtering.")
+        print("No models available for Nunmai Portal after filtering.")
         return
 
     if free_tier and not model_ids:
@@ -589,7 +589,7 @@ def _model_flow_nous(config, current_model="", args=None):
     )
     if selected:
         _save_model_choice(selected)
-        # Reactivate Nous as the provider and update config
+        # Reactivate Nunmai as the provider and update config
         inference_url = creds.get("base_url", "")
         _update_config_for_provider("nous", inference_url)
         # Reload after the auth helper writes provider state. The incoming
@@ -615,7 +615,7 @@ def _model_flow_nous(config, current_model="", args=None):
             save_env_value("OPENAI_BASE_URL", "")
             save_env_value("OPENAI_API_KEY", "")
         save_config(config)
-        print(f"Default model set to: {selected} (via Nous Portal)")
+        print(f"Default model set to: {selected} (via Nunmai Portal)")
         # Offer Tool Gateway enablement for paid subscribers
         prompt_enable_tool_gateway(config)
     else:

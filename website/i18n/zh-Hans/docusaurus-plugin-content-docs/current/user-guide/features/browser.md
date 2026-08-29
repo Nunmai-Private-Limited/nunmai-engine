@@ -33,8 +33,8 @@ Nunmai Engine 内置完整的浏览器自动化工具集，支持多种后端选
 
 ## 配置
 
-:::tip Nous 订阅用户
-如果您拥有付费 [Nous Portal](https://portal.nousresearch.com) 订阅，可通过 **[Tool Gateway](tool-gateway.md)** 使用浏览器自动化功能，无需单独的 API 密钥。新安装可运行 `nunmai setup --portal` 登录并一次性开启所有 gateway 工具；已有安装可通过 `nunmai model` 或 `nunmai tools` 选择 **Nous Subscription** 作为浏览器提供商。
+:::tip Nunmai 订阅用户
+如果您拥有付费 [Nunmai Portal](https://portal.nousresearch.com) 订阅，可通过 **[Tool Gateway](tool-gateway.md)** 使用浏览器自动化功能，无需单独的 API 密钥。新安装可运行 `nunmai setup --portal` 登录并一次性开启所有 gateway 工具；已有安装可通过 `nunmai model` 或 `nunmai tools` 选择 **Nunmai Subscription** 作为浏览器提供商。
 :::
 
 ### Browserbase 云端模式

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 15
 title: "Subscription Proxy"
-description: "Use your Nous Portal subscription (or other OAuth provider) as an OpenAI-compatible endpoint for external apps"
+description: "Use your Nunmai Portal subscription (or other OAuth provider) as an OpenAI-compatible endpoint for external apps"
 ---
 
 # Subscription Proxy
@@ -32,7 +32,7 @@ proxy when you just want **the model** through your subscription.
 nunmai portal
 ```
 
-This opens your browser for the Nous Portal OAuth flow. Nunmai stores
+This opens your browser for the Nunmai Portal OAuth flow. Nunmai stores
 the refresh token in `~/.nunmai/auth.json` — the same place all Nunmai
 provider logins live.
 
@@ -43,7 +43,7 @@ nunmai proxy start
 ```
 
 ```
-Starting Nunmai proxy for Nous Portal
+Starting Nunmai proxy for Nunmai Portal
   Listening on:  http://127.0.0.1:8645/v1
   Forwarding to: (resolved per-request from your subscription)
   Use any bearer token in the client — the proxy attaches your real credential.
@@ -72,7 +72,7 @@ automatically when the bearer approaches expiry.
 nunmai proxy providers
 ```
 
-Currently shipped: `nous` (Nous Portal) and `xai` (xAI / Grok). More
+Currently shipped: `nous` (Nunmai Portal) and `xai` (xAI / Grok). More
 OAuth providers can be added by implementing the `UpstreamAdapter`
 interface in `nunmai_cli/proxy/adapters/`.
 
@@ -85,7 +85,7 @@ nunmai proxy status
 ```
 Nunmai proxy upstream adapters
 
-  [nous    ] Nous Portal — ready (bearer expires 2026-05-15T06:43:21Z)
+  [nous    ] Nunmai Portal — ready (bearer expires 2026-05-15T06:43:21Z)
 ```
 
 If you see `not logged in`, run `nunmai portal`. If you see
@@ -95,7 +95,7 @@ happens if you signed out from the Portal web UI) — just re-run
 
 ## Allowed paths
 
-The proxy only forwards paths the upstream actually serves. For Nous
+The proxy only forwards paths the upstream actually serves. For Nunmai
 Portal:
 
 | Path | Purpose |

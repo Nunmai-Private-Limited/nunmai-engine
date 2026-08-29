@@ -1,16 +1,16 @@
-"""OpenRouter-compatible image generation backend (OpenRouter + Nous Portal).
+"""OpenRouter-compatible image generation backend (OpenRouter + Nunmai Portal).
 
-Both OpenRouter and the Nous Portal inference endpoint speak the same
+Both OpenRouter and the Nunmai Portal inference endpoint speak the same
 OpenAI-style ``/chat/completions`` image-generation protocol: send
 ``modalities: ["image", "text"]`` with an image-output model (e.g.
 ``google/gemini-3-pro-image``), pass reference images as ``image_url``
 content parts for grounding, and read the generated images back from
 ``choices[0].message.images[].image_url.url`` (a ``data:image/...;base64`` URI).
 
-Nous Portal proxies OpenRouter, so one implementation services both — we only
+Nunmai Portal proxies OpenRouter, so one implementation services both — we only
 swap the resolved ``(base_url, api_key)``. Credentials are resolved through the
 agent's existing :func:`~nunmai_cli.runtime_provider.resolve_runtime_provider`,
-which already understands OpenRouter's key pool and the Nous OAuth device-code
+which already understands OpenRouter's key pool and the Nunmai OAuth device-code
 token, so this plugin never reinvents auth.
 
 Reference grounding is the reason pet sprite generation cares about this
@@ -54,9 +54,9 @@ On the Image API path the request gains exact per-model aspect ratios plus
 ``resolution`` / ``quality`` / ``background`` / ``seed`` / ``n`` /
 ``output_compression``, and up to 16 reference images instead of 3.
 
-The Image API is OpenRouter-only: Nous Portal proxies the chat-completions
+The Image API is OpenRouter-only: Nunmai Portal proxies the chat-completions
 protocol and has no ``/images/generations`` route, so the second surface is
-enabled per provider (see ``supports_image_api``) and stays off for Nous.
+enabled per provider (see ``supports_image_api``) and stays off for Nunmai.
 """
 
 from __future__ import annotations
@@ -795,7 +795,7 @@ def _save_image_api_entry(entry: Dict[str, Any], prefix: str) -> Optional[str]:
 class OpenRouterCompatImageProvider(ImageGenProvider):
     """Image generation over an OpenRouter-compatible chat-completions endpoint.
 
-    Instantiated once per backend (OpenRouter, Nous Portal). The two differ only
+    Instantiated once per backend (OpenRouter, Nunmai Portal). The two differ only
     in which runtime provider supplies ``(base_url, api_key)`` and in the config
     namespace used for the model override.
     """
@@ -819,7 +819,7 @@ class OpenRouterCompatImageProvider(ImageGenProvider):
         self._setup_schema = setup_schema
         self._live_models_cache: Optional[tuple] = None
         self._image_api_models_cache: Optional[tuple] = None
-        # OpenRouter only: Nous Portal proxies the chat-completions protocol
+        # OpenRouter only: Nunmai Portal proxies the chat-completions protocol
         # and has no /images/generations route, so routing a model there would
         # turn a working setup into a 404.
         self._supports_image_api = supports_image_api
@@ -870,7 +870,7 @@ class OpenRouterCompatImageProvider(ImageGenProvider):
         dedicated ``GET /images/models`` catalog (40+ models: Seedream, Flux,
         Recraft, Qwen, MAI, Krea, ...) and the chat-completions image models,
         so every image model the endpoint serves — including ones released
-        after this code shipped — is selectable in ``nunmai tools``. Nous
+        after this code shipped — is selectable in ``nunmai tools``. Nunmai
         Portal (no ``/images`` route) lists the chat-completions catalog only.
         Offline fallback: the static default chain plus the curated Image API
         snapshot.
@@ -1263,7 +1263,7 @@ class OpenRouterCompatImageProvider(ImageGenProvider):
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            # OpenRouter attribution headers (harmless against Nous Portal).
+            # OpenRouter attribution headers (harmless against Nunmai Portal).
             "HTTP-Referer": "https://github.com/NousResearch/hermes-agent",
             "X-Title": "Nunmai Engine",
         }
@@ -1464,14 +1464,14 @@ def _build_providers() -> List[OpenRouterCompatImageProvider]:
         ),
         OpenRouterCompatImageProvider(
             provider_name="nous",
-            display_name="Nous Portal",
+            display_name="Nunmai Portal",
             runtime_name="nous",
             config_key="nous",
             model_env_var="NOUS_IMAGE_MODEL",
             setup_schema={
-                "name": "Nous Portal (image)",
+                "name": "Nunmai Portal (image)",
                 "badge": "subscription",
-                "tag": "Reference-grounded image generation via Nous Portal (OpenRouter-backed)",
+                "tag": "Reference-grounded image generation via Nunmai Portal (OpenRouter-backed)",
                 "env_vars": [],
                 "requires_nous_auth": True,
             },
@@ -1480,6 +1480,6 @@ def _build_providers() -> List[OpenRouterCompatImageProvider]:
 
 
 def register(ctx: Any) -> None:
-    """Register the OpenRouter + Nous Portal image gen providers."""
+    """Register the OpenRouter + Nunmai Portal image gen providers."""
     for provider in _build_providers():
         ctx.register_image_gen_provider(provider)

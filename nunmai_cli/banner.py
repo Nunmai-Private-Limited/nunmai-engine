@@ -758,8 +758,8 @@ _AUTO_UPDATE_SKIP_CMDS = {"update", "doctor", "uninstall", "gateway", "serve", "
 
 
 _STALE_IDENTITY = (
-    ("You are Nunmai Agent, an intelligent AI assistant created by Nous Research", "You are Nunmai Engine, an intelligent AI assistant created by Nunmai Research"),
-    ("created by Nous Research", "created by Nunmai Research"),
+    ("You are Nunmai Engine, an intelligent AI assistant created by Nunmai Research", "You are Nunmai Engine, an intelligent AI assistant created by Nunmai Research"),
+    ("created by Nunmai Research", "created by Nunmai Research"),
 )
 
 

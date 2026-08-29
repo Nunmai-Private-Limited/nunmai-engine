@@ -33,7 +33,7 @@ describe('createBillingApi', () => {
       min_usd: '10',
       monthly_cap: null,
       ok: true,
-      org_name: 'Nous',
+      org_name: 'Nunmai',
       portal_url: 'https://portal.nousresearch.com/billing',
       role: 'OWNER'
     } satisfies BillingStateResponse

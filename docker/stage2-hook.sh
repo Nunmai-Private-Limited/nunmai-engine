@@ -573,10 +573,10 @@ if [ ! -f "$NUNMAI_HOME/auth.json" ] && [ -n "${NUNMAI_AUTH_JSON_BOOTSTRAP:-}" ]
     fi
 fi
 
-# auth.json: re-seed a TERMINALLY-DEAD Nous bootstrap session (self-heal).
+# auth.json: re-seed a TERMINALLY-DEAD Nunmai bootstrap session (self-heal).
 #
 # The [ ! -f ] guard above deliberately refuses to clobber an existing
-# auth.json, so a container whose Nous bootstrap session took a terminal
+# auth.json, so a container whose Nunmai bootstrap session took a terminal
 # invalid_grant (tokens cleared, providers.nous.last_auth_error.relogin_required
 # stamped) can NOT recover from a plain restart — it stays unauthenticated until
 # the credential is replaced. An orchestrator that manages the container can

@@ -42,7 +42,7 @@ def _valid_manifest() -> dict:
                 ],
             },
             "nous": {
-                "metadata": {"display_name": "Nous Portal"},
+                "metadata": {"display_name": "Nunmai Portal"},
                 "models": [
                     {"id": "anthropic/claude-opus-4.7"},
                     {"id": "moonshotai/kimi-k2.6"},

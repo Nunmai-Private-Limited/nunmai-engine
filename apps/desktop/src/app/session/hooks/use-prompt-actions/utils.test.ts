@@ -535,14 +535,14 @@ describe('renderRpcResult', () => {
           input: 10,
           output: 20,
           total: 30,
-          credits_lines: ['Nous credits: 8,420 remaining', 'Resets: 2026-08-01']
+          credits_lines: ['Nunmai credits: 8,420 remaining', 'Resets: 2026-08-01']
         },
         'usage'
       )
 
       expect(body.split('\n')).toEqual([
         'Usage: 1 calls · 10 in / 20 out · 30 total',
-        'Nous credits: 8,420 remaining',
+        'Nunmai credits: 8,420 remaining',
         'Resets: 2026-08-01'
       ])
     })

@@ -88,7 +88,7 @@ function parseServersDoc(raw: string): McpServers {
 // agent's MCP loader read.
 const serverEnabled = (server: Record<string, unknown>) => server.enabled !== false
 
-// Shared cache for the Nous-approved catalog — feeds both description enrichment
+// Shared cache for the Nunmai-approved catalog — feeds both description enrichment
 // and the Catalog install view; invalidated after an install.
 const MCP_CATALOG_KEY = ['mcp-catalog'] as const
 
@@ -1063,7 +1063,7 @@ export function McpTab({ gateway, profile }: { gateway: NunmaiGateway | null; pr
           <div className="flex min-h-0 flex-1 flex-col p-2">
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]">
               {/* ONE coherent column: the configured fleet on top, the
-                  Nous-approved catalog below it. Installed entries live in the
+                  Nunmai-approved catalog below it. Installed entries live in the
                   fleet list (with live status), so the catalog section only
                   offers what's NOT installed yet — no duplicate rows, no tab
                   flipping to find the install button. */}
@@ -1519,7 +1519,7 @@ function CatalogTag({ children }: { children: string }) {
   )
 }
 
-// The Nous-approved MCP catalog: one-click installs of curated servers, with an
+// The Nunmai-approved MCP catalog: one-click installs of curated servers, with an
 // inline prompt for any required credentials (never shows stored values). On
 // install the parent refetches config + catalog and reloads live sessions.
 function McpCatalog({

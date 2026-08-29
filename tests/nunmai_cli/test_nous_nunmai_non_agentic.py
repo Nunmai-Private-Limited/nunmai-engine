@@ -38,7 +38,7 @@ from nunmai_cli.model_switch import (
 )
 def test_matches_real_nous_nunmai_chat_models(model_name: str) -> None:
     assert is_nous_nunmai_non_agentic(model_name), (
-        f"expected {model_name!r} to be flagged as Nous Hermes 3/4"
+        f"expected {model_name!r} to be flagged as Nunmai Hermes 3/4"
     )
     assert _check_nunmai_model_warning(model_name) == _NUNMAI_MODEL_WARNING
 

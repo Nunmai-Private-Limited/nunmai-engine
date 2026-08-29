@@ -139,7 +139,7 @@ def get_active_provider() -> Optional[ImageGenProvider]:
     except Exception as exc:
         logger.debug("Could not read image_gen.provider from config: %s", exc)
 
-    # The managed "Nous Subscription" selection is serviced by the FAL
+    # The managed "Nunmai Subscription" selection is serviced by the FAL
     # plugin through the managed fal-queue gateway (the legacy FAL pipeline
     # routes managed when the stored selection is "nous").
     if configured:

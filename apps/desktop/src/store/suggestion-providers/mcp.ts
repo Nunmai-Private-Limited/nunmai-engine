@@ -18,7 +18,7 @@ import { notifyError } from '@/store/notifications'
 /**
  * The MCP draft provider — the suggestion bus's founding member (PR #85036).
  *
- * Matches the draft against the Nous-approved MCP catalog's `suggest`
+ * Matches the draft against the Nunmai-approved MCP catalog's `suggest`
  * metadata (`GET /api/mcp/catalog` — the same reviewed manifests behind
  * `nunmai mcp catalog`), by whole-word keyword and pasted-link host suffix,
  * excluding servers already configured. The catalog is the single source of

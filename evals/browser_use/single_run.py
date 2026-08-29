@@ -92,7 +92,7 @@ if ARM == "prns":
 from run_agent import AIAgent  # noqa: E402
 
 # Provider resolution: default openrouter (original battery), but allow the
-# Nous-subscription path on boxes without an OpenRouter key. Credentials are
+# Nunmai-subscription path on boxes without an OpenRouter key. Credentials are
 # resolved through the product's own auth state, never printed.
 _or_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
 if _or_key:
@@ -106,7 +106,7 @@ else:
     # throwaway home (auth state lives in the real profile). Never printed.
     _tok = os.environ.get("BUBENCH_NOUS_TOKEN", "").strip()
     if not _tok:
-        raise SystemExit("no OPENROUTER_API_KEY and no Nous auth available")
+        raise SystemExit("no OPENROUTER_API_KEY and no Nunmai auth available")
     _agent_auth = dict(
         base_url=os.environ.get("BUBENCH_NOUS_BASE_URL", "https://inference-api.nousresearch.com/v1"),
         api_key=_tok,

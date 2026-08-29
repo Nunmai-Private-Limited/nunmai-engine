@@ -479,7 +479,7 @@ class TestPollRetryPolicy:
 
 
 # ---------------------------------------------------------------------------
-# Managed Nous gateway path
+# Managed Nunmai gateway path
 # ---------------------------------------------------------------------------
 
 
@@ -499,7 +499,7 @@ def _managed_cfg(
 
 class TestManagedGateway:
     def test_managed_submit_uses_gateway_origin_and_nous_token(self, monkeypatch):
-        """Managed mode submits to the gateway origin with the Nous token."""
+        """Managed mode submits to the gateway origin with the Nunmai token."""
         import plugins.image_gen.krea as krea_mod
         from plugins.image_gen.krea import KreaImageGenProvider
 
@@ -526,7 +526,7 @@ class TestManagedGateway:
         assert headers["Authorization"] == "Bearer nous-tok-abc"
         # Idempotency key drives the gateway's per-generation billing boundary.
         assert headers["x-idempotency-key"]
-        # Poll is bound to the same gateway + Nous token.
+        # Poll is bound to the same gateway + Nunmai token.
         poll_url = mock_get.call_args[0][0]
         assert poll_url.startswith("https://krea-gateway.example.com/jobs/")
         poll_headers = mock_get.call_args.kwargs["headers"]

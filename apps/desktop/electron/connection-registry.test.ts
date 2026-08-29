@@ -422,7 +422,7 @@ test('resolvedConnectionId reuses the exact URL envelope and rejects weak or dup
       {
         id: 'cloud-nous',
         kind: 'cloud',
-        label: 'Nous cloud',
+        label: 'Nunmai cloud',
         url: sharedUrl,
         authMode: 'oauth',
         headers: { 'CF-Access-Client-Id': { encoding: 'safeStorage', value: 'header-cloud' } },

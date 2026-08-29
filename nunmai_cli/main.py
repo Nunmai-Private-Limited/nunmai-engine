@@ -1055,7 +1055,7 @@ def _has_any_provider_configured() -> bool:
     # while the PROVIDER_REGISTRY sweep below spawns subprocesses (gh) and can
     # take 15-20s — long enough that desktop setup.status calls time out.
 
-    # Check for Nous Portal OAuth credentials
+    # Check for Nunmai Portal OAuth credentials
     auth_file = get_nunmai_home() / "auth.json"
     if auth_file.exists():
         try:
@@ -4476,7 +4476,7 @@ def _aux_config_menu() -> None:
         print("  Side tasks (vision, compression, web extraction, etc.) default")
         print('  to your main chat model.  "auto" means "use my main model" —')
         print("  Nunmai only falls back to a lightweight backend (OpenRouter,")
-        print("  Nous Portal) if the main model is unavailable.  Override a")
+        print("  Nunmai Portal) if the main model is unavailable.  Override a")
         print("  task below if you want it pinned to a specific provider/model.")
         print()
 
@@ -5695,7 +5695,7 @@ def cmd_sync(args):
                 file=sys.stderr,
             )
         if not status.get("logged_in"):
-            print("\nNot logged into Nous Portal — sync is inert.", file=sys.stderr)
+            print("\nNot logged into Nunmai Portal — sync is inert.", file=sys.stderr)
         elif not status.get("nous_admin"):
             print(
                 "\nSync is not enabled for your account yet.",
@@ -11754,7 +11754,7 @@ def _maybe_setup_dashboard_auth_interactively(args) -> None:
     print()
     print("  How do you want to authenticate the dashboard?")
     print("    [1] Username & password (quickest; for a trusted LAN / VPN)")
-    print("    [2] OAuth via Nous Portal (run `nunmai dashboard register`)")
+    print("    [2] OAuth via Nunmai Portal (run `nunmai dashboard register`)")
     print("    [3] Cancel")
     print()
 
@@ -11770,7 +11770,7 @@ def _maybe_setup_dashboard_auth_interactively(args) -> None:
             "  Run this on the host where the dashboard lives, then start "
             "the dashboard again:\n"
             "    nunmai dashboard register\n"
-            "  It provisions a Nous Portal OAuth client and writes "
+            "  It provisions a Nunmai Portal OAuth client and writes "
             "NUNMAI_DASHBOARD_OAUTH_CLIENT_ID into ~/.nunmai/.env for you.\n"
             "  Docs: https://nunmai.in/docs/"
             "user-guide/features/web-dashboard#authentication-gated-mode"
@@ -12284,7 +12284,7 @@ def cmd_dashboard(args):
 
 
 def cmd_dashboard_register(args):
-    """Register a self-hosted dashboard OAuth client with Nous Portal."""
+    """Register a self-hosted dashboard OAuth client with Nunmai Portal."""
     from nunmai_cli.dashboard_register import cmd_dashboard_register as _impl
 
     _impl(args)
@@ -13583,7 +13583,7 @@ def main():
     build_peer_parser(subparsers)
 
     # =========================================================================
-    # portal command — Nous Portal status + Tool Gateway routing
+    # portal command — Nunmai Portal status + Tool Gateway routing
     # =========================================================================
     from nunmai_cli.portal_cli import add_parser as _add_portal_parser
     _add_portal_parser(subparsers)

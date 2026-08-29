@@ -78,7 +78,7 @@ function providerConfigured(provider: ToolProvider, envState: Record<string, boo
 
 /**
  * Resolve the readiness pill state for a provider row. Prefers the honest
- * server-computed `status` (keys ∧ Nous entitlement ∧ post-setup install
+ * server-computed `status` (keys ∧ Nunmai entitlement ∧ post-setup install
  * state). Older backends don't send `status` — fall back to the legacy
  * env-var heuristic, mapped onto the same state space (`ready` /
  * `needs_keys`), so the pill still renders against an outdated runtime.
@@ -527,7 +527,7 @@ export function ToolsetConfigPanel({ toolset, onConfiguredChange, profile }: Too
   // Default-provider selection and a user click race just after config arrives:
   // a stale initialization effect must never replace an explicit choice.
   const providerChoiceClaimedRef = useRef(false)
-  // Guard the Nous Portal sign-in poll loop against unmount/state updates.
+  // Guard the Nunmai Portal sign-in poll loop against unmount/state updates.
   const mountedRef = useRef(true)
 
   // eslint-disable-next-line no-restricted-syntax -- mount flag guarding an async poll loop, not an atom mirror
@@ -570,7 +570,7 @@ export function ToolsetConfigPanel({ toolset, onConfiguredChange, profile }: Too
   // Default the expanded provider to the one actually active in config
   // (`is_active` / `cfg.active_provider`, mirroring the CLI picker), then the
   // first fully-configured provider, else the first provider. Without this the
-  // panel highlighted the first keyless provider (e.g. Nous Portal) even when
+  // panel highlighted the first keyless provider (e.g. Nunmai Portal) even when
   // the user had already selected another (e.g. DuckDuckGo).
   // eslint-disable-next-line no-restricted-syntax -- one-shot provider-choice claim flag, not an atom mirror
   useEffect(() => {
@@ -615,10 +615,10 @@ export function ToolsetConfigPanel({ toolset, onConfiguredChange, profile }: Too
       )
 
       if (result.needs_nous_auth) {
-        // Managed Nous row selected without Portal entitlement: the config
+        // Managed Nunmai row selected without Portal entitlement: the config
         // keys are written but the backend won't activate until the user
         // signs in (the CLI runs this gate inline; the GUI surfaces it as a
-        // sign-in action). Reuses the existing Nous Portal device-code flow.
+        // sign-in action). Reuses the existing Nunmai Portal device-code flow.
         notify({
           kind: 'warning',
           title: copy.nousAuthNeededTitle,
@@ -638,7 +638,7 @@ export function ToolsetConfigPanel({ toolset, onConfiguredChange, profile }: Too
     }
   }
 
-  // Drive the existing Nous Portal OAuth device-code flow (the same session
+  // Drive the existing Nunmai Portal OAuth device-code flow (the same session
   // machinery onboarding uses: start → open verification URL → poll), then
   // refetch the toolset config so is_active / status flip once entitled.
   async function signInToNousPortal() {

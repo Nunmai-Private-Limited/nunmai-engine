@@ -14,7 +14,7 @@ const NOUS_BLUE = '#0053FD'
 
 describe('themeHue', () => {
   it('reads the accent hue that ships', () => {
-    // Nous blue. Both palettes sit at this hue — light seeds `#0053fd` and dark
+    // Nunmai blue. Both palettes sit at this hue — light seeds `#0053fd` and dark
     // `#4a84fe`, the same blue at two lightnesses, which is what lets one pick
     // serve both appearances.
     expect(themeHue(nousTheme)).toBe(263)
@@ -162,7 +162,7 @@ describe('retintTheme', () => {
     expect(retintTheme(nousTheme, 'nonsense').colors).toEqual(nousTheme.colors)
   })
 
-  // The real motivating case: Nous blue is legible on GitHub's light sidebar
+  // The real motivating case: Nunmai blue is legible on GitHub's light sidebar
   // (5.4:1) but NOT its dark one (3.6:1), so dark has to adapt or ship
   // invisible section headers.
   describe('a seed that only works in one mode', () => {

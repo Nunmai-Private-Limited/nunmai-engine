@@ -1,4 +1,4 @@
-"""Tests for Nous Portal reasoning-capability metadata.
+"""Tests for Nunmai Portal reasoning-capability metadata.
 
 The Portal serves OpenRouter's catalog schema, so it reuses
 ``parse_openrouter_reasoning_capabilities`` and the same cache-only tri-state

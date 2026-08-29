@@ -9,10 +9,10 @@ Currently supports:
                           ``~/.nunmai/logs/*.log`` are not leaked into
                           the public paste service. Pass ``--no-redact``
                           to disable.
-                          Pass ``--nous`` to upload instead to Nous-internal
+                          Pass ``--nous`` to upload instead to Nunmai-internal
                           storage (AWS S3) via a signed URL minted by the
-                          Nous account service: the bundle is private
-                          (viewable only by Nous staff / allowlisted mods via
+                          Nunmai account service: the bundle is private
+                          (viewable only by Nunmai staff / allowlisted mods via
                           a Google-login-gated viewer) and auto-deletes after
                           14 days, rather than going to a public paste.
 """
@@ -655,9 +655,9 @@ def collect_share_bundle(
 
     This is the single source of collection + redaction shared by both
     destinations: the paste.rs path (:func:`build_debug_share`) and the
-    Nous-S3 path (``--nous``).  Centralising it guarantees the Nous bundle is
+    Nous-S3 path (``--nous``).  Centralising it guarantees the Nunmai bundle is
     built from the *same* force-redacted snapshots as the public paste path —
-    redaction is the safety boundary, so the Nous path must never see raw
+    redaction is the safety boundary, so the Nunmai path must never see raw
     logs.
 
     The dump header is prepended to each full log (mirroring the historical
@@ -712,7 +712,7 @@ def collect_share_bundle(
 
 
 def build_nous_bundle(bundle: dict[str, str], redact: bool = True) -> bytes:
-    """Gzip-compress a :func:`collect_share_bundle` mapping into the Nous envelope.
+    """Gzip-compress a :func:`collect_share_bundle` mapping into the Nunmai envelope.
 
     The JSON shape is what the discord-support viewer (Repo 3) parses::
 
@@ -920,7 +920,7 @@ _NOUS_PRIVACY_NOTICE = """\
   • Full agent.log, gateway.log, and desktop.log (up to 512 KB each — likely
     contains conversation content, tool outputs, and file paths)
 
-  • The bundle is viewable only by Nous staff (and allowlisted Discord mods)
+  • The bundle is viewable only by Nunmai staff (and allowlisted Discord mods)
     via a Google-login-gated viewer.
   • It is NOT a public paste — there is no public URL to the contents.
   • It auto-deletes after 14 days.
@@ -931,7 +931,7 @@ def _run_debug_share_nous(args, *, log_lines: int, redact: bool) -> None:
     """Handle ``nunmai debug share --nous``: upload the bundle to Nous-S3.
 
     Collects the same force-redacted bundle as the paste path, gzips it into
-    the Nous envelope, requests a signed URL from NAS, uploads, and prints the
+    the Nunmai envelope, requests a signed URL from NAS, uploads, and prints the
     private viewer link. On any failure falls back to a clear error that
     suggests ``--local``.
     """
@@ -955,13 +955,13 @@ def _run_debug_share_nous(args, *, log_lines: int, redact: bool) -> None:
         )
     blob = build_nous_bundle(bundle, redact=redact)
 
-    print("Uploading to Nous diagnostics storage...")
+    print("Uploading to Nunmai diagnostics storage...")
     try:
         res = share_to_nous(blob)
     except Exception as exc:
         print(
             f"\nNous upload failed: {exc}\n"
-            "\nThe Nous diagnostics service may be unavailable or not yet "
+            "\nThe Nunmai diagnostics service may be unavailable or not yet "
             "provisioned.\n"
             "Run `nunmai debug share --local` to print the report instead, "
             "or `nunmai debug share` to upload to a public paste service.\n",
@@ -970,7 +970,7 @@ def _run_debug_share_nous(args, *, log_lines: int, redact: bool) -> None:
         sys.exit(1)
 
     view_url = res.get("viewUrl") or res.get("view_url")
-    print("\nDebug bundle uploaded to Nous (private):")
+    print("\nDebug bundle uploaded to Nunmai (private):")
     if view_url:
         print(f"  View URL  {view_url}")
     else:
@@ -983,13 +983,13 @@ def _run_debug_share_nous(args, *, log_lines: int, redact: bool) -> None:
         print("\n⏱  Auto-deletes after 14 days.")
 
     print(
-        "\nShare this private link with the Nous team — only Nous staff "
+        "\nShare this private link with the Nunmai team — only Nunmai staff "
         "(via Google login) can open it."
     )
     print(
         "\nPick up the discussion in:\n"
         "  GitHub Issues        https://github.com/NousResearch/hermes-agent/issues\n"
-        "  Nous Portal Support  https://portal.nousresearch.com/help\n"
+        "  Nunmai Portal Support  https://portal.nousresearch.com/help\n"
         "  Discord              https://discord.gg/NousResearch"
     )
 
@@ -1044,7 +1044,7 @@ def run_debug(args):
         print("  --lines N    Number of log lines to include (default: 200)")
         print("  --expire N   Paste expiry in days (default: 7)")
         print("  --local      Print report locally instead of uploading")
-        print("  --nous       Upload to Nous-internal storage (private, staff-only,")
+        print("  --nous       Upload to Nunmai-internal storage (private, staff-only,")
         print("               auto-deletes in 14 days) instead of a public paste")
         print("  --no-redact  Disable upload-time secret redaction (default: redact)")
         print()

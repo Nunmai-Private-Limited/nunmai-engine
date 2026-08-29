@@ -985,7 +985,7 @@ class TestRunDebugShareNous:
                 run_debug_share(self._args())
         assert exc.value.code == 1
         err = capsys.readouterr().err
-        assert "Nous upload failed" in err
+        assert "Nunmai upload failed" in err
         assert "--local" in err
 
     def test_nous_does_not_touch_pastebin(self, nunmai_home):

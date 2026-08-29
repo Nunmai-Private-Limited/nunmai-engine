@@ -132,7 +132,7 @@ def get_active_provider() -> Optional[VideoGenProvider]:
     except Exception as exc:
         logger.debug("Could not read video_gen.provider from config: %s", exc)
 
-    # The managed "Nous Subscription" selection is serviced by the FAL
+    # The managed "Nunmai Subscription" selection is serviced by the FAL
     # plugin through the managed fal-queue gateway (the plugin's resolver
     # routes managed when the stored selection is "nous").
     if configured:

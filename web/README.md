@@ -74,7 +74,7 @@ Read before adding or editing UI styles. These rules keep the dashboard legible 
 
 ### Brand uppercase via `text-display`, not raw `uppercase`
 
-- The dashboard preserves the Nous brand uppercase aesthetic, but it is **opt-in per element, not global**.
+- The dashboard preserves the Nunmai brand uppercase aesthetic, but it is **opt-in per element, not global**.
 - Apply uppercase via the DS utility `text-display` on **brand chrome only** — page titles, nav section headings, badges, brand wordmark. DS components (`Button`, `Badge`, `Tabs`, `Segmented`, etc.) already self-apply `text-display`.
 - **Do not introduce new `uppercase`** (the literal Tailwind class) in `nunmai-engine/web/src`. Prefer `text-display` for new brand chrome. Legacy `uppercase` call sites (e.g. `components/ui/label.tsx`, `card.tsx`) remain until migrated.
 - The app shell no longer forces uppercase globally, so blanket `normal-case` opt-outs are unnecessary. Use `normal-case` only where a DS component applies `text-display` but the label should stay sentence case — e.g. dynamic user content (model slugs, theme names) **or** fixed UI copy that is not brand chrome (EnvPage “not configured” toggle, sidebar “New chat”).

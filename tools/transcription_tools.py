@@ -1025,7 +1025,7 @@ def _get_provider(stt_config: dict) -> str:
     explicit = "provider" in stt_config
     provider = stt_config.get("provider", DEFAULT_PROVIDER)
 
-    # The managed "Nous Subscription" selection (stt.provider: nous) is
+    # The managed "Nunmai Subscription" selection (stt.provider: nous) is
     # serviced by the OpenAI provider implementation, routed through the
     # managed openai-audio gateway by _resolve_openai_audio_client_config.
     if isinstance(provider, str) and provider.strip().lower() == "nous":
@@ -3335,7 +3335,7 @@ def _resolve_openai_audio_client_config() -> tuple[str, str]:
             raise ValueError(selection_error(
                 "stt",
                 NOUS_MANAGED_PROVIDER,
-                "the Nous Tool Gateway is not available (not entitled or "
+                "the Nunmai Tool Gateway is not available (not entitled or "
                 "unreachable)",
             ))
         return managed_gateway.nous_user_token, urljoin(

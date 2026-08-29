@@ -1459,7 +1459,7 @@ DEFAULT_CONFIG = {
         # class of over-claim that otherwise forces users to run
         # `git status` to verify edits landed.  Set false to suppress.
         "file_mutation_verifier": True,
-        # Nous credits status-bar notices (usage bands, grant-spent, depleted /
+        # Nunmai credits status-bar notices (usage bands, grant-spent, depleted /
         # restored).  When false, no credits notices are emitted — balance data
         # is still captured and /usage keeps working.  Off switch for sub +
         # top-up users who find the gauge noisy.
@@ -1676,7 +1676,7 @@ DEFAULT_CONFIG = {
         # sessions are excluded; swept sessions stay resumable.
         "startup_orphan_sweep": True,
         # OAuth gate configuration (engaged when ``--host`` is set and
-        # ``--insecure`` is not). The bundled Nous Portal plugin reads
+        # ``--insecure`` is not). The bundled Nunmai Portal plugin reads
         # both keys at startup; they are the canonical surface for these
         # settings. Each can be overridden by an environment variable —
         # ``NUNMAI_DASHBOARD_OAUTH_CLIENT_ID`` and
@@ -2038,7 +2038,7 @@ DEFAULT_CONFIG = {
     # Subagent delegation — override the provider:model used by delegate_task
     # so child agents can run on a different (cheaper/faster) provider and model.
     # Uses the same runtime provider resolution as CLI/gateway startup, so all
-    # configured providers (OpenRouter, Nous, Z.ai, Kimi, etc.) are supported.
+    # configured providers (OpenRouter, Nunmai, Z.ai, Kimi, etc.) are supported.
     "delegation": {
         "model": "",       # e.g. "google/gemini-3-flash-preview" (empty = inherit parent model)
         "provider": "",    # e.g. "openrouter" (empty = inherit parent provider + credentials)
@@ -2680,7 +2680,7 @@ DEFAULT_CONFIG = {
         # provider == "chronos". All non-secret (URLs + the JWT audience): the
         # agent holds NO external-scheduler credentials. For hosted agents, NAS
         # sets these at provision time. The outbound provision call reuses the
-        # agent's existing Nous Portal token — there is no token key here.
+        # agent's existing Nunmai Portal token — there is no token key here.
         "chronos": {
             # NAS / portal base URL the agent calls to arm/cancel one-shots
             # and that mints the inbound fire JWT (used as the expected issuer).
@@ -2975,7 +2975,7 @@ DEFAULT_CONFIG = {
     },
 
     # Remotely-hosted model catalog manifest.  When enabled, the CLI fetches
-    # curated model lists for OpenRouter and Nous Portal from this URL,
+    # curated model lists for OpenRouter and Nunmai Portal from this URL,
     # falling back to the in-repo snapshot on network failure.  Lets us
     # update model picker lists without shipping a nunmai-engine release.
     # The default URL is served by the docs site GitHub Pages deploy.
@@ -3816,7 +3816,7 @@ DEFAULT_CONFIG = {
         "upstream_deny_cidrs": None,
         # Extra allowed upstream hosts beyond the bundled defaults (which
         # cover OpenRouter, OpenAI, Anthropic, Google, xAI, Mistral, Groq,
-        # Together, DeepSeek, Nous).  Wildcards (`*.foo.com`) are supported.
+        # Together, DeepSeek, Nunmai).  Wildcards (`*.foo.com`) are supported.
         "extra_allowed_hosts": [],
     },
 
@@ -3910,8 +3910,8 @@ DEFAULT_CONFIG = {
 OPTIONAL_ENV_VARS = {
     # ── Provider (handled in provider selection, not shown in checklists) ──
     "NOUS_BASE_URL": {
-        "description": "Nous Portal base URL override",
-        "prompt": "Nous Portal base URL (leave empty for default)",
+        "description": "Nunmai Portal base URL override",
+        "prompt": "Nunmai Portal base URL (leave empty for default)",
         "url": None,
         "password": False,
         "category": "provider",
@@ -4373,7 +4373,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "FIRECRAWL_GATEWAY_URL": {
-        "description": "Exact Firecrawl tool-gateway origin override for Nous Subscribers only (optional)",
+        "description": "Exact Firecrawl tool-gateway origin override for Nunmai Subscribers only (optional)",
         "prompt": "Firecrawl gateway URL (leave empty to derive from domain)",
         "url": None,
         "password": False,
@@ -4381,7 +4381,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TOOL_GATEWAY_DOMAIN": {
-        "description": "Shared tool-gateway domain suffix for Nous Subscribers only, used to derive vendor hosts, e.g. nousresearch.com -> firecrawl-gateway.nousresearch.com",
+        "description": "Shared tool-gateway domain suffix for Nunmai Subscribers only, used to derive vendor hosts, e.g. nousresearch.com -> firecrawl-gateway.nousresearch.com",
         "prompt": "Tool-gateway domain suffix",
         "url": None,
         "password": False,
@@ -4389,7 +4389,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TOOL_GATEWAY_SCHEME": {
-        "description": "Shared tool-gateway URL scheme for Nous Subscribers only, used to derive vendor hosts (`https` by default, set `http` for local gateway testing)",
+        "description": "Shared tool-gateway URL scheme for Nunmai Subscribers only, used to derive vendor hosts (`https` by default, set `http` for local gateway testing)",
         "prompt": "Tool-gateway URL scheme",
         "url": None,
         "password": False,
@@ -4397,7 +4397,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TOOL_GATEWAY_USER_TOKEN": {
-        "description": "Explicit Nous Subscriber access token for tool-gateway requests (optional; otherwise read from the Nunmai auth store)",
+        "description": "Explicit Nunmai Subscriber access token for tool-gateway requests (optional; otherwise read from the Nunmai auth store)",
         "prompt": "Tool-gateway user token",
         "url": None,
         "password": True,

@@ -14,7 +14,7 @@ from agent.rate_limit_tracker import (
 )
 
 
-# ── Sample headers from Nous inference API ──────────────────────────────
+# ── Sample headers from Nunmai inference API ──────────────────────────────
 
 NOUS_HEADERS = {
     "x-ratelimit-limit-requests": "800",

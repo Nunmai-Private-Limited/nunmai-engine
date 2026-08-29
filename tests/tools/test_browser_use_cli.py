@@ -258,7 +258,7 @@ class TestFindCli:
 class TestLegacyCloudMigration:
     """Pre-CLI direct-API Browser Use cloud configs (cloud_provider:
     "browser-use" + BROWSER_USE_API_KEY) auto-route to the CLI backend;
-    Nous-gateway users stay on the legacy provider path."""
+    Nunmai-gateway users stay on the legacy provider path."""
 
     _LEGACY = {"browser": {"cloud_provider": "browser-use"}}
 

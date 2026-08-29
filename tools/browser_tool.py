@@ -3,7 +3,7 @@
 Browser Tool Module
 
 This module provides browser automation tools using agent-browser CLI.  It
-supports multiple backends — **Browser Use** (cloud, default for Nous
+supports multiple backends — **Browser Use** (cloud, default for Nunmai
 subscribers), **Browserbase** (cloud, direct credentials), and **local
 Chromium** — with identical agent-facing behaviour.  The backend is
 auto-detected from config and available credentials.
@@ -830,7 +830,7 @@ def _resolve_cloud_provider_uncached() -> Optional[CloudBrowserProvider]:
 
     Reads ``config["browser"]["cloud_provider"]`` once and caches the result
     for the process lifetime. An explicit ``local`` provider disables cloud
-    fallback. If unset, fall back to Browser Use (managed Nous gateway or
+    fallback. If unset, fall back to Browser Use (managed Nunmai gateway or
     direct API key) and then Browserbase (direct credentials only) — the
     historic auto-detect order, now expressed as the
     :data:`agent.browser_registry._LEGACY_PREFERENCE` walk.
@@ -861,7 +861,7 @@ def _resolve_cloud_provider_uncached() -> Optional[CloudBrowserProvider]:
                 _cloud_provider_resolved = True
                 return None
             if provider_key == "nous":
-                # Managed "Nous Subscription" selection is serviced by the
+                # Managed "Nunmai Subscription" selection is serviced by the
                 # Browser Use provider, whose config resolver routes it
                 # through the managed browser-use gateway.
                 provider_key = "browser-use"
@@ -908,7 +908,7 @@ def _resolve_cloud_provider_uncached() -> Optional[CloudBrowserProvider]:
 
     if resolved is None and provider_key is None:
         # Auto-detect path — permitted ONLY when no cloud_provider selection
-        # was ever written: Browser Use first (managed Nous gateway or
+        # was ever written: Browser Use first (managed Nunmai gateway or
         # direct API key), then Browserbase (direct credentials). Uses
         # the legacy class names imported at the top of this module so
         # tests that ``monkeypatch.setattr(browser_tool, "BrowserUseProvider", ...)``

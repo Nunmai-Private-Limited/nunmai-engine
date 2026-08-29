@@ -5134,7 +5134,7 @@ class TestRetryExhaustion:
         content after retries".
 
         Regression: running a Claude refusal through an OpenAI-compatible
-        portal (Nous Portal fronting Anthropic) returns ``message.refusal``
+        portal (Nunmai Portal fronting Anthropic) returns ``message.refusal``
         with empty content. The transport now promotes that to a
         ``content_filter`` finish reason and the loop surfaces it as a terminal
         ``content_policy_blocked`` result instead of retrying a deterministic
@@ -5235,7 +5235,7 @@ class TestConversationHistoryNotMutated:
 
 
 class TestNousCredentialRefresh:
-    """Verify Nous credential refresh rebuilds the runtime client."""
+    """Verify Nunmai credential refresh rebuilds the runtime client."""
 
     def test_try_refresh_nous_client_credentials_rebuilds_client(
         self, agent, monkeypatch
@@ -5529,7 +5529,7 @@ class TestGpt5ApiModeRouting:
 
 
     def test_nous_gpt5_stays_on_chat_completions(self, agent):
-        """Nous serves gpt-5.x on /chat/completions — must not upgrade to codex_responses."""
+        """Nunmai serves gpt-5.x on /chat/completions — must not upgrade to codex_responses."""
         agent.provider = "nous"
         agent.base_url = "https://inference-api.nousresearch.com/v1"
         agent.api_mode = "chat_completions"

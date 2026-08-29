@@ -1,15 +1,15 @@
 """Regression tests for image_gen provider persistence (managed FAL clobber).
 
 Historical bug: ``_select_plugin_image_gen_provider`` hardcoded the direct
-(non-managed) routing. When a user picked FAL through the Nous-subscription
+(non-managed) routing. When a user picked FAL through the Nunmai-subscription
 managed flow, the managed write landed first — then the image selector ran
 and clobbered it back to direct, silently routing every generation through
-the user's personal FAL_KEY instead of the Nous Tool Gateway (real incident:
+the user's personal FAL_KEY instead of the Nunmai Tool Gateway (real incident:
 personal key drained to zero while the subscription sat unused).
 
 Current contract (strict provider-string selection): each picker row writes
 exactly ONE provider string per category — ``image_gen.provider: nous`` for
-the managed "Nous Subscription" row, ``image_gen.provider: fal`` for the
+the managed "Nunmai Subscription" row, ``image_gen.provider: fal`` for the
 BYOK FAL row — and any legacy ``use_gateway`` key is popped so the
 read-time shim (use_gateway: true ⇒ nous) cannot override the fresh pick.
 The video twin (``_select_plugin_video_gen_provider``) shares the contract.
@@ -95,14 +95,14 @@ def _quiet_reconfigure(monkeypatch):
 def test_reconfigure_managed_fal_row_keeps_managed_selection(monkeypatch):
     """The sibling bug of fe63353cb: the legacy-backend model-pick step in
     _reconfigure_provider hardcoded the direct selection AFTER the managed
-    branch wrote the managed one — a Nous Subscription user re-entering the
+    branch wrote the managed one — a Nunmai Subscription user re-entering the
     picker to change models was silently flipped onto their personal
     FAL_KEY."""
     _quiet_reconfigure(monkeypatch)
     import nunmai_cli.tools_config as tc
 
     managed_row = {
-        "name": "Nous Subscription",
+        "name": "Nunmai Subscription",
         "env_vars": [],
         "requires_nous_auth": True,
         "managed_nous_feature": "image_gen",

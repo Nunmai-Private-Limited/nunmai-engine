@@ -1,4 +1,4 @@
-"""Unit tests for the Nous Portal profile's reasoning wiring.
+"""Unit tests for the Nunmai Portal profile's reasoning wiring.
 
 The Portal honors ``reasoning: {enabled: false}`` — it is the only wire shape
 that does, and ``extra_body.thinking`` is not forwarded upstream. The profile
@@ -21,9 +21,9 @@ import pytest
 
 @pytest.fixture
 def nous_profile():
-    """Resolve the registered Nous profile through the real discovery path."""
+    """Resolve the registered Nunmai profile through the real discovery path."""
     # ``model_tools`` triggers plugin discovery on import, which is what
-    # registers the Nous profile in the global provider registry.
+    # registers the Nunmai profile in the global provider registry.
     import model_tools  # noqa: F401
     import providers
 

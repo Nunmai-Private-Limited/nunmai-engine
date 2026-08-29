@@ -333,7 +333,7 @@ TOOL_CATEGORIES = {
                 "tts_provider": "edge",
             },
             {
-                "name": "Nous Subscription",
+                "name": "Nunmai Subscription",
                 "badge": "subscription",
                 "tag": "Managed OpenAI TTS billed to your subscription",
                 "env_vars": [],
@@ -426,7 +426,7 @@ TOOL_CATEGORIES = {
                 "post_setup": "faster_whisper",
             },
             {
-                "name": "Nous Subscription",
+                "name": "Nunmai Subscription",
                 "badge": "subscription",
                 "tag": "Managed OpenAI transcription billed to your subscription",
                 "env_vars": [],
@@ -492,14 +492,14 @@ TOOL_CATEGORIES = {
         # plugins.web.<vendor>.provider via _plugin_web_search_providers()
         # in _visible_providers(). Only non-provider UX setup-flow rows
         # for the firecrawl backend are listed here:
-        #   - "Nous Subscription" — managed Firecrawl billed via Nous
+        #   - "Nunmai Subscription" — managed Firecrawl billed via Nunmai
         #     subscription (requires_nous_auth + override_env_vars).
         #   - "Firecrawl Self-Hosted" — points firecrawl at a private
         #     Docker instance via FIRECRAWL_API_URL only.
         # See PR #25182 for the migration rationale.
         "providers": [
             {
-                "name": "Nous Subscription",
+                "name": "Nunmai Subscription",
                 "badge": "subscription",
                 "tag": "Managed Firecrawl billed to your subscription",
                 "web_backend": "firecrawl",
@@ -527,14 +527,14 @@ TOOL_CATEGORIES = {
         # ``plugins.image_gen.<vendor>`` package via
         # ``_plugin_image_gen_providers()`` in ``_visible_providers``.
         # Only non-provider UX setup-flow rows remain here:
-        #   - "Nous Subscription" — managed FAL billed via the Nous
+        #   - "Nunmai Subscription" — managed FAL billed via the Nunmai
         #     subscription (requires_nous_auth + override_env_vars).
         #     Uses the fal plugin as the underlying backend but has a
         #     distinct setup UX.
         # Mirrors the shape browser/video_gen ship today.
         "providers": [
             {
-                "name": "Nous Subscription",
+                "name": "Nunmai Subscription",
                 "badge": "subscription",
                 "tag": "Managed FAL image generation billed to your subscription",
                 "env_vars": [],
@@ -548,13 +548,13 @@ TOOL_CATEGORIES = {
     "video_gen": {
         "name": "Video Generation",
         "icon": "🎬",
-        # "Nous Subscription" row mirrors the image_gen pattern — managed
-        # FAL video generation billed via the Nous Portal.  Plugin-backed
+        # "Nunmai Subscription" row mirrors the image_gen pattern — managed
+        # FAL video generation billed via the Nunmai Portal.  Plugin-backed
         # provider rows (FAL BYOK, xAI, …) are injected at runtime by
         # ``_plugin_video_gen_providers()`` in ``_visible_providers``.
         "providers": [
             {
-                "name": "Nous Subscription",
+                "name": "Nunmai Subscription",
                 "badge": "subscription",
                 "tag": "Managed FAL video generation billed to your subscription",
                 "env_vars": [],
@@ -562,7 +562,7 @@ TOOL_CATEGORIES = {
                 "managed_nous_feature": "video_gen",
                 "override_env_vars": ["FAL_KEY"],
                 # The underlying plugin backend — when the user picks
-                # "Nous Subscription" we set video_gen.provider = "fal"
+                # "Nunmai Subscription" we set video_gen.provider = "fal"
                 # and video_gen.use_gateway = True so the FAL plugin
                 # routes through the managed queue gateway.
                 "video_gen_plugin_name": "fal",
@@ -613,10 +613,10 @@ TOOL_CATEGORIES = {
         # non-provider UX setup-flow rows remain here. "Local Browser" is
         # listed FIRST so it is the default-highlighted (index 0) choice on a
         # fresh install — pressing Enter must land on the free, no-key local
-        # backend, never on the paid Nous Subscription gateway row:
+        # backend, never on the paid Nunmai Subscription gateway row:
         #   - "Local Browser" — non-cloud option, no CloudBrowserProvider.
-        #   - "Nous Subscription (Browser Use cloud)" — managed Browser Use
-        #     billed via Nous subscription (requires_nous_auth +
+        #   - "Nunmai Subscription (Browser Use cloud)" — managed Browser Use
+        #     billed via Nunmai subscription (requires_nous_auth +
         #     override_env_vars). Uses the browser-use plugin as the
         #     underlying backend but has a distinct setup UX.
         #   - "Camofox" — anti-detection local Firefox; short-circuits the
@@ -632,7 +632,7 @@ TOOL_CATEGORIES = {
                 "post_setup": "agent_browser",
             },
             {
-                "name": "Nous Subscription (Browser Use cloud)",
+                "name": "Nunmai Subscription (Browser Use cloud)",
                 "badge": "subscription",
                 "tag": "Managed Browser Use billed to your subscription",
                 "env_vars": [],
@@ -1991,7 +1991,7 @@ def _ensure_browser_use_cli(*, verbose_hints: bool = False) -> None:
     The Browser Use CLI 3.0 is the primary driver engine for EVERY browser
     backend except Camofox (which is Firefox-based with no CDP surface, so
     the CDP-only browser-use harness cannot drive it). Local, Browserbase,
-    Firecrawl, and the Nous-managed cloud rows all execute through
+    Firecrawl, and the Nunmai-managed cloud rows all execute through
     ``browser_exec`` when the CLI is runnable — so every one of those
     picker selections must attempt this install, not just the explicit
     "Browser Use" row. Failure is non-fatal: ``browser_exec`` can still run
@@ -3318,7 +3318,7 @@ def _plugin_video_gen_providers() -> list[dict]:
 # PR #25182 — this helper is the sole source of truth for the category's
 # provider rows. The hardcoded entries that used to drive the category
 # were deleted in the same PR; only the two non-provider UX rows
-# ("Nous Subscription" managed-gateway entry, "Firecrawl Self-Hosted")
+# ("Nunmai Subscription" managed-gateway entry, "Firecrawl Self-Hosted")
 # remain in TOOL_CATEGORIES because they describe alternative *setup
 # flows* for the firecrawl backend rather than distinct providers.
 def _plugin_web_search_providers() -> list[dict]:
@@ -3413,7 +3413,7 @@ def web_provider_capabilities(backend: str) -> list:
 # for those three in the "Browser Automation" picker. The hardcoded
 # ``TOOL_CATEGORIES["browser"]`` entries that drove the category before
 # were deleted in the same PR; only non-provider UX setup-flow rows remain
-# ("Nous Subscription", "Local Browser", "Camofox") — see the comment block
+# ("Nunmai Subscription", "Local Browser", "Camofox") — see the comment block
 # in ``TOOL_CATEGORIES["browser"]`` for why each one stays hardcoded.
 def _plugin_browser_providers() -> list[dict]:
     """Build picker-row dicts from plugin-registered cloud browser providers.
@@ -3527,9 +3527,9 @@ def _visible_providers(
 ) -> list[dict]:
     """Return provider entries visible for the current auth/config state.
 
-    Nous-managed Tool Gateway rows (``managed_nous_feature``) are always
+    Nunmai-managed Tool Gateway rows (``managed_nous_feature``) are always
     shown — even to logged-out / unentitled users — so the picker advertises
-    that the capability exists.  Selecting one drives an inline Nous Portal
+    that the capability exists.  Selecting one drives an inline Nunmai Portal
     login + entitlement check (see ``_configure_provider``); the row only
     *activates* the gateway once paid access is confirmed.
     """
@@ -3549,7 +3549,7 @@ def _visible_providers(
     )
     visible = []
     for provider in cat.get("providers", []):
-        # Nous-managed Tool Gateway rows stay visible regardless of auth —
+        # Nunmai-managed Tool Gateway rows stay visible regardless of auth —
         # selecting one drives an inline Portal login. A `requires_nous_auth`
         # row that is NOT a managed gateway feature (pure pre-auth UX) is
         # still hidden until the user is logged in.
@@ -3570,7 +3570,7 @@ def _visible_providers(
         visible.append(provider)
 
     # Inject plugin-registered image_gen backends (OpenAI today, more
-    # later) so the picker lists them alongside FAL / Nous Subscription.
+    # later) so the picker lists them alongside FAL / Nunmai Subscription.
     if cat.get("name") == "Image Generation":
         visible.extend(_plugin_image_gen_providers())
 
@@ -3582,14 +3582,14 @@ def _visible_providers(
     # Inject plugin-registered web search backends. After PR #25182, this
     # is the SOLE source of provider rows for the Web Search & Extract
     # category — the per-provider hardcoded entries were deleted. The two
-    # remaining hardcoded rows ("Nous Subscription", "Firecrawl
+    # remaining hardcoded rows ("Nunmai Subscription", "Firecrawl
     # Self-Hosted") are non-provider UX setup-flow rows for firecrawl.
     if cat.get("name") == "Web Search & Extract":
         visible.extend(_plugin_web_search_providers())
 
     # Inject plugin-registered cloud browser backends. After PR #25214,
     # Browserbase / Browser Use / Firecrawl are the plugin-supplied rows;
-    # the hardcoded "Nous Subscription" / "Local Browser" / "Camofox" rows
+    # the hardcoded "Nunmai Subscription" / "Local Browser" / "Camofox" rows
     # stay because they're non-provider UX setup flows (subscription auth,
     # local fallback, and the REST-API anti-detection backend respectively).
     if cat.get("name") == "Browser Automation":
@@ -3611,10 +3611,10 @@ def _hidden_nous_gateway_message(
     *,
     force_fresh: bool = False,
 ) -> str:
-    """Deprecated: Nous Tool Gateway rows are no longer hidden.
+    """Deprecated: Nunmai Tool Gateway rows are no longer hidden.
 
     Previously this returned a "log in / upgrade" banner shown above a
-    category when its Nous-managed rows were filtered out for unentitled
+    category when its Nunmai-managed rows were filtered out for unentitled
     users. Those rows are now always listed (see ``_visible_providers``), and
     the login + entitlement guidance happens inline when the user selects one
     (``ensure_nous_portal_access``). Kept as a no-op so call sites stay simple;
@@ -3774,7 +3774,7 @@ def provider_readiness_status(
 
     - ``"ready"``       — usable as-is (keys set / entitled / installed).
     - ``"needs_keys"``  — declares env vars and at least one is unset.
-    - ``"needs_auth"``  — needs a sign-in: Nous Portal login/entitlement for
+    - ``"needs_auth"``  — needs a sign-in: Nunmai Portal login/entitlement for
       managed Tool Gateway rows, or xAI Grok OAuth / XAI_API_KEY for
       ``post_setup: "xai_grok"`` rows.
     - ``"needs_setup"`` — keyless row whose ``post_setup`` install hook has
@@ -3782,7 +3782,7 @@ def provider_readiness_status(
 
     Keyless ≠ usable: this is the server-side truth the GUI "Ready" pill
     renders from (the old client-side heuristic showed Ready for every
-    zero-env-var row, including logged-out Nous Subscription rows).
+    zero-env-var row, including logged-out Nunmai Subscription rows).
 
     ``features`` (a ``NousSubscriptionFeatures``) can be passed to avoid
     re-fetching portal state per row. ``is_active`` is the completed-setup
@@ -3924,7 +3924,7 @@ def _configure_tool_category(
     hidden_nous_message = _hidden_nous_gateway_message(
         cat,
         config,
-        f"the Nous Subscription provider for {name}",
+        f"the Nunmai Subscription provider for {name}",
         force_fresh=force_fresh,
     )
 
@@ -3965,9 +3965,9 @@ def _configure_tool_category(
         print()
 
         # Plain text labels only (no ANSI codes in menu items)
-        # When the user is logged into Nous, surface a marker on providers
+        # When the user is logged into Nunmai, surface a marker on providers
         # whose access is included in their subscription so it's visually
-        # obvious which options cost extra vs. cost nothing on top of Nous.
+        # obvious which options cost extra vs. cost nothing on top of Nunmai.
         try:
             _nous_logged_in = bool(
                 get_nous_subscription_features(
@@ -3991,17 +3991,17 @@ def _configure_tool_category(
                     configured = ""
                 else:
                     configured = " [configured]"
-            # Mark Nous-managed entries. Logged-in paid subscribers get the
-            # "included" star; everyone else gets a "via Nous Portal" hint so
+            # Mark Nunmai-managed entries. Logged-in paid subscribers get the
+            # "included" star; everyone else gets a "via Nunmai Portal" hint so
             # it's clear selecting the row triggers a Portal login. The rows
             # are always shown now (see _visible_providers) — selecting one
             # drives an inline login + entitlement check.
             sub_marker = ""
             if p.get("managed_nous_feature"):
                 if _nous_logged_in:
-                    sub_marker = "  ★ Included with your Nous subscription"
+                    sub_marker = "  ★ Included with your Nunmai subscription"
                 else:
-                    sub_marker = "  ★ via Nous Portal (login on select)"
+                    sub_marker = "  ★ via Nunmai Portal (login on select)"
             provider_choices.append(f"{p['name']}{badge}{tag}{configured}{sub_marker}")
 
         # Add skip option
@@ -4071,7 +4071,7 @@ def _is_provider_active(
     """Check if a provider entry matches the currently active config."""
     plugin_name = provider.get("image_gen_plugin_name")
     if plugin_name and not provider.get("managed_nous_feature"):
-        # Managed (Nous-subscription) entries fall through to the
+        # Managed (Nunmai-subscription) entries fall through to the
         # managed_feature branch below, which also checks use_gateway —
         # otherwise a managed FAL pick and a direct-key FAL pick would both
         # report active for the same provider name (video already guards).
@@ -4461,7 +4461,7 @@ def _configure_xai_imagine_storage(section_name: str, config: dict) -> None:
 def _select_plugin_image_gen_provider(plugin_name: str, config: dict, *, use_gateway: bool = False) -> None:
     """Persist a plugin-backed image generation provider selection.
 
-    ``use_gateway=True`` marks a provider picked through the Nous-managed
+    ``use_gateway=True`` marks a provider picked through the Nunmai-managed
     flow: the stored selection becomes ``image_gen.provider: nous`` (the
     single provider string the runtime switches on). BYOK picks store the
     plugin name. Any legacy ``use_gateway`` key is removed so old-config
@@ -4637,12 +4637,12 @@ def _write_provider_config(provider: dict, config: dict, *, managed_feature) -> 
     This is the pure, non-interactive core of :func:`_configure_provider` —
     it writes ``tts.provider`` / ``browser.cloud_provider`` / ``web.backend``
     based on the provider's markers, but does NOT prompt for env vars, run
-    post-setup hooks, gate on Nous auth, or run interactive model pickers.
+    post-setup hooks, gate on Nunmai auth, or run interactive model pickers.
     Both the CLI configurator and the desktop GUI ``PUT .../provider``
     endpoint call through here so there is one code path.
 
     Selection model: every row writes exactly ONE provider string per
-    category. Managed "Nous Subscription" rows write ``nous``; BYOK rows
+    category. Managed "Nunmai Subscription" rows write ``nous``; BYOK rows
     write the vendor name. ``use_gateway`` is no longer written — a fresh
     pick removes any legacy key from the touched section so the read-time
     legacy shim (use_gateway: true ⇒ nous) cannot override the new choice.
@@ -4700,7 +4700,7 @@ def _write_provider_config(provider: dict, config: dict, *, managed_feature) -> 
         cu_cfg["backend"] = provider["computer_use_backend"]
 
     # Managed rows for categories without a marker handled above (e.g. the
-    # image_gen/video_gen "Nous Subscription" rows carry only
+    # image_gen/video_gen "Nunmai Subscription" rows carry only
     # managed_nous_feature) still persist the "nous" selection.
     if managed_feature and managed_feature not in {"web", "tts", "stt", "browser"}:
         section = config.setdefault(managed_feature, {})
@@ -4746,7 +4746,7 @@ def apply_provider_selection(ts_key: str, provider_name: str, config: dict) -> N
     rows the GUI/CLI picker shows via :func:`_visible_providers`) and writes
     the corresponding backend/provider config keys. Unlike
     :func:`_configure_provider`, this does NOT prompt for API keys, run
-    post-setup hooks, gate on Nous Portal auth, or run interactive model
+    post-setup hooks, gate on Nunmai Portal auth, or run interactive model
     pickers — those are handled separately (env endpoints, post-setup
     endpoints, the model picker) in the desktop GUI.
 
@@ -4814,8 +4814,8 @@ def _configure_provider(
     env_vars = provider.get("env_vars", [])
     managed_feature = provider.get("managed_nous_feature")
 
-    # Nous-managed Tool Gateway backends are always listed (see
-    # _visible_providers), but only *activate* once the user has paid Nous
+    # Nunmai-managed Tool Gateway backends are always listed (see
+    # _visible_providers), but only *activate* once the user has paid Nunmai
     # Portal access. Selecting one runs an inline Portal login when needed —
     # auth + entitlement only, no inference-provider switch and no bulk
     # "enable all tools" prompt (that lives in `nunmai model`).
@@ -4826,11 +4826,11 @@ def _configure_provider(
         )
 
         if not ensure_nous_portal_access(
-            capability=f"{provider.get('name', 'the Nous Tool Gateway')}",
+            capability=f"{provider.get('name', 'the Nunmai Tool Gateway')}",
             coverage_category=MANAGED_FEATURE_COVERAGE_CATEGORY.get(managed_feature),
         ):
             _print_warning(
-                "  Not enabled — Nous Portal access is required for this backend."
+                "  Not enabled — Nunmai Portal access is required for this backend."
             )
             return
 
@@ -4845,10 +4845,10 @@ def _configure_provider(
         if not features.nous_auth_present or not entitled:
             message = format_nous_portal_entitlement_message(
                 features.account_info,
-                capability=f"{provider.get('name', 'Nous Subscription')}",
+                capability=f"{provider.get('name', 'Nunmai Subscription')}",
             )
             _print_warning(
-                f"  {message or 'Nous Subscription is only available after logging into Nous Portal.'}"
+                f"  {message or 'Nunmai Subscription is only available after logging into Nunmai Portal.'}"
             )
             return
 
@@ -4889,7 +4889,7 @@ def _configure_provider(
             _run_post_setup(provider["post_setup"])
         _print_success(f"  {provider['name']} - no configuration needed!")
         if managed_feature:
-            _print_info("  Requests for this tool will be billed to your Nous subscription.")
+            _print_info("  Requests for this tool will be billed to your Nunmai subscription.")
         # Plugin-registered image_gen provider: write image_gen.provider
         # and route model selection to the plugin's own catalog.
         plugin_name = provider.get("image_gen_plugin_name")
@@ -4923,9 +4923,9 @@ def _configure_provider(
     # Prompt for each required env var
     all_configured = True
     # If this BYOK provider lives in a category that ALSO has a
-    # Nous-managed sibling, show a single dim hint so users know
+    # Nunmai-managed sibling, show a single dim hint so users know
     # they can avoid the key entirely via a Portal subscription.
-    # Suppressed when the user is already authed to Nous.
+    # Suppressed when the user is already authed to Nunmai.
     _show_portal_hint = False
     if env_vars and not managed_feature and not provider.get("requires_nous_auth"):
         try:
@@ -4947,7 +4947,7 @@ def _configure_provider(
             _show_portal_hint = False
 
     if _show_portal_hint:
-        _print_info("  Available through Nous Portal subscription.")
+        _print_info("  Available through Nunmai Portal subscription.")
 
     for var in env_vars:
         existing = get_env_value(var["key"])
@@ -5278,7 +5278,7 @@ def _configure_tool_category_for_reconfig(
     hidden_nous_message = _hidden_nous_gateway_message(
         cat,
         config,
-        f"the Nous Subscription provider for {name}",
+        f"the Nunmai Subscription provider for {name}",
         force_fresh=force_fresh,
     )
 
@@ -5337,7 +5337,7 @@ def _reconfigure_provider(
     env_vars = provider.get("env_vars", [])
     managed_feature = provider.get("managed_nous_feature")
 
-    # Same inline Nous Portal login + entitlement gate as _configure_provider:
+    # Same inline Nunmai Portal login + entitlement gate as _configure_provider:
     # managed Tool Gateway backends only activate with paid Portal access.
     if managed_feature:
         from nunmai_cli.nous_subscription import (
@@ -5346,11 +5346,11 @@ def _reconfigure_provider(
         )
 
         if not ensure_nous_portal_access(
-            capability=f"{provider.get('name', 'the Nous Tool Gateway')}",
+            capability=f"{provider.get('name', 'the Nunmai Tool Gateway')}",
             coverage_category=MANAGED_FEATURE_COVERAGE_CATEGORY.get(managed_feature),
         ):
             _print_warning(
-                "  Not enabled — Nous Portal access is required for this backend."
+                "  Not enabled — Nunmai Portal access is required for this backend."
             )
             return
 
@@ -5364,10 +5364,10 @@ def _reconfigure_provider(
         if not features.nous_auth_present or not entitled:
             message = format_nous_portal_entitlement_message(
                 features.account_info,
-                capability=f"{provider.get('name', 'Nous Subscription')}",
+                capability=f"{provider.get('name', 'Nunmai Subscription')}",
             )
             _print_warning(
-                f"  {message or 'Nous Subscription is only available after logging into Nous Portal.'}"
+                f"  {message or 'Nunmai Subscription is only available after logging into Nunmai Portal.'}"
             )
             return
 
@@ -5459,7 +5459,7 @@ def _reconfigure_provider(
             _run_post_setup(provider["post_setup"])
         _print_success(f"  {provider['name']} - no configuration needed!")
         if managed_feature:
-            _print_info("  Requests for this tool will be billed to your Nous subscription.")
+            _print_info("  Requests for this tool will be billed to your Nunmai subscription.")
         plugin_name = provider.get("image_gen_plugin_name")
         if plugin_name:
             _select_plugin_image_gen_provider(plugin_name, config, use_gateway=bool(managed_feature))
@@ -5476,7 +5476,7 @@ def _reconfigure_provider(
             if backend == "fal":
                 img_cfg = config.setdefault("image_gen", {})
                 if isinstance(img_cfg, dict):
-                    # A managed (Nous Subscription) row also carries
+                    # A managed (Nunmai Subscription) row also carries
                     # imagegen_backend="fal" — store the "nous" selection
                     # for it, "fal" for BYOK, and drop any legacy
                     # use_gateway key.
@@ -5526,7 +5526,7 @@ def _reconfigure_provider(
             img_cfg = config.setdefault("image_gen", {})
             if isinstance(img_cfg, dict):
                 # Same managed-row guard as the no-env-vars branch above:
-                # never clobber a Nous-managed pick back onto direct keys.
+                # never clobber a Nunmai-managed pick back onto direct keys.
                 img_cfg["provider"] = (
                     NOUS_MANAGED_PROVIDER if managed_feature else "fal"
                 )
@@ -5649,7 +5649,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
             )
             for ts_key in sorted(auto_configured):
                 label = next((l for k, l, _ in CONFIGURABLE_TOOLSETS if k == ts_key), ts_key)
-                print(color(f"  ✓ {label}: using your Nous subscription defaults", Colors.GREEN))
+                print(color(f"  ✓ {label}: using your Nunmai subscription defaults", Colors.GREEN))
 
             # Walk through ALL selected tools that have provider options or
             # need API keys.  This ensures browser (Local vs Browserbase),

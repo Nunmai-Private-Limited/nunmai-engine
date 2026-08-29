@@ -1,10 +1,10 @@
-"""Client for uploading ``nunmai debug share`` bundles to Nous-internal S3.
+"""Client for uploading ``nunmai debug share`` bundles to Nunmai-internal S3.
 
 This is the opt-in (``--nous``) destination for ``nunmai debug share``.
-Unlike the public paste.rs path, bundles uploaded here go to a Nous-owned
-S3 bucket via a short-lived signed URL minted by the Nous account service
+Unlike the public paste.rs path, bundles uploaded here go to a Nunmai-owned
+S3 bucket via a short-lived signed URL minted by the Nunmai account service
 (NAS).  The bucket auto-expires objects after 14 days, and the contents are
-only viewable by Nous staff (and allowlisted Discord mods) through a
+only viewable by Nunmai staff (and allowlisted Discord mods) through a
 Google-OAuth-gated viewer.
 
 Flow:
@@ -24,7 +24,7 @@ import json
 import os
 import urllib.request
 
-# Base URL of the Nous account service that mints the signed upload URL.
+# Base URL of the Nunmai account service that mints the signed upload URL.
 # Overridable via env so the feature can be pointed at staging / a local dev
 # NAS instance during testing.
 NAS_BASE = os.environ.get(

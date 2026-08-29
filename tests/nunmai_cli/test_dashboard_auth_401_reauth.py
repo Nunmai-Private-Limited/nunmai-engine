@@ -209,7 +209,7 @@ class TestTransparentRefreshOnAccessTokenEviction:
 
 
     def test_provider_hint_routes_refresh_to_token_owner(self, gated_app):
-        """A Nous-style RT must not be rejected by Basic just because Basic
+        """A Nunmai-style RT must not be rejected by Basic just because Basic
         was registered first. The non-secret provider hint routes directly to
         the provider that minted the session."""
         class WrongProvider(StubAuthProvider):

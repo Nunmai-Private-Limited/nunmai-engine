@@ -1,5 +1,5 @@
 """Regression test: Discord /model picker must surface ALL models for a
-provider whose list exceeds 25 entries (e.g. Nous curated + Portal free
+provider whose list exceeds 25 entries (e.g. Nunmai curated + Portal free
 recommendations), not silently truncate the tail at 25 options.
 
 Discord caps a single Select at 25 options and a View at 5 action rows. The
@@ -79,7 +79,7 @@ def test_nous_free_models_render_across_partitioned_selects():
         providers=[
             {
                 "slug": "nous",
-                "name": "Nous Portal",
+                "name": "Nunmai Portal",
                 "models": list(models),
                 "total_models": len(models),
                 "is_current": True,

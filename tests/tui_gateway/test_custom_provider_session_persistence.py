@@ -299,7 +299,7 @@ class TestBareCustomNoBaseUrlHealsFromConfig:
 #
 # The config-provider fallback above only heals when ``config.model.provider``
 # still points at the custom entry. A user whose global default is a built-in
-# provider (e.g. Nous) but who switched THIS session to a self-hosted model
+# provider (e.g. Nunmai) but who switched THIS session to a self-hosted model
 # gets no heal: the bare provider is dropped, resume falls back to the default
 # provider, and the default provider's endpoint 404s with "Model '<x>' not
 # found" (the b200/nunmai-ultra-sft report). The stored MODEL NAME is the one
@@ -475,7 +475,7 @@ class TestOverridesHaveRoutableProvider:
 # Room plumbing sessions are per-member scratch conversations inside a group
 # chat (desktop Bot Mode). They must ALWAYS rebuild from the member profile's
 # current config: restoring the stored model/provider pin from an old row is
-# what left room bots stuck on a stale provider (e.g. "out of Nous credits"
+# what left room bots stuck on a stale provider (e.g. "out of Nunmai credits"
 # after the profile was switched to ollama-cloud) while the same bots worked
 # fine in DMs. The stored-runtime restore stays intact for normal 1:1 chats.
 #
@@ -484,7 +484,7 @@ class TestOverridesHaveRoutableProvider:
 # "Group:" title shape kept as a legacy fallback for rows created by older
 # desktop builds that never sent the marker.
 #
-# Regression: GH #89497 (room bots hang then report "out of Nous credits").
+# Regression: GH #89497 (room bots hang then report "out of Nunmai credits").
 
 
 class TestRoomPlumbingRuntimeOverrides:
@@ -566,7 +566,7 @@ class TestRoomPlumbingRuntimeOverrides:
 # explicit ``follow_profile_config`` contract so resume ALWAYS rebuilds from
 # the member profile's CURRENT config — restoring the stored model/provider
 # pin from an old row is what left bot DMs stuck on a stale provider (e.g.
-# "out of Nous credits" after the profile was switched to ollama-cloud) while
+# "out of Nunmai credits" after the profile was switched to ollama-cloud) while
 # the same bot worked fine in rooms. Normal 1:1 user chats keep the
 # stored-runtime restore (opening an older chat must show the model it
 # actually used).
@@ -714,7 +714,7 @@ class TestFollowProfileConfigRuntimeOverrides:
 # _persist_live_session_runtime updated the model column separately. Resume
 # then read the fresh model from the column but the STALE provider/endpoint
 # from model_config, silently routing the chat to the wrong provider (e.g. a
-# VeniceAI/empero endpoint under a model that should run on Nous). The sibling
+# VeniceAI/empero endpoint under a model that should run on Nunmai). The sibling
 # CLI path (_persist_model_switch_to_session) already deletes stale keys with
 # or-None; the gateway writer must drop them too, not merely omit the write.
 

@@ -38,7 +38,7 @@ class TestReadFileSchemaStatic(unittest.TestCase):
 
     def test_pdf_wording_upgrades_with_hosted_ocr_route(self):
         """The ONE dynamic word: text-layer → scanned-or-text, keyed on
-        hosted_ocr_available(). Nous gateway deliberately does not
+        hosted_ocr_available(). Nunmai gateway deliberately does not
         upgrade (Parse proxy live-probed broken 2026-08-28)."""
         import tools.file_tools as ft
 
@@ -54,7 +54,7 @@ class TestReadFileSchemaStatic(unittest.TestCase):
 
     def test_hosted_ocr_available_gate_states(self):
         """Maintainer decision: ONLY a direct FIRECRAWL_API_KEY unlocks —
-        not config true, not the Nous gateway."""
+        not config true, not the Nunmai gateway."""
         import tools.read_extract as rx
 
         # direct key → True
@@ -73,14 +73,14 @@ class TestReadFileSchemaStatic(unittest.TestCase):
             with patch("nunmai_cli.config.load_config_readonly",
                        return_value={"file_tools": {"hosted_ocr": True}}):
                 self.assertFalse(rx.hosted_ocr_available())
-        # nothing → False (Nous gateway alone must NOT unlock)
+        # nothing → False (Nunmai gateway alone must NOT unlock)
         with patch("nunmai_cli.config.load_config_readonly",
                    return_value={}):
             rx.os.environ.pop("FIRECRAWL_API_KEY", None)
             self.assertFalse(rx.hosted_ocr_available())
 
     def test_runtime_route_is_direct_key_only(self):
-        """_hosted_ocr_config never resolves the Nous gateway: api_url is
+        """_hosted_ocr_config never resolves the Nunmai gateway: api_url is
         always None (anydoc defaults to api.firecrawl.dev) and enabled
         tracks the key."""
         import tools.read_extract as rx

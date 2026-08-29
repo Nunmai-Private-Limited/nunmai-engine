@@ -8,8 +8,8 @@ These guard the contract:
     picker path (``provider_model_ids``) and the gateway ``/model`` picker
     path (``list_authenticated_providers``) merge fresh models.dev entries
     on top of the curated static list.
-  * OpenRouter and Nous Portal are NEVER merged — they keep their curated
-    (OpenRouter) or live-Portal (Nous) semantics.
+  * OpenRouter and Nunmai Portal are NEVER merged — they keep their curated
+    (OpenRouter) or live-Portal (Nunmai) semantics.
   * If models.dev is unreachable (offline / CI), the curated list is the
     fallback — no crash, no empty list.
 

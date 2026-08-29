@@ -1,12 +1,12 @@
 ---
 sidebar_position: 0
 title: "Run Nemotron 3 Ultra free in Nunmai Engine"
-description: "Try NVIDIA Nemotron 3 Ultra on Nous Portal — free June 4–18 — with day 0 support in Nunmai Engine"
+description: "Try NVIDIA Nemotron 3 Ultra on Nunmai Portal — free June 4–18 — with day 0 support in Nunmai Engine"
 ---
 
 # Run Nemotron 3 Ultra free in Nunmai Engine
 
-Nunmai Research has been inducted into the **Nemotron Coalition** of leading AI labs working with **NVIDIA** to advance open frontier foundation models. In honor of this, we've partnered with **Nebius** to provide **Nemotron 3 Ultra** free on [Nous Portal](https://portal.nousresearch.com) for two weeks (**June 4th – June 18th**). Follow the instructions below to try the model in your Nunmai Engine today.
+Nunmai Research has been inducted into the **Nemotron Coalition** of leading AI labs working with **NVIDIA** to advance open frontier foundation models. In honor of this, we've partnered with **Nebius** to provide **Nemotron 3 Ultra** free on [Nunmai Portal](https://portal.nousresearch.com) for two weeks (**June 4th – June 18th**). Follow the instructions below to try the model in your Nunmai Engine today.
 
 :::info Limited-time offer
 The `nvidia/nemotron-3-ultra:free` tier is available from **June 4th to June 18th**. The `:free` tag is what keeps it on the no-cost plan — pick that exact variant.
@@ -22,9 +22,9 @@ The simplest path: a one-click installer with a guided, point-and-click setup. N
 
 [Download the Nunmai Desktop installer](https://nunmai.in/) for macOS or Windows, then open it. On first launch it finishes setting itself up (usually under a minute).
 
-### 2. Connect Nous Portal
+### 2. Connect Nunmai Portal
 
-When the app opens, you'll see a "Let's get you set up" screen. Click **Nous Portal** (marked **Recommended**). Your browser opens — create a [Nous Portal](https://portal.nousresearch.com) account (or sign in), choose the **Free** plan, and authorize Nunmai. The app connects automatically.
+When the app opens, you'll see a "Let's get you set up" screen. Click **Nunmai Portal** (marked **Recommended**). Your browser opens — create a [Nunmai Portal](https://portal.nousresearch.com) account (or sign in), choose the **Free** plan, and authorize Nunmai. The app connects automatically.
 
 ### 3. Pick the free Nemotron 3 Ultra model
 
@@ -74,9 +74,9 @@ nunmai setup
 
 Select **Quick Setup**. Nunmai opens a browser tab and waits for you to finish the next steps.
 
-### 3. Create a Nous Portal account
+### 3. Create a Nunmai Portal account
 
-In the browser, create a [Nous Portal](https://portal.nousresearch.com) account (or sign in) and choose the **Free** plan.
+In the browser, create a [Nunmai Portal](https://portal.nousresearch.com) account (or sign in) and choose the **Free** plan.
 
 ### 4. Connect your account
 
@@ -111,13 +111,13 @@ Already set up with another model?
 
 ## Troubleshooting
 
-- **Don't see the model in the list?** Make sure you finished the Nous Portal connection and that you're on the **Free** plan. In the CLI, `nunmai portal info` confirms you're logged in and routing through Nous.
+- **Don't see the model in the list?** Make sure you finished the Nunmai Portal connection and that you're on the **Free** plan. In the CLI, `nunmai portal info` confirms you're logged in and routing through Nunmai.
 - **Picked the wrong variant?** Re-select `nvidia/nemotron-3-ultra:free` — the `:free` suffix is required to stay on the no-cost tier.
 - **Browser didn't open / you're on a remote host (CLI)?** See [OAuth over SSH / Remote Hosts](/guides/oauth-over-ssh) for port-forwarding workarounds.
 
 ## See also
 
 - **[Desktop App](/user-guide/desktop)** — The native one-click app (macOS, Windows, Linux)
-- **[Run Nunmai Engine with Nous Portal](/guides/run-nunmai-with-nous-portal)** — Full Portal walkthrough: models, Tool Gateway, and verification
-- **[Nous Portal integration](/integrations/nous-portal)** — What's in the subscription
+- **[Run Nunmai Engine with Nunmai Portal](/guides/run-nunmai-with-nous-portal)** — Full Portal walkthrough: models, Tool Gateway, and verification
+- **[Nunmai Portal integration](/integrations/nous-portal)** — What's in the subscription
 - **[Quickstart](/getting-started/quickstart)** — Install-to-chat in under 5 minutes

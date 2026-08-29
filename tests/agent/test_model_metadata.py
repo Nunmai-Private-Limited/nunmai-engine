@@ -352,7 +352,7 @@ class TestDefaultContextLengths:
 
         # Longest-first substring matching must resolve both the bare V4
         # ids (native DeepSeek) and the vendor-prefixed forms (OpenRouter
-        # / Nous Portal) to 1M without probing down to the legacy 128K
+        # / Nunmai Portal) to 1M without probing down to the legacy 128K
         # ``deepseek`` substring fallback.
         with mock_patch("agent.model_metadata.fetch_model_metadata", return_value={}), \
              mock_patch("agent.model_metadata.fetch_endpoint_model_metadata", return_value={}), \
@@ -801,11 +801,11 @@ class TestFetchEndpointModelMetadata:
 
 
 # =========================================================================
-# Nous Portal context-window resolution (provider="nous")
+# Nunmai Portal context-window resolution (provider="nous")
 # =========================================================================
 
 class TestNousPortalContextResolution:
-    """Nous Portal /v1/models is authoritative for what Nous infra enforces
+    """Nunmai Portal /v1/models is authoritative for what Nunmai infra enforces
     and may diverge from the OpenRouter catalog.
 
     Invariants this class pins down:
@@ -832,7 +832,7 @@ class TestNousPortalContextResolution:
         """An empty model name must not substring-match arbitrary catalog
         entries — '' is a substring of every key, so pre-fix it "matched"
         whatever the endpoint listed first (e.g. a 32K embedding model on
-        the Nous portal) and poisoned the resolved context length."""
+        the Nunmai portal) and poisoned the resolved context length."""
         import agent.model_metadata as mm
         mock_fetch.return_value = {
             "voyageai/voyage-code-4": {"context_length": 32_000},

@@ -452,7 +452,7 @@ def _parse_api_mode(raw: Any) -> Optional[str]:
 
 
 def _nous_inference_base_url_override() -> str:
-    """Return the trusted Nous runtime base URL override, if configured.
+    """Return the trusted Nunmai runtime base URL override, if configured.
 
     Delegates to ``auth._nous_inference_env_override`` so every
     ``NOUS_INFERENCE_BASE_URL`` read shares one normalization path
@@ -2066,7 +2066,7 @@ def resolve_runtime_provider(
                 getattr(entry, "runtime_api_key", None)
                 or getattr(entry, "access_token", "")
             )
-        # For Nous, the pool entry's runtime_api_key is the agent_key
+        # For Nunmai, the pool entry's runtime_api_key is the agent_key
         # compatibility field. It must be an invoke JWT. The pool doesn't
         # refresh it during selection (that would trigger network calls in
         # non-runtime contexts like `nunmai auth list`). If the key is
@@ -2080,11 +2080,11 @@ def resolve_runtime_provider(
                 "scope": getattr(entry, "scope", None),
             }
             if not _agent_key_is_usable(nous_state, min_ttl):
-                logger.debug("Nous pool entry agent_key expired/missing, refreshing selected pool entry")
+                logger.debug("Nunmai pool entry agent_key expired/missing, refreshing selected pool entry")
                 try:
                     refreshed = pool.try_refresh_current()
                 except Exception as exc:
-                    logger.debug("Nous pool entry refresh failed: %s", exc)
+                    logger.debug("Nunmai pool entry refresh failed: %s", exc)
                     refreshed = None
                 if refreshed is not None:
                     entry = refreshed
@@ -2098,7 +2098,7 @@ def resolve_runtime_provider(
                         "scope": getattr(entry, "scope", None),
                     }
                 if not pool_api_key or not _agent_key_is_usable(nous_state, min_ttl):
-                    logger.debug("Nous pool entry agent_key still unavailable, falling through to runtime resolution")
+                    logger.debug("Nunmai pool entry agent_key still unavailable, falling through to runtime resolution")
                     pool_api_key = ""
         if (
             entry is not None
@@ -2141,9 +2141,9 @@ def resolve_runtime_provider(
         except AuthError:
             if requested_provider != "auto":
                 raise
-            # Auto-detected Nous but credentials are stale/revoked —
+            # Auto-detected Nunmai but credentials are stale/revoked —
             # fall through to env-var providers (e.g. OpenRouter).
-            logger.info("Auto-detected Nous provider but credentials failed; "
+            logger.info("Auto-detected Nunmai provider but credentials failed; "
                         "falling through to next provider.")
 
     if provider == "openai-codex":
