@@ -6,10 +6,12 @@
  * Nunmai Engine is a Python application (managed by uv), so this package is a
  * small launcher around the official installer (https://nunmai-engine.nunmai.in):
  *
- *   npm install -g nunmai   -> postinstall runs the FULL, non-interactive install
+ *   npm install nunmai      -> (with or without -g) postinstall runs the FULL, non-interactive install
  *                              (engine, Python, git, Node, browser + computer-use
  *                              tools). Nothing on the system is modified — every
  *                              dependency is provisioned into Nunmai's own dirs.
+ *                              A `nunmai` command is always left on PATH
+ *                              (~/.local/bin), even for local, non -g installs.
  *   nunmai                  -> launches the installed engine (first run opens the
  *                              AI-account wizard). If the engine is missing (e.g.
  *                              npm ran with --ignore-scripts), it installs first.
@@ -57,8 +59,49 @@ function findLauncher() {
   return null;
 }
 
+function ensureFallbackLauncher() {
+  // Local installs (`npm install nunmai` without -g) leave the bin shim in
+  // ./node_modules/.bin, which is not on PATH. Make sure `nunmai` resolves
+  // anyway by linking this shim into ~/.local/bin (or $PREFIX/bin on Termux).
+  // The real installer replaces the link with the engine launcher (ln -sf).
+  if (IS_WIN) return null;
+  const binDir = process.env.PREFIX && fs.existsSync(path.join(process.env.PREFIX, "bin"))
+    ? path.join(process.env.PREFIX, "bin")
+    : path.join(os.homedir(), ".local", "bin");
+  const target = path.join(binDir, "nunmai");
+  try {
+    fs.mkdirSync(binDir, { recursive: true });
+    try { if (fs.realpathSync(target) === SELF) return target; } catch (_) { /* absent or dangling */ }
+    try { fs.unlinkSync(target); } catch (_) { /* nothing to remove */ }
+    fs.symlinkSync(SELF, target);
+    fs.chmodSync(SELF, 0o755);
+    ensurePathLine(binDir);
+    return target;
+  } catch (e) {
+    console.error(`nunmai: could not link launcher into ${binDir}: ${e.message}`);
+    return null;
+  }
+}
+
+function ensurePathLine(binDir) {
+  // Add ~/.local/bin to PATH in the user's shell rc if it is not there already.
+  if (binDir !== path.join(os.homedir(), ".local", "bin")) return;
+  const onPath = (process.env.PATH || "").split(path.delimiter).includes(binDir);
+  if (onPath) return;
+  const shell = path.basename(process.env.SHELL || "");
+  const rc = shell === "zsh" ? ".zshrc" : shell === "fish" ? null : ".bashrc";
+  if (!rc) return;
+  const rcPath = path.join(os.homedir(), rc);
+  try {
+    const cur = fs.existsSync(rcPath) ? fs.readFileSync(rcPath, "utf8") : "";
+    if (cur.includes(".local/bin")) return;
+    fs.appendFileSync(rcPath, '\n# Nunmai Engine — ensure ~/.local/bin is on PATH\nexport PATH="$HOME/.local/bin:$PATH"\n');
+    console.log(`nunmai: added ~/.local/bin to PATH in ~/${rc} (open a new terminal).`);
+  } catch (_) { /* best effort */ }
+}
+
 function run(cmd, args, opts) {
-  const env = Object.assign({}, process.env, { NUNMAI_NPM_SHIM: "1" });
+  const env = Object.assign({}, process.env, { NUNMAI_NPM_SHIM: "1", NUNMAI_NPM_SHIM_PATH: SELF });
   const r = spawnSync(cmd, args, Object.assign({ stdio: "inherit", env }, opts || {}));
   if (r.error) {
     console.error(`nunmai: could not start ${cmd}: ${r.error.message}`);
@@ -106,6 +149,7 @@ function postinstall() {
   // Runs from `npm install -g nunmai`. Must never fail the npm install: on any
   // problem we exit 0 and the first `nunmai` run retries interactively.
   if (process.env.NUNMAI_NPM_NO_POSTINSTALL === "1" || process.env.CI) {
+    if (!findLauncher()) ensureFallbackLauncher();
     console.log("nunmai: engine install deferred to first run.");
     return 0;
   }
@@ -115,9 +159,11 @@ function postinstall() {
   }
   const code = install(true);
   if (code !== 0) {
+    ensureFallbackLauncher();
     console.error(`\nnunmai: installer exited with code ${code}. Run \`nunmai\` to retry, or install manually:\n${manualHint()}`);
     return 0;
   }
+  if (!DRY && !findLauncher()) ensureFallbackLauncher();
   console.log("\n✓ Nunmai Engine installed. Open a new terminal and run:  nunmai");
   return 0;
 }

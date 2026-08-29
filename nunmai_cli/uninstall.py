@@ -109,6 +109,65 @@ def remove_path_from_shell_configs():
     return removed_from
 
 
+NPM_SHIM_MARKER = "# nunmai-npm-shim: "
+
+
+def find_npm_shim_path() -> "Path | None":
+    """Return the npm bootstrap shim recorded in the ``nunmai`` launcher.
+
+    scripts/install.sh stamps ``# nunmai-npm-shim: <path>`` into the launcher
+    when the install was driven by the ``nunmai`` npm package. The shim is
+    owned by npm (node_modules/nunmai/bin/nunmai.js), survives our uninstall,
+    and reinstalls the engine on its next run — so it must become the
+    ``nunmai`` command again once our launcher is gone.
+    """
+    for launcher in (Path.home() / ".local" / "bin" / "nunmai", Path("/usr/local/bin/nunmai")):
+        try:
+            if not launcher.is_file():
+                continue
+            for line in launcher.read_text(encoding="utf-8").splitlines():
+                if line.startswith(NPM_SHIM_MARKER):
+                    shim = Path(line[len(NPM_SHIM_MARKER):].strip())
+                    if shim.is_file():
+                        return shim
+        except Exception:
+            continue
+    return None
+
+
+def restore_npm_shim_launcher(shim: Path) -> "Path | None":
+    """Point ``~/.local/bin/nunmai`` back at the npm shim and keep the dir on PATH.
+
+    Runs after :func:`remove_wrapper_script` (launcher gone) and after
+    :func:`remove_path_from_shell_configs` (our PATH line gone), so it re-adds
+    a marker-free ``~/.local/bin`` PATH line the config sweep won't strip.
+    """
+    bin_dir = Path.home() / ".local" / "bin"
+    link = bin_dir / "nunmai"
+    try:
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        if link.exists() or link.is_symlink():
+            link.unlink()
+        link.symlink_to(shim)
+    except Exception as e:
+        log_warn(f"Could not restore npm launcher at {link}: {e}")
+        return None
+
+    on_path = str(bin_dir) in os.environ.get("PATH", "").split(os.pathsep)
+    if not on_path:
+        for config_path in find_shell_configs():
+            try:
+                content = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
+                if ".local/bin" in content:
+                    continue
+                with open(config_path, "a", encoding="utf-8") as fh:
+                    fh.write('\nexport PATH="$HOME/.local/bin:$PATH"\n')
+                break
+            except Exception:
+                continue
+    return link
+
+
 def remove_wrapper_script():
     """Remove the nunmai wrapper script if it exists."""
     wrapper_paths = [
@@ -882,14 +941,20 @@ def _perform_uninstall(
         else:
             log_info("No Nunmai-set User env vars to remove")
     
-    # 3. Remove wrapper script
+    # 3. Remove wrapper script (remembering the npm shim it may point back to)
     log_info("Removing nunmai command...")
+    npm_shim = find_npm_shim_path()
     removed_wrappers = remove_wrapper_script()
     if removed_wrappers:
         for wrapper in removed_wrappers:
             log_success(f"Removed {wrapper}")
     else:
         log_info("No wrapper script found")
+    if npm_shim is not None:
+        restored = restore_npm_shim_launcher(npm_shim)
+        if restored is not None:
+            log_success(f"Kept npm launcher {restored} → running `nunmai` reinstalls the engine")
+            log_info("To remove it too:  npm uninstall -g nunmai   (or `npm uninstall nunmai` where you installed it)")
 
     # 3a. Remove the Windows launchers from the managed binary dir. Both
     #     modes delete the code checkout below, so a surviving launcher
