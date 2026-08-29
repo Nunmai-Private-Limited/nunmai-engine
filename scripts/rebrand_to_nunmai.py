@@ -42,6 +42,9 @@ PROTECT_RE = re.compile("|".join(f"(?:{p})" for p in PROTECT), re.IGNORECASE)
 # tool-gateway., staging) and github.com/NousResearch are deliberately kept
 # so login, inference, update-check and skills-hub keep working.
 POST_REPLACEMENTS = [
+    # Dockerfile SQLite FTS5 self-test: trigram 'erm' is a substring of 'hermes'; after the
+    # row becomes 'nunmai' the probe must search a substring of 'nunmai'.
+    (re.compile(r"MATCH 'erm'"), "MATCH 'unm'"),
     (re.compile(r"https://setup\.hermes-agent\.nousresearch\.com"), "https://setup.nunmai.in"),
     (re.compile(r"https://hermes-agent\.nousresearch\.com(?!/docs/api/skills-index\.json)"), "https://nunmai.in"),
     (re.compile(r"https://nousresearch\.com(?![\w-]|\.[\w-])"), "https://nunmai.in"),
