@@ -1,0 +1,4 @@
+[console_scripts]
+nunmai = nunmai_cli.main:main
+nunmai-acp = acp_adapter.entry:main
+nunmai-engine = run_agent:main

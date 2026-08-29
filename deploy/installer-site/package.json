@@ -1,0 +1,10 @@
+{
+  "name": "nunmai-engine-installer-site",
+  "private": true,
+  "scripts": {
+    "build": "bash build.sh",
+    "deploy": "bash build.sh && wrangler deploy",
+    "dev": "bash build.sh && wrangler dev"
+  },
+  "devDependencies": { "wrangler": "^4" }
+}
