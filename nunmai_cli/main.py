@@ -6395,11 +6395,19 @@ def _run_npm_install_deterministic(
             capture_output=capture_output,
         )
 
+    from nunmai_cli.npm_engine import is_ebadengine
+
     def _attempt(npm_exe: str) -> subprocess.CompletedProcess:
         lockfile = cwd / "package-lock.json"
         if lockfile.exists():
             ci_result = _run([npm_exe, "ci", "--include=dev", *extra_args])
             if ci_result.returncode == 0:
+                return ci_result
+            if is_ebadengine(f"{ci_result.stdout or ''}\n{ci_result.stderr or ''}"):
+                # A node/npm outside package.json's `engines` range (with the
+                # checkout's `engine-strict=true`) fails `npm install` with the
+                # exact same EBADENGINE wall — don't print it twice. Hand the
+                # failure straight to the engine repair below.
                 return ci_result
             # Fall through to `npm install` — lockfile may be out of sync on a
             # WIP fork/branch, or `npm ci` may not be available on very old npm.
