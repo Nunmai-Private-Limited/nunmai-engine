@@ -13,8 +13,10 @@ imagePullSecrets: []          # e.g. [{name: ghcr-pull}] for a private image
 secrets:
   existingSecret: ""
   env: {}
-  #  ANTHROPIC_API_KEY: sk-ant-...
-  #  OPENROUTER_API_KEY: sk-or-...
+  # The engine talks ONLY to the Nunmai Portal (deploy/k8s/portal). Put the
+  # customer's portal virtual key here — the custom provider reads it from
+  # OPENROUTER_API_KEY (its default key slot). No vendor keys in customer pods.
+  #  OPENROUTER_API_KEY: sk-nunmai-portal-key-for-this-customer
   #  TELEGRAM_BOT_TOKEN: ...
 
 # Seeded into /opt/data on first start only (the engine owns the files after
@@ -22,8 +24,9 @@ secrets:
 config:
   configYaml: |
     model:
-      provider: openrouter
-      default: anthropic/claude-sonnet-4.5
+      provider: custom
+      base_url: http://litellm.nunmai-portal.svc.cluster.local:4000/v1
+      default: nunmai-smart          # alias routed by the portal (see deploy/k8s/portal)
   soulMd: ""                  # persona / branding (SOUL.md); empty = engine default
   extraFiles: {}              # filename -> content, e.g. "skills/acme-faq/SKILL.md": |...
 

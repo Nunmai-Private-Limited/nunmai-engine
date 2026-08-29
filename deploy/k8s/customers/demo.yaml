@@ -1,13 +1,13 @@
 # Example customer. Copy to <name>.yaml, fill secrets (or use --set / an existing Secret).
 customer: demo
 secrets:
-  env:
-    OPENROUTER_API_KEY: "replace-me"
+  existingSecret: nunmai-demo-secrets   # kubectl -n cust-demo create secret generic nunmai-demo-secrets --from-literal=OPENROUTER_API_KEY=<portal key>
 config:
   configYaml: |
     model:
-      provider: openrouter
-      default: anthropic/claude-sonnet-4.5
+      provider: custom
+      base_url: http://litellm.nunmai-portal.svc.cluster.local:4000/v1
+      default: nunmai-smart
   soulMd: |
     You are Demo Co's assistant. Be concise and friendly.
 dashboard:
