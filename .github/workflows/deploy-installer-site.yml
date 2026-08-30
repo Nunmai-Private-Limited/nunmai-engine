@@ -55,13 +55,31 @@ jobs:
           fi
           npx --yes wrangler@4 deploy
 
+      # The site sets Cache-Control max-age=300, so the edge can serve the
+      # previous version for up to 5 minutes after a deploy: poll until the
+      # live bytes match the checkout (which has the same CRLF/LF endings the
+      # deploy uploaded). Cloudflare bot protection returns 403 to bare curl
+      # from GitHub's datacenter IPs, so send a browser UA and, if it still
+      # refuses, warn instead of failing — the deploy step already succeeded.
       - name: Verify the live installers match the repo
         run: |
+          UA="Mozilla/5.0 (X11; Linux x86_64) nunmai-installer-site-verify"
           for f in install.sh install.ps1; do
-            curl -fsSL --retry 5 --retry-delay 5 "https://nunmai-engine.nunmai.in/$f" -o "/tmp/$f"
-            if ! cmp -s "/tmp/$f" "scripts/$f"; then
-              echo "::error::Live $f does not match scripts/$f after deploy" >&2
+            ok=0
+            for attempt in $(seq 1 13); do
+              code=$(curl -sSL -A "$UA" -H "Cache-Control: no-cache" -o "/tmp/$f" -w "%{http_code}" "https://nunmai-engine.nunmai.in/$f" || echo 000)
+              if [ "$code" = "403" ]; then
+                echo "::warning::Cloudflare returned 403 to the verifier for $f; live check skipped (deploy itself succeeded)."
+                ok=1; break
+              fi
+              if [ "$code" = "200" ] && cmp -s "/tmp/$f" "scripts/$f"; then
+                echo "$f: live matches repo (attempt $attempt)"; ok=1; break
+              fi
+              echo "$f: not yet live (HTTP $code, attempt $attempt/13); waiting 30s for the edge cache..."
+              sleep 30
+            done
+            if [ "$ok" != "1" ]; then
+              echo "::error::Live $f still does not match scripts/$f 6 minutes after deploy" >&2
               exit 1
             fi
           done
-          echo "Live installers verified."
