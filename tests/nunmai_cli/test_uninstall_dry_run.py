@@ -45,4 +45,8 @@ def test_build_uninstall_parser_accepts_dry_run():
     args = parser.parse_args(["uninstall", "--dry-run", "--full"])
 
     assert args.dry_run is True
-    assert args.full is True
+    assert args.full is True  # legacy flag still accepted
+    assert args.keep_data is False
+
+    args = parser.parse_args(["uninstall", "--keep-data", "-y"])
+    assert args.keep_data is True and args.yes is True

@@ -168,6 +168,107 @@ def restore_npm_shim_launcher(shim: Path) -> "Path | None":
     return link
 
 
+def _npm_global_prefix(shim: Path) -> "Path | None":
+    """Return the npm global prefix that owns ``shim`` (``.../node_modules/nunmai/bin/nunmai.js``).
+
+    ``None`` when the shim belongs to a project-local ``npm install nunmai``
+    (a ``node_modules`` next to a ``package.json``) — a project dependency is
+    the project's business, not ours to ``npm uninstall``.
+    """
+    try:
+        parts = shim.resolve().parts
+    except Exception:
+        parts = shim.parts
+    for i in range(len(parts) - 1):
+        if parts[i] != "node_modules" or parts[i + 1] != "nunmai":
+            continue
+        nm_parent = Path(*parts[:i]) if i else Path(shim.anchor)
+        if (nm_parent / "package.json").exists():
+            return None  # project-local install
+        if _is_windows():
+            # %APPDATA%\npm\node_modules\nunmai — prefix is the dir holding node_modules
+            return nm_parent if (nm_parent / "nunmai.cmd").exists() else None
+        # POSIX global layout is always <prefix>/lib/node_modules/<pkg>
+        return nm_parent.parent if nm_parent.name == "lib" else None
+    return None
+
+
+def _npm_executables(prefix: Path, nunmai_home: Path) -> "list[str]":
+    """npm binaries to try, most specific first."""
+    names = ("npm.cmd", "npm") if _is_windows() else ("npm",)
+    cands: list[Path] = []
+    for n in names:
+        cands.append(prefix / n if _is_windows() else prefix / "bin" / n)
+        cands.append(nunmai_home / "node" / n if _is_windows() else nunmai_home / "node" / "bin" / n)
+    out = [str(c) for c in cands if c.exists()]
+    for n in names:
+        found = shutil.which(n)
+        if found and found not in out:
+            out.append(found)
+    return out
+
+
+def remove_npm_package(shim: Path, nunmai_home: Path) -> "bool | None":
+    """``npm uninstall -g nunmai`` for the global install that owns ``shim``.
+
+    Returns True when removed, False when the removal failed, and None when
+    the shim is a project-local dependency we deliberately leave alone.
+    Runs before ``$NUNMAI_HOME`` is deleted so a Nunmai-managed npm is still
+    usable.
+    """
+    prefix = _npm_global_prefix(shim)
+    if prefix is None:
+        return None
+    for npm in _npm_executables(prefix, nunmai_home):
+        try:
+            r = subprocess.run(
+                [npm, "uninstall", "-g", "--prefix", str(prefix), "nunmai"],
+                capture_output=True, text=True, timeout=180,
+                shell=_is_windows() and npm.lower().endswith(".cmd"),
+            )
+        except Exception:
+            continue
+        if r.returncode == 0 and not shim.exists():
+            return True
+    return False
+
+
+def _cache_base() -> Path:
+    if _is_windows():
+        return Path(os.environ.get("LOCALAPPDATA") or (Path.home() / "AppData" / "Local"))
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Caches"
+    return Path(os.environ.get("XDG_CACHE_HOME") or (Path.home() / ".cache"))
+
+
+def playwright_browsers_dir() -> "Path | None":
+    """Where ``playwright install chromium`` (installer ``--full``) put the browsers.
+
+    ``None`` when the user pointed Playwright somewhere themselves via
+    ``PLAYWRIGHT_BROWSERS_PATH`` — that location is theirs to manage.
+    """
+    if os.environ.get("PLAYWRIGHT_BROWSERS_PATH"):
+        return None
+    return _cache_base() / "ms-playwright"
+
+
+def uv_cache_dir(nunmai_home: Path) -> "Path | None":
+    """The uv download cache — only when the only ``uv`` around is the one the
+    installer put under ``$NUNMAI_HOME/bin`` (or none is on PATH at all)."""
+    if os.environ.get("UV_CACHE_DIR"):
+        return None
+    found = shutil.which("uv")
+    if found:
+        try:
+            if nunmai_home.resolve() not in Path(found).resolve().parents:
+                return None  # the user's own uv — its cache stays
+        except Exception:
+            return None
+    if _is_windows():
+        return _cache_base() / "uv" / "cache"
+    return _cache_base() / "uv"
+
+
 def remove_wrapper_script():
     """Remove the nunmai wrapper script if it exists."""
     wrapper_paths = [
@@ -181,11 +282,16 @@ def remove_wrapper_script():
     
     removed = []
     for wrapper in wrapper_paths:
-        if wrapper.exists():
+        if wrapper.exists() or wrapper.is_symlink():
             try:
-                # Check if it's our wrapper (contains nunmai_cli reference)
+                if wrapper.is_symlink() and not wrapper.exists():
+                    wrapper.unlink()  # dangling link (e.g. to an already-removed npm shim)
+                    removed.append(wrapper)
+                    continue
+                # Check if it's our wrapper (contains nunmai_cli reference) or
+                # the npm bootstrap shim's fallback symlink.
                 content = wrapper.read_text(encoding="utf-8")
-                if 'nunmai_cli' in content or 'nunmai-engine' in content:
+                if 'nunmai_cli' in content or 'nunmai-engine' in content or 'nunmai-npm-shim' in content:
                     wrapper.unlink()
                     removed.append(wrapper)
             except Exception as e:
@@ -706,22 +812,29 @@ def run_gui_uninstall(args):
     print()
 
 
+def _wants_full(args) -> bool:
+    """A clean, complete removal is the default. ``--keep-data`` keeps
+    ``$NUNMAI_HOME``; the legacy ``--full`` flag is accepted and means the default."""
+    return not bool(getattr(args, "keep_data", False))
+
+
 def run_uninstall(args):
     """
     Run the uninstall process.
-    
-    Options:
-    - Full uninstall: removes code + ~/.nunmai/ (configs, data, logs)
-    - Keep data: removes code but keeps ~/.nunmai/ for future reinstall
+
+    Default: remove everything — engine, ~/.nunmai (config, data, logs,
+    managed Node/uv), services, launchers, caches and the npm package.
+    ``--keep-data``: same, but ~/.nunmai is kept for a future reinstall.
     """
     project_root = get_project_root()
     nunmai_home = get_nunmai_home()
+    full_uninstall = _wants_full(args)
 
     if bool(getattr(args, "dry_run", False)):
         _print_uninstall_dry_run(
             project_root=project_root,
             nunmai_home=nunmai_home,
-            full_uninstall=bool(getattr(args, "full", False)),
+            full_uninstall=full_uninstall,
         )
         return
 
@@ -731,15 +844,11 @@ def run_uninstall(args):
     is_default_profile = _is_default_nunmai_home(nunmai_home)
     named_profiles = _discover_named_profiles() if is_default_profile else []
 
-    # Non-interactive fast path (``--yes``): no prompts. ``--full`` selects a
-    # full wipe (code + ~/.nunmai data); otherwise keep-data. Named profiles
-    # are NOT auto-removed here — that's a destructive, surprising default for
-    # an unattended run, so it stays opt-in to the interactive flow. This is
-    # the path the desktop app's detached cleanup script uses for its
-    # lite/full modes.
-    skip_confirm = bool(getattr(args, "yes", False))
-    if skip_confirm:
-        full_uninstall = bool(getattr(args, "full", False))
+    # Non-interactive fast path (``--yes``): no prompts. Named profiles are
+    # NOT auto-removed here — that's a surprising default for an unattended
+    # run, so it stays opt-in to the interactive flow. This is the path the
+    # desktop app's detached cleanup script uses.
+    if bool(getattr(args, "yes", False)):
         _perform_uninstall(
             project_root=project_root,
             nunmai_home=nunmai_home,
@@ -750,29 +859,28 @@ def run_uninstall(args):
         return
 
     # Interactive flow — one question, like the installer asks none.
-    #   nunmai uninstall          → removes the engine, KEEPS config/data  [Y/n]
-    #   nunmai uninstall --full   → also deletes config/data; needs a typed "yes"
-    full_uninstall = bool(getattr(args, "full", False))
-
+    #   nunmai uninstall              → removes everything            [y/N]
+    #   nunmai uninstall --keep-data  → removes everything but ~/.nunmai [Y/n]
     print()
     print(color("◆ Nunmai Engine Uninstaller", Colors.MAGENTA, Colors.BOLD))
     print()
     print(f"  Engine:  {project_root}")
     if full_uninstall:
-        print(f"  Data:    {nunmai_home}  " + color("(will be deleted: config, API keys, sessions, cron, logs)", Colors.RED))
+        print(f"  Data:    {nunmai_home}  " + color("(deleted: config, API keys, sessions, cron, logs)", Colors.RED))
     else:
         print(f"  Data:    {nunmai_home}  " + color("(kept — reinstall picks your settings back up)", Colors.GREEN))
+    print("  Also:    gateway service, the `nunmai` command, managed Node/uv, browser cache, npm package")
     if named_profiles:
-        print("  Profiles: " + ", ".join(p.name for p in named_profiles) + ("  (deleted with --full, asked below)" if full_uninstall else "  (kept)"))
+        print("  Profiles: " + ", ".join(p.name for p in named_profiles) + ("  (asked below)" if full_uninstall else "  (kept)"))
     print()
 
     remove_profiles = False
     try:
         if full_uninstall:
-            print(color("This permanently deletes ALL Nunmai data on this machine.", Colors.RED, Colors.BOLD))
-            confirm = input(f"Type '{color('yes', Colors.YELLOW)}' to remove everything: ").strip().lower()
-            if confirm != "yes":
+            resp = input(color("Remove Nunmai Engine and all of its data? [y/N]: ", Colors.BOLD)).strip().lower()
+            if resp not in {"y", "yes"}:
                 print("Cancelled — nothing was changed.")
+                print(color("  (to keep your config and data:  nunmai uninstall --keep-data)", Colors.DIM))
                 return
             if named_profiles:
                 resp = input(color(
@@ -781,10 +889,9 @@ def run_uninstall(args):
                 )).strip().lower()
                 remove_profiles = resp in {"y", "yes"}
         else:
-            resp = input(color("Remove Nunmai Engine? [Y/n]: ", Colors.BOLD)).strip().lower()
+            resp = input(color("Remove Nunmai Engine (keeping your data)? [Y/n]: ", Colors.BOLD)).strip().lower()
             if resp not in {"", "y", "yes"}:
                 print("Cancelled — nothing was changed.")
-                print(color("  (to delete config and data as well:  nunmai uninstall --full)", Colors.DIM))
                 return
     except (KeyboardInterrupt, EOFError):
         print()
@@ -810,9 +917,11 @@ def _print_uninstall_dry_run(*, project_root: Path, nunmai_home: Path, full_unin
     print("  • Nunmai PATH entries from shell configs / Windows User PATH")
     print("  • Nunmai wrapper scripts and Nunmai-managed node/npm/npx symlinks")
     print("  • Desktop Chat GUI artifacts")
+    print("  • The `nunmai` npm package (when installed with npm)")
     print(f"  • Code checkout: {project_root}")
     if full_uninstall:
         print(f"  • Nunmai config/data: {nunmai_home}")
+        print("  • Playwright browser cache and the uv cache (when uv is Nunmai-managed)")
         if _is_default_nunmai_home(nunmai_home):
             profiles = _discover_named_profiles()
             if profiles:
@@ -874,11 +983,27 @@ def _perform_uninstall(
         for name in remove_nunmai_env_vars_windows():
             _did(f"Removed User env var: {name}")
 
-    # 3. The `nunmai` command (remembering the npm shim it may point back to)
+    # 3. The `nunmai` command. If the install came through `npm install
+    #    nunmai`, remove that package too (before $NUNMAI_HOME goes, so a
+    #    Nunmai-managed npm is still there to do it). Only when the npm
+    #    removal fails do we point `nunmai` back at the shim so the user
+    #    still has a working command to reinstall or retry with.
     npm_shim = find_npm_shim_path()
     for wrapper in remove_wrapper_script():
         _did(f"Removed command {wrapper}")
-    npm_restored = restore_npm_shim_launcher(npm_shim) if npm_shim is not None else None
+    npm_restored = None
+    npm_failed = False
+    if npm_shim is not None:
+        try:
+            outcome = remove_npm_package(npm_shim, nunmai_home)
+        except Exception as e:
+            log_warn(f"Could not remove the npm package: {e}")
+            outcome = False
+        if outcome is True:
+            _did("Removed the npm package (npm uninstall -g nunmai)")
+        elif outcome is False:
+            npm_failed = True
+            npm_restored = restore_npm_shim_launcher(npm_shim)
 
     if _is_windows():
         for launcher in remove_windows_bin_launchers():
@@ -916,12 +1041,22 @@ def _perform_uninstall(
             for prof in named_profiles:
                 _uninstall_profile(prof)
                 _did(f"Removed profile {prof.name}")
+        # Caches the installer filled: decide about uv BEFORE $NUNMAI_HOME
+        # (and the managed uv inside it) disappears.
+        cache_dirs = [d for d in (playwright_browsers_dir(), uv_cache_dir(nunmai_home)) if d is not None]
         try:
             if nunmai_home.exists():
                 shutil.rmtree(nunmai_home)
                 _did(f"Removed data {nunmai_home}")
         except Exception as e:
             log_warn(f"Could not fully remove {nunmai_home}: {e} — remove it manually")
+        for cache in cache_dirs:
+            try:
+                if cache.is_dir():
+                    shutil.rmtree(cache)
+                    _did(f"Removed cache {cache}")
+            except Exception as e:
+                log_warn(f"Could not remove {cache}: {e}")
 
     # Done
     print()
@@ -931,8 +1066,12 @@ def _perform_uninstall(
         print(color("✓ Nothing left to remove.", Colors.GREEN, Colors.BOLD))
     if not full_uninstall:
         print(f"  Kept your config and data: {nunmai_home}")
-    if npm_restored is not None:
-        print(f"  The npm launcher stays; `nunmai` reinstalls the engine. Remove it with:  npm uninstall -g nunmai")
+    if npm_failed:
+        print(color("  Could not remove the npm package automatically. Run:  npm uninstall -g nunmai", Colors.YELLOW))
+        if npm_restored is not None:
+            print("  Until then `nunmai` is the npm launcher and would reinstall the engine.")
+    elif npm_shim is not None and _npm_global_prefix(npm_shim) is None:
+        print("  Installed as a project dependency — remove it there with:  npm uninstall nunmai")
     print()
     if _is_windows():
         print(color("Open a new terminal to pick up the updated PATH.", Colors.DIM))
@@ -948,6 +1087,7 @@ class _UninstallArgs:
         self.gui = mode == "gui"
         self.gui_summary = False
         self.full = mode == "full"
+        self.keep_data = mode == "lite"
         self.yes = True  # the module entrypoint is always non-interactive
 
 

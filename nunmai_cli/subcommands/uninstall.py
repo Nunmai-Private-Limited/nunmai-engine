@@ -6,6 +6,7 @@ Handler injected to avoid importing ``main``.
 
 from __future__ import annotations
 
+import argparse
 from typing import Callable
 
 
@@ -17,13 +18,21 @@ def build_uninstall_parser(subparsers, *, cmd_uninstall: Callable) -> None:
     uninstall_parser = subparsers.add_parser(
         "uninstall",
         help="Uninstall Nunmai Engine",
-        description="Remove Nunmai Engine from your system. Can keep configs/data for reinstall.",
+        description=(
+            "Remove Nunmai Engine and everything it installed: the engine, "
+            "~/.nunmai (config, API keys, sessions, logs, managed Node/uv), the "
+            "gateway service, the `nunmai` command, browser/uv caches and the "
+            "npm package. Use --keep-data to keep ~/.nunmai for a later reinstall."
+        ),
     )
     uninstall_parser.add_argument(
-        "--full",
+        "--keep-data",
         action="store_true",
-        help="Full uninstall - remove everything including configs and data",
+        help="Keep ~/.nunmai (config, API keys, sessions, logs) so a reinstall picks them back up",
     )
+    # Legacy flag: a clean, complete removal is now the default, so --full is
+    # accepted silently for scripts and docs that still pass it.
+    uninstall_parser.add_argument("--full", action="store_true", help=argparse.SUPPRESS)
     uninstall_parser.add_argument(
         "--gui",
         action="store_true",

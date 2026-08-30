@@ -230,20 +230,70 @@ function postinstall() {
   return 0;
 }
 
+// The npm global prefix that owns this shim, or null for a project-local
+// `npm install nunmai` (a node_modules next to a package.json — the project's
+// dependency, not ours to remove).
+function npmGlobalPrefix() {
+  const parts = SELF.split(path.sep);
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (parts[i] !== "node_modules" || parts[i + 1] !== "nunmai") continue;
+    const nmParent = parts.slice(0, i).join(path.sep) || path.sep;
+    if (fs.existsSync(path.join(nmParent, "package.json"))) return null;
+    if (IS_WIN) return fs.existsSync(path.join(nmParent, "nunmai.cmd")) ? nmParent : null;
+    return path.basename(nmParent) === "lib" ? path.dirname(nmParent) : null;
+  }
+  return null;
+}
+
+function removeFallbackLauncher() {
+  // Undo ensureFallbackLauncher(): the ~/.local/bin (or $PREFIX/bin) symlink
+  // and the Windows .cmd shim that point back at this file.
+  let removed = false;
+  if (IS_WIN) {
+    const shim = path.join(winBinDir(), "nunmai.cmd");
+    if (isWinShim(shim)) { try { fs.unlinkSync(shim); removed = true; } catch (_) { /* best effort */ } }
+    return removed;
+  }
+  for (const p of candidates()) {
+    try {
+      if (fs.lstatSync(p).isSymbolicLink() && fs.realpathSync(p) === SELF) { fs.unlinkSync(p); removed = true; }
+    } catch (_) { /* absent or not ours */ }
+  }
+  return removed;
+}
+
+// `npm uninstall -g nunmai` for the global install this shim belongs to.
+// Returns true (removed), false (failed), or null (project-local install).
+function removeSelfFromNpm() {
+  const prefix = npmGlobalPrefix();
+  if (prefix === null) return null;
+  const nodeDir = path.dirname(process.execPath);
+  const npms = IS_WIN
+    ? [path.join(nodeDir, "npm.cmd"), "npm.cmd", "npm"]
+    : [path.join(nodeDir, "npm"), path.join(prefix, "bin", "npm"), "npm"];
+  for (const npm of npms) {
+    const r = spawnSync(npm, ["uninstall", "-g", "--prefix", prefix, "nunmai"], { stdio: "ignore", shell: IS_WIN && npm.toLowerCase().endsWith(".cmd") });
+    if (!r.error && r.status === 0 && !fs.existsSync(SELF)) return true;
+  }
+  return false;
+}
+
 // Commands that must never trigger an engine install when the engine is
 // absent: a user asking to remove, or merely inspect, Nunmai should not be
 // handed a multi-minute full install first.
 function handleWithoutEngine(argv) {
   const cmd = (argv[0] || "").toLowerCase();
   if (cmd === "uninstall") {
-    let removed = false;
-    if (IS_WIN) {
-      // Drop our own .cmd shim (never a real launcher — those carry no marker).
-      const shim = path.join(winBinDir(), "nunmai.cmd");
-      if (isWinShim(shim)) { try { fs.unlinkSync(shim); removed = true; } catch (_) { /* best effort */ } }
+    console.log("Nunmai Engine is not installed on this machine — nothing to remove.");
+    removeFallbackLauncher();
+    const npm = removeSelfFromNpm();
+    if (npm === true) {
+      console.log("Removed the `nunmai` npm launcher as well (npm uninstall -g nunmai). Nunmai is now fully gone.");
+    } else if (npm === false) {
+      console.log("Could not remove the npm launcher automatically. Run:  npm uninstall -g nunmai");
+    } else {
+      console.log("This launcher is a project dependency — remove it there with:  npm uninstall nunmai");
     }
-    console.log("Nunmai Engine is not installed on this machine — nothing to remove." + (removed ? " (Removed the launcher shim.)" : ""));
-    console.log("To remove this npm launcher too:  npm uninstall -g nunmai   (or `npm uninstall nunmai` for a local install)");
     return 0;
   }
   if (cmd === "--version" || cmd === "-v" || cmd === "version") {
@@ -256,7 +306,7 @@ function handleWithoutEngine(argv) {
       "",
       "  nunmai            install the engine, then start it",
       "  nunmai --version  show the launcher version",
-      "  nunmai uninstall  remove the engine (nothing to remove right now)",
+      "  nunmai uninstall  remove the engine and this launcher (nothing installed right now)",
       "",
       `Manual install: ${manualHint().trim()}`,
     ].join("\n"));
