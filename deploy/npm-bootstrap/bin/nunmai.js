@@ -33,11 +33,27 @@ const IS_WIN = process.platform === "win32";
 const SELF = fs.realpathSync(__filename);
 const DRY = process.env.NUNMAI_BOOTSTRAP_DRY_RUN === "1";
 
+// Marker stamped into the Windows fallback shim (a .cmd that re-enters this
+// file). findLauncher() must never treat that shim as the engine launcher or
+// `nunmai` would recurse into itself forever.
+const WIN_SHIM_MARKER = "rem nunmai-npm-shim";
+
+function winBinDir() {
+  // Same managed dir install.ps1 uses for the real launchers (Set-PathVariable):
+  // %NUNMAI_HOME%\bin, defaulting to %LOCALAPPDATA%\nunmai\bin.
+  const home = os.homedir();
+  const nunmaiHome = process.env.NUNMAI_HOME || path.join(process.env.LOCALAPPDATA || path.join(home, "AppData", "Local"), "nunmai");
+  return path.join(nunmaiHome, "bin");
+}
+
+function isWinShim(p) {
+  try { return p.toLowerCase().endsWith(".cmd") && fs.readFileSync(p, "utf8").includes(WIN_SHIM_MARKER); } catch (_) { return false; }
+}
+
 function candidates() {
   const home = os.homedir();
   if (IS_WIN) {
-    const nunmaiHome = process.env.NUNMAI_HOME || path.join(process.env.LOCALAPPDATA || path.join(home, "AppData", "Local"), "nunmai");
-    const bin = path.join(nunmaiHome, "bin");
+    const bin = winBinDir();
     return [path.join(bin, "nunmai.exe"), path.join(bin, "nunmai.cmd")];
   }
   const list = [];
@@ -52,6 +68,7 @@ function findLauncher() {
   for (const p of candidates()) {
     try {
       if (fs.realpathSync(p) === SELF) continue; // never recurse into this shim
+      if (IS_WIN && isWinShim(p)) continue;      // ...nor into the Windows .cmd shim
       fs.accessSync(p, fs.constants.X_OK);
       return p;
     } catch (_) { /* not there */ }
@@ -64,7 +81,7 @@ function ensureFallbackLauncher() {
   // ./node_modules/.bin, which is not on PATH. Make sure `nunmai` resolves
   // anyway by linking this shim into ~/.local/bin (or $PREFIX/bin on Termux).
   // The real installer replaces the link with the engine launcher (ln -sf).
-  if (IS_WIN) return null;
+  if (IS_WIN) return ensureWinFallbackLauncher();
   const binDir = process.env.PREFIX && fs.existsSync(path.join(process.env.PREFIX, "bin"))
     ? path.join(process.env.PREFIX, "bin")
     : path.join(os.homedir(), ".local", "bin");
@@ -80,6 +97,51 @@ function ensureFallbackLauncher() {
   } catch (e) {
     console.error(`nunmai: could not link launcher into ${binDir}: ${e.message}`);
     return null;
+  }
+}
+
+function ensureWinFallbackLauncher() {
+  // Windows twin of the symlink above: drop a nunmai.cmd shim into the managed
+  // bin dir and register that dir on the User PATH, so a plain `nunmai` works
+  // after a local `npm install nunmai` (where npm >= 11.19 skips postinstall
+  // and node_modules\.bin is not on PATH). install.ps1 later overwrites the
+  // shim with the real launcher (Install-NunmaiCommandLaunchers) and keeps the
+  // same PATH entry, so nothing here has to be undone.
+  const binDir = winBinDir();
+  const target = path.join(binDir, "nunmai.cmd");
+  try {
+    fs.mkdirSync(binDir, { recursive: true });
+    // Never clobber a real engine launcher.
+    if (fs.existsSync(path.join(binDir, "nunmai.exe"))) return null;
+    if (fs.existsSync(target) && !isWinShim(target)) return null;
+    const body = `@echo off\r\n${WIN_SHIM_MARKER}: ${SELF}\r\n"${process.execPath}" "${SELF}" %*\r\n`;
+    fs.writeFileSync(target, body);
+    ensureWinUserPath(binDir);
+    return target;
+  } catch (e) {
+    console.error(`nunmai: could not stage launcher into ${binDir}: ${e.message}`);
+    return null;
+  }
+}
+
+function ensureWinUserPath(binDir) {
+  // Persist binDir at the front of the User PATH (registry), the same way
+  // install.ps1's Set-PathVariable does. Idempotent; best effort.
+  const norm = (p) => p.trim().replace(/[\\/]+$/, "").toLowerCase();
+  const onPath = (process.env.PATH || "").split(";").some((p) => norm(p) === norm(binDir));
+  if (onPath || DRY) return;
+  const ps = [
+    `$d='${binDir.replace(/'/g, "''")}'`,
+    "$cur=[Environment]::GetEnvironmentVariable('Path','User')",
+    "$items=@(); if ($cur) { $items=@($cur -split ';') }",
+    "if (-not ($items | Where-Object { $_.TrimEnd('\\') -ieq $d })) { [Environment]::SetEnvironmentVariable('Path', ((@($d) + $items) -join ';'), 'User'); exit 0 }",
+    "exit 3",
+  ].join("; ");
+  const r = spawnSync("powershell", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps], { stdio: "ignore" });
+  if (r.status === 0) {
+    console.log(`nunmai: added ${binDir} to your user PATH (open a new terminal, then run \`nunmai\`).`);
+  } else if (r.status !== 3) {
+    console.error(`nunmai: could not update the user PATH automatically. Add this folder to PATH to use \`nunmai\` directly: ${binDir}`);
   }
 }
 

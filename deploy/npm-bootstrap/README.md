@@ -15,10 +15,13 @@ engine; the first run opens the AI-account wizard (Claude, ChatGPT, Kimi,
 Gemini, OpenRouter).
 
 - macOS, Linux, Windows 10/11 (PowerShell), Android (Termux).
-- **Local install** (`npm install nunmai`, no `-g`): run it with `npx nunmai`.
+- **Local install** (`npm install nunmai`, no `-g`): run it once with `npx nunmai`.
   npm ≥ 11.19 blocks dependency install scripts by default, so the engine is
-  installed on the first `npx nunmai` run. To get a plain `nunmai` command from
-  a local install, allow the script: `npm install nunmai --allow-scripts=nunmai`.
+  installed on that first run. The launcher then puts a plain `nunmai` command
+  on your PATH itself — `~/.local/bin` on macOS/Linux, `%LOCALAPPDATA%\nunmai\bin`
+  (registered on the user PATH) on Windows — so after opening a new terminal
+  `nunmai` just works. To skip even that first `npx`, allow the script:
+  `npm install nunmai --allow-scripts=nunmai`.
 - If npm skipped the install script (`--ignore-scripts`, `CI` set, or the
   allow-scripts policy above), the install simply happens on the first run.
 - After `nunmai uninstall`, the `nunmai` command falls back to this launcher —

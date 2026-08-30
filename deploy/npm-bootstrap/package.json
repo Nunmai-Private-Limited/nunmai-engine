@@ -1,6 +1,6 @@
 {
   "name": "nunmai",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Nunmai Engine — `npm i nunmai` (global or local) installs the engine with all features and dependencies; run `nunmai` to start.",
   "license": "MIT",
   "homepage": "https://nunmai.in",
