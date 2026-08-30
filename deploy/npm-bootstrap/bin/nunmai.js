@@ -281,20 +281,97 @@ function removeSelfFromNpm() {
 // Commands that must never trigger an engine install when the engine is
 // absent: a user asking to remove, or merely inspect, Nunmai should not be
 // handed a multi-minute full install first.
+// Directories a previous (possibly half-finished) install may have left when
+// no engine launcher exists any more: the data dir and the engine checkout.
+function nunmaiHomeDir() {
+  const home = os.homedir();
+  return process.env.NUNMAI_HOME
+    || (IS_WIN ? path.join(process.env.LOCALAPPDATA || path.join(home, "AppData", "Local"), "nunmai") : path.join(home, ".nunmai"));
+}
+
+function leftoverDirs(keepData) {
+  const nunmaiHome = nunmaiHomeDir();
+  const engineDirs = [path.join(nunmaiHome, "nunmai-engine")];
+  if (!IS_WIN && typeof process.getuid === "function" && process.getuid() === 0) engineDirs.push("/usr/local/lib/nunmai-engine");
+  // Full removal: the data dir swallows the engine checkout inside it.
+  const wanted = keepData ? engineDirs : [nunmaiHome].concat(engineDirs.filter((d) => !d.startsWith(nunmaiHome + path.sep)));
+  return wanted.filter((d) => { try { return fs.statSync(d).isDirectory(); } catch (_) { return false; } });
+}
+
+// Strip the "# Nunmai Engine — …" PATH block the installer appends to shell
+// rc files (the comment line plus the export/fish_add_path line after it).
+function sweepShellRcFiles() {
+  const home = os.homedir();
+  const files = [".bashrc", ".bash_profile", ".profile", ".zshrc", ".zprofile", path.join(".config", "fish", "config.fish")].map((f) => path.join(home, f));
+  const touched = [];
+  for (const f of files) {
+    let text;
+    try { text = fs.readFileSync(f, "utf8"); } catch (_) { continue; }
+    const lines = text.split("\n"), out = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (/^# Nunmai Engine/.test(lines[i])) {
+        if (i + 1 < lines.length && /PATH|fish_add_path/.test(lines[i + 1])) i++;
+        continue;
+      }
+      out.push(lines[i]);
+    }
+    const next = out.join("\n").replace(/\n{3,}/g, "\n\n");
+    if (next !== text) { try { fs.writeFileSync(f, next); touched.push(f); } catch (_) { /* best effort */ } }
+  }
+  return touched;
+}
+
+function askYesNo(question) {
+  if (!process.stdin.isTTY) return Promise.resolve(false);
+  const rl = require("readline").createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => rl.question(question, (a) => { rl.close(); resolve(/^y(es)?$/i.test(a.trim())); }));
+}
+
+async function uninstallWithoutEngine(argv) {
+  const yes = argv.includes("--yes") || argv.includes("-y");
+  const keepData = argv.includes("--keep-data");
+  const dryRun = argv.includes("--dry-run");
+  console.log("Nunmai Engine is not installed on this machine — nothing to remove.");
+  const dirs = leftoverDirs(keepData);
+  if (dryRun) {
+    console.log("Dry run: nothing will be changed.");
+    if (dirs.length) { console.log("Would remove leftover files:"); for (const d of dirs) console.log(`  ${d}`); }
+    console.log(npmGlobalPrefix() === null ? "Would leave this project-local launcher in place." : "Would remove the `nunmai` npm launcher (npm uninstall -g nunmai).");
+    return true;
+  }
+  removeFallbackLauncher();
+  for (const f of sweepShellRcFiles()) console.log(`Removed PATH entry from ${f}`);
+  if (dirs.length) {
+    console.log("Leftover files from an earlier install were found:");
+    for (const d of dirs) console.log(`  ${d}`);
+    let go = yes;
+    if (!go) {
+      go = await askYesNo("Remove them? [y/N]: ");
+      if (!go && !process.stdin.isTTY) console.log("Not removed (no terminal to ask). Re-run with:  nunmai uninstall --yes");
+    }
+    if (go) {
+      for (const d of dirs) {
+        try { fs.rmSync(d, { recursive: true, force: true }); console.log(`Removed ${d}`); }
+        catch (e) { console.error(`Could not remove ${d}: ${e.message}`); }
+      }
+    }
+  }
+}
 function handleWithoutEngine(argv) {
   const cmd = (argv[0] || "").toLowerCase();
   if (cmd === "uninstall") {
-    console.log("Nunmai Engine is not installed on this machine — nothing to remove.");
-    removeFallbackLauncher();
-    const npm = removeSelfFromNpm();
-    if (npm === true) {
-      console.log("Removed the `nunmai` npm launcher as well (npm uninstall -g nunmai). Nunmai is now fully gone.");
-    } else if (npm === false) {
-      console.log("Could not remove the npm launcher automatically. Run:  npm uninstall -g nunmai");
-    } else {
-      console.log("This launcher is a project dependency — remove it there with:  npm uninstall nunmai");
-    }
-    return 0;
+    return uninstallWithoutEngine(argv).then((dryRun) => {
+      if (dryRun) return 0;
+      const npm = removeSelfFromNpm();
+      if (npm === true) {
+        console.log("Removed the `nunmai` npm launcher as well (npm uninstall -g nunmai). Nunmai is now fully gone.");
+      } else if (npm === false) {
+        console.log("Could not remove the npm launcher automatically. Run:  npm uninstall -g nunmai");
+      } else {
+        console.log("This launcher is a project dependency — remove it there with:  npm uninstall nunmai");
+      }
+      return 0;
+    });
   }
   if (cmd === "--version" || cmd === "-v" || cmd === "version") {
     console.log(`nunmai launcher ${require("../package.json").version} (engine not installed — run \`nunmai\` to install)`);
@@ -306,7 +383,7 @@ function handleWithoutEngine(argv) {
       "",
       "  nunmai            install the engine, then start it",
       "  nunmai --version  show the launcher version",
-      "  nunmai uninstall  remove the engine and this launcher (nothing installed right now)",
+      "  nunmai uninstall  remove leftover files and this launcher (--yes skips the prompt)",
       "",
       `Manual install: ${manualHint().trim()}`,
     ].join("\n"));
@@ -322,7 +399,11 @@ function main() {
   let launcher = findLauncher();
   if (!launcher) {
     const handled = handleWithoutEngine(argv);
-    if (handled !== null) process.exit(handled);
+    if (handled !== null) {
+      if (typeof handled === "number") process.exit(handled);
+      handled.then((code) => process.exit(code), (e) => { console.error(`nunmai: ${e.message}`); process.exit(1); });
+      return;
+    }
     const code = install(false);
     if (code !== 0) {
       console.error(`\nnunmai: installer exited with code ${code}. You can retry it manually:\n${manualHint()}`);

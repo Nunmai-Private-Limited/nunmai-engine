@@ -30,8 +30,11 @@ Gemini, OpenRouter).
 - Remove: `nunmai uninstall` — one confirmation, then everything goes: the engine,
   `~/.nunmai` (config, keys, sessions, managed Node/uv), the gateway service,
   browser/uv caches **and this npm package**. `nunmai uninstall --keep-data`
-  keeps `~/.nunmai` for a later reinstall. Running `nunmai uninstall` when
-  nothing is installed just says so (and removes the launcher itself).
+  keeps `~/.nunmai` for a later reinstall; `--yes` skips the prompt;
+  `--dry-run` only shows the plan. Running `nunmai uninstall` when the engine
+  is not installed says so, offers to clear any leftovers from an earlier or
+  failed install, and removes the launcher itself — so the next `nunmai` is a
+  plain "command not found".
 
 This package only contains the launcher; the engine's source lives at
 https://github.com/Nunmai-Private-Limited/nunmai-engine.
