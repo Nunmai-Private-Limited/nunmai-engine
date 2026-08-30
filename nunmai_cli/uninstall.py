@@ -749,100 +749,46 @@ def run_uninstall(args):
         )
         return
 
-    print()
-    print(color("┌─────────────────────────────────────────────────────────┐", Colors.MAGENTA, Colors.BOLD))
-    print(color("│            ◆ Nunmai Engine Uninstaller                  │", Colors.MAGENTA, Colors.BOLD))
-    print(color("└─────────────────────────────────────────────────────────┘", Colors.MAGENTA, Colors.BOLD))
-    print()
-    
-    # Show what will be affected
-    print(color("Current Installation:", Colors.CYAN, Colors.BOLD))
-    print(f"  Code:    {project_root}")
-    print(f"  Config:  {nunmai_home / 'config.yaml'}")
-    print(f"  Secrets: {nunmai_home / '.env'}")
-    print(f"  Data:    {nunmai_home / 'cron/'}, {nunmai_home / 'sessions/'}, {nunmai_home / 'logs/'}")
-    print()
+    # Interactive flow — one question, like the installer asks none.
+    #   nunmai uninstall          → removes the engine, KEEPS config/data  [Y/n]
+    #   nunmai uninstall --full   → also deletes config/data; needs a typed "yes"
+    full_uninstall = bool(getattr(args, "full", False))
 
-    if named_profiles:
-        print(color("Other profiles detected:", Colors.CYAN, Colors.BOLD))
-        for p in named_profiles:
-            running = " (gateway running)" if getattr(p, "gateway_running", False) else ""
-            print(f"  • {p.name}{running}: {p.path}")
-        print()
-    
-    # Ask for confirmation
-    print(color("Uninstall Options:", Colors.YELLOW, Colors.BOLD))
     print()
-    print("  1) " + color("Keep data", Colors.GREEN) + " - Remove code only, keep configs/sessions/logs")
-    print("     (Recommended - you can reinstall later with your settings intact)")
+    print(color("◆ Nunmai Engine Uninstaller", Colors.MAGENTA, Colors.BOLD))
     print()
-    print("  2) " + color("Full uninstall", Colors.RED) + " - Remove everything including all data")
-    print("     (Warning: This deletes all configs, sessions, and logs permanently)")
-    print()
-    print("  3) " + color("Cancel", Colors.CYAN) + " - Don't uninstall")
-    print()
-    
-    try:
-        choice = input(color("Select option [1/2/3]: ", Colors.BOLD)).strip()
-    except (KeyboardInterrupt, EOFError):
-        print()
-        print("Cancelled.")
-        return
-    
-    if choice == "3" or choice.lower() in {"c", "cancel", "q", "quit", "n", "no"}:
-        print()
-        print("Uninstall cancelled.")
-        return
-    
-    full_uninstall = (choice == "2")
-
-    # When doing a full uninstall from the default profile, also offer to
-    # remove any named profiles — stopping their gateway services, unlinking
-    # their alias wrappers, and wiping their NUNMAI_HOME dirs. Otherwise
-    # those leave zombie services and data behind.
-    remove_profiles = False
-    if full_uninstall and named_profiles:
-        print()
-        print(color("Other profiles will NOT be removed by default.", Colors.YELLOW))
-        print(f"Found {len(named_profiles)} named profile(s): " +
-              ", ".join(p.name for p in named_profiles))
-        print()
-        try:
-            resp = input(color(
-                f"Also stop and remove these {len(named_profiles)} profile(s)? [y/N]: ",
-                Colors.BOLD
-            )).strip().lower()
-        except (KeyboardInterrupt, EOFError):
-            print()
-            print("Cancelled.")
-            return
-        remove_profiles = resp in {"y", "yes"}
-
-    # Final confirmation
-    print()
+    print(f"  Engine:  {project_root}")
     if full_uninstall:
-        print(color("⚠️  WARNING: This will permanently delete ALL Nunmai data!", Colors.RED, Colors.BOLD))
-        print(color("   Including: configs, API keys, sessions, scheduled jobs, logs", Colors.RED))
-        if remove_profiles:
-            print(color(
-                f"   Plus {len(named_profiles)} profile(s): " +
-                ", ".join(p.name for p in named_profiles),
-                Colors.RED
-            ))
+        print(f"  Data:    {nunmai_home}  " + color("(will be deleted: config, API keys, sessions, cron, logs)", Colors.RED))
     else:
-        print("This will remove the Nunmai code but keep your configuration and data.")
-    
+        print(f"  Data:    {nunmai_home}  " + color("(kept — reinstall picks your settings back up)", Colors.GREEN))
+    if named_profiles:
+        print("  Profiles: " + ", ".join(p.name for p in named_profiles) + ("  (deleted with --full, asked below)" if full_uninstall else "  (kept)"))
     print()
+
+    remove_profiles = False
     try:
-        confirm = input(f"Type '{color('yes', Colors.YELLOW)}' to confirm: ").strip().lower()
+        if full_uninstall:
+            print(color("This permanently deletes ALL Nunmai data on this machine.", Colors.RED, Colors.BOLD))
+            confirm = input(f"Type '{color('yes', Colors.YELLOW)}' to remove everything: ").strip().lower()
+            if confirm != "yes":
+                print("Cancelled — nothing was changed.")
+                return
+            if named_profiles:
+                resp = input(color(
+                    f"Also remove the {len(named_profiles)} named profile(s) listed above? [y/N]: ",
+                    Colors.BOLD,
+                )).strip().lower()
+                remove_profiles = resp in {"y", "yes"}
+        else:
+            resp = input(color("Remove Nunmai Engine? [Y/n]: ", Colors.BOLD)).strip().lower()
+            if resp not in {"", "y", "yes"}:
+                print("Cancelled — nothing was changed.")
+                print(color("  (to delete config and data as well:  nunmai uninstall --full)", Colors.DIM))
+                return
     except (KeyboardInterrupt, EOFError):
         print()
-        print("Cancelled.")
-        return
-    
-    if confirm != "yes":
-        print()
-        print("Uninstall cancelled.")
+        print("Cancelled — nothing was changed.")
         return
 
     _perform_uninstall(
@@ -895,191 +841,103 @@ def _perform_uninstall(
     wipe ``$NUNMAI_HOME`` data and named profiles on full uninstall.
     """
     print()
-    print(color("Uninstalling...", Colors.CYAN, Colors.BOLD))
+    print(color("Uninstalling…", Colors.CYAN, Colors.BOLD))
     print()
-    
+
+    # Output policy: print a line only for something that actually changed.
+    # Steps that find nothing stay silent — an uninstall should read like the
+    # installer's success path, not a diagnostic transcript.
+    done: list[str] = []
+
+    def _did(msg: str) -> None:
+        done.append(msg)
+        log_success(msg)
+
     # 1. Stop and uninstall gateway service + kill standalone processes
-    log_info("Checking for running gateway...")
-    if not uninstall_gateway_service():
-        log_info("No gateway service or processes found")
-    
-    # 2. Remove PATH entries from shell configs (POSIX) AND from the Windows
-    #    User-scope registry.  Both helpers no-op on the wrong platform so we
-    #    can safely call them unconditionally.
-    log_info("Removing PATH entries from shell configs...")
-    removed_configs = remove_path_from_shell_configs()
-    if removed_configs:
-        for config in removed_configs:
-            log_success(f"Updated {config}")
-    else:
-        log_info("No PATH entries found to remove in shell rc files")
+    if uninstall_gateway_service():
+        _did("Stopped the gateway")
+
+    # 2. PATH entries: shell rc files (POSIX) and the Windows User registry.
+    for config in remove_path_from_shell_configs():
+        _did(f"Removed PATH entry from {config}")
 
     if _is_windows():
-        log_info("Removing PATH entries from Windows User environment...")
-        # Expand %LOCALAPPDATA% etc. in nunmai_home so the marker matching is
-        # against fully resolved paths — installer writes literal strings
-        # like C:\Users\<u>\AppData\Local\nunmai\git\cmd, not %LOCALAPPDATA%.
         # The managed binary dir (nunmai\bin: launchers + managed uv) leaves
-        # the PATH only when the full wipe below is about to delete it;
-        # keep-data mode keeps the dir and the still-working uv resolvable.
+        # the PATH only when the full wipe below deletes it; keep-data mode
+        # keeps the dir and the still-working uv resolvable.
         sweep_managed_bin = full_uninstall and _is_default_nunmai_home(nunmai_home)
-        removed_path_entries = remove_path_from_windows_registry(
+        for entry in remove_path_from_windows_registry(
             Path(os.path.expandvars(str(nunmai_home))),
             include_managed_bin=sweep_managed_bin,
-        )
-        if removed_path_entries:
-            for entry in removed_path_entries:
-                log_success(f"Removed from User PATH: {entry}")
-        else:
-            log_info("No Nunmai-owned PATH entries in User environment")
+        ):
+            _did(f"Removed from User PATH: {entry}")
+        for name in remove_nunmai_env_vars_windows():
+            _did(f"Removed User env var: {name}")
 
-        log_info("Removing NUNMAI_HOME / NUNMAI_GIT_BASH_PATH User env vars...")
-        removed_env = remove_nunmai_env_vars_windows()
-        if removed_env:
-            for name in removed_env:
-                log_success(f"Removed User env var: {name}")
-        else:
-            log_info("No Nunmai-set User env vars to remove")
-    
-    # 3. Remove wrapper script (remembering the npm shim it may point back to)
-    log_info("Removing nunmai command...")
+    # 3. The `nunmai` command (remembering the npm shim it may point back to)
     npm_shim = find_npm_shim_path()
-    removed_wrappers = remove_wrapper_script()
-    if removed_wrappers:
-        for wrapper in removed_wrappers:
-            log_success(f"Removed {wrapper}")
-    else:
-        log_info("No wrapper script found")
-    if npm_shim is not None:
-        restored = restore_npm_shim_launcher(npm_shim)
-        if restored is not None:
-            log_success(f"Kept npm launcher {restored} → running `nunmai` reinstalls the engine")
-            log_info("To remove it too:  npm uninstall -g nunmai   (or `npm uninstall nunmai` where you installed it)")
+    for wrapper in remove_wrapper_script():
+        _did(f"Removed command {wrapper}")
+    npm_restored = restore_npm_shim_launcher(npm_shim) if npm_shim is not None else None
 
-    # 3a. Remove the Windows launchers from the managed binary dir. Both
-    #     modes delete the code checkout below, so a surviving launcher
-    #     would dangle — `nunmai` in a new terminal would resolve and then
-    #     error on its missing venv target, worse than command-not-found.
     if _is_windows():
-        log_info("Removing Windows nunmai launchers...")
-        removed_launchers = remove_windows_bin_launchers()
-        if removed_launchers:
-            for launcher in removed_launchers:
-                log_success(f"Removed {launcher}")
-        else:
-            log_info("No Windows nunmai launchers found")
+        for launcher in remove_windows_bin_launchers():
+            _did(f"Removed command {launcher}")
 
-    # 3b. Remove node/npm/npx symlinks the installer left in ~/.local/bin
-    #     (only when they still point into this Nunmai home's node dir, so we
-    #     never clobber an existing nvm / user-managed Node).
-    log_info("Removing Nunmai-managed node/npm/npx symlinks...")
-    removed_node_links = remove_node_symlinks(nunmai_home)
-    if removed_node_links:
-        for link in removed_node_links:
-            log_success(f"Removed {link}")
-    else:
-        log_info("No Nunmai-managed node/npm/npx symlinks found")
+    for link in remove_node_symlinks(nunmai_home):
+        _did(f"Removed {link}")
 
-    # 3c. Remove the desktop Chat GUI's artifacts too (built renderer/release,
-    #     node_modules, the packaged app bundle, and the Electron userData
-    #     dir). Both the "keep data" and "full" CLI flows remove the agent
-    #     code, so the GUI — which is just another consumer of the same
-    #     checkout — should go with it. uninstall_gui() never touches config /
-    #     sessions / .env, so it's safe in keep-data mode; on full uninstall the
-    #     step-5 rmtree(nunmai_home) would sweep the in-tree artifacts anyway,
-    #     but the packaged app + Electron userData live OUTSIDE NUNMAI_HOME and
-    #     must be cleaned explicitly here.
-    log_info("Removing desktop Chat GUI artifacts...")
+    # 3c. Desktop Chat GUI artifacts (packaged app + Electron userData live
+    #     outside NUNMAI_HOME, so they need explicit cleanup in both modes).
     try:
         from nunmai_cli.gui_uninstall import uninstall_gui
-        gui_removed = uninstall_gui(nunmai_home)
-        if not gui_removed:
-            log_info("No desktop GUI artifacts found")
+        if uninstall_gui(nunmai_home):
+            _did("Removed the desktop app")
     except Exception as e:
         log_warn(f"Could not remove desktop GUI artifacts: {e}")
 
-    # 4. Remove installation directory (code)
-    log_info("Removing installation directory...")
-    
-    # Check if we're running from within the install dir
-    # We need to be careful here
+    # 4. The code checkout
     try:
         if project_root.exists():
-            # If the install is inside ~/.nunmai/, just remove the nunmai-engine subdir
-            if nunmai_home in project_root.parents or project_root.parent == nunmai_home:
-                shutil.rmtree(project_root)
-                log_success(f"Removed {project_root}")
-            else:
-                # Installation is somewhere else entirely
-                shutil.rmtree(project_root)
-                log_success(f"Removed {project_root}")
+            shutil.rmtree(project_root)
+            _did(f"Removed engine {project_root}")
     except Exception as e:
-        log_warn(f"Could not fully remove {project_root}: {e}")
-        log_info("You may need to manually remove it")
+        log_warn(f"Could not fully remove {project_root}: {e} — remove it manually")
 
-    # 4b. Remove Windows-only installer artifacts that are NOT user data:
-    #     PortableGit, bundled Node, gateway-service dir.  Installer put them
-    #     under NUNMAI_HOME but they're install tooling, not config — safe to
-    #     remove even in "keep data" mode.  If we're doing a full uninstall
-    #     the step-5 rmtree(nunmai_home) would sweep them anyway; calling
-    #     this helper there is a no-op since they'll already be gone.
+    # 4b. Windows-only installer tooling (PortableGit, bundled Node, service
+    #     dir): install artifacts, not user data — safe in keep-data mode too.
     if _is_windows():
-        log_info("Removing Windows installer artifacts (PortableGit, Node, gateway-service)...")
-        removed_artifacts = remove_portable_tooling_windows(nunmai_home)
-        if removed_artifacts:
-            for path in removed_artifacts:
-                log_success(f"Removed {path}")
-        else:
-            log_info("No Windows installer artifacts to remove")
-    
-    # 5. Optionally remove ~/.nunmai/ data directory (and named profiles)
+        for path in remove_portable_tooling_windows(nunmai_home):
+            _did(f"Removed {path}")
+
+    # 5. Config/data (full uninstall only) and named profiles
     if full_uninstall:
-        # 5a. Stop and remove each named profile's gateway service and
-        #     alias wrapper. The profile NUNMAI_HOME dirs live under
-        #     ``<default>/profiles/<name>/`` and will be swept away by the
-        #     rmtree below, but services + alias scripts live OUTSIDE the
-        #     default root and have to be cleaned up explicitly.
         if remove_profiles and named_profiles:
             for prof in named_profiles:
                 _uninstall_profile(prof)
-
-        log_info("Removing configuration and data...")
+                _did(f"Removed profile {prof.name}")
         try:
             if nunmai_home.exists():
                 shutil.rmtree(nunmai_home)
-                log_success(f"Removed {nunmai_home}")
+                _did(f"Removed data {nunmai_home}")
         except Exception as e:
-            log_warn(f"Could not fully remove {nunmai_home}: {e}")
-            log_info("You may need to manually remove it")
-    else:
-        log_info(f"Keeping configuration and data in {nunmai_home}")
-    
+            log_warn(f"Could not fully remove {nunmai_home}: {e} — remove it manually")
+
     # Done
     print()
-    print(color("┌─────────────────────────────────────────────────────────┐", Colors.GREEN, Colors.BOLD))
-    print(color("│              ✓ Uninstall Complete!                      │", Colors.GREEN, Colors.BOLD))
-    print(color("└─────────────────────────────────────────────────────────┘", Colors.GREEN, Colors.BOLD))
-    print()
-    
-    if not full_uninstall:
-        print(color("Your configuration and data have been preserved:", Colors.CYAN))
-        print(f"  {nunmai_home}/")
-        print()
-        print("To reinstall later with your existing settings:")
-        if _is_windows():
-            print(color("  iex (irm https://nunmai-engine.nunmai.in/install.ps1)", Colors.DIM))
-        else:
-            print(color("  curl -fsSL https://nunmai-engine.nunmai.in/install.sh | bash", Colors.DIM))
-        print()
-
-    if _is_windows():
-        print(color("Open a new terminal (PowerShell / Windows Terminal) to pick up", Colors.YELLOW))
-        print(color("the updated User PATH and environment variables.", Colors.YELLOW))
+    if done:
+        print(color("✓ Nunmai Engine removed.", Colors.GREEN, Colors.BOLD))
     else:
-        print(color("Reload your shell to complete the process:", Colors.YELLOW))
-        print("  source ~/.bashrc  # or ~/.zshrc")
+        print(color("✓ Nothing left to remove.", Colors.GREEN, Colors.BOLD))
+    if not full_uninstall:
+        print(f"  Kept your config and data: {nunmai_home}")
+    if npm_restored is not None:
+        print(f"  The npm launcher stays; `nunmai` reinstalls the engine. Remove it with:  npm uninstall -g nunmai")
     print()
-    print("Thank you for using Nunmai Engine! ◆")
+    if _is_windows():
+        print(color("Open a new terminal to pick up the updated PATH.", Colors.DIM))
+    else:
+        print(color("Open a new terminal (or `source ~/.zshrc` / `~/.bashrc`) to refresh PATH.", Colors.DIM))
     print()
 
 
