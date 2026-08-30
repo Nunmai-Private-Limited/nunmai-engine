@@ -230,12 +230,49 @@ function postinstall() {
   return 0;
 }
 
+// Commands that must never trigger an engine install when the engine is
+// absent: a user asking to remove, or merely inspect, Nunmai should not be
+// handed a multi-minute full install first.
+function handleWithoutEngine(argv) {
+  const cmd = (argv[0] || "").toLowerCase();
+  if (cmd === "uninstall") {
+    let removed = false;
+    if (IS_WIN) {
+      // Drop our own .cmd shim (never a real launcher — those carry no marker).
+      const shim = path.join(winBinDir(), "nunmai.cmd");
+      if (isWinShim(shim)) { try { fs.unlinkSync(shim); removed = true; } catch (_) { /* best effort */ } }
+    }
+    console.log("Nunmai Engine is not installed on this machine — nothing to remove." + (removed ? " (Removed the launcher shim.)" : ""));
+    console.log("To remove this npm launcher too:  npm uninstall -g nunmai   (or `npm uninstall nunmai` for a local install)");
+    return 0;
+  }
+  if (cmd === "--version" || cmd === "-v" || cmd === "version") {
+    console.log(`nunmai launcher ${require("../package.json").version} (engine not installed — run \`nunmai\` to install)`);
+    return 0;
+  }
+  if (cmd === "--help" || cmd === "-h" || cmd === "help") {
+    console.log([
+      "Nunmai Engine is not installed on this machine yet.",
+      "",
+      "  nunmai            install the engine, then start it",
+      "  nunmai --version  show the launcher version",
+      "  nunmai uninstall  remove the engine (nothing to remove right now)",
+      "",
+      `Manual install: ${manualHint().trim()}`,
+    ].join("\n"));
+    return 0;
+  }
+  return null;
+}
+
 function main() {
   const argv = process.argv.slice(2);
   if (argv[0] === "--bootstrap-postinstall") process.exit(postinstall());
 
   let launcher = findLauncher();
   if (!launcher) {
+    const handled = handleWithoutEngine(argv);
+    if (handled !== null) process.exit(handled);
     const code = install(false);
     if (code !== 0) {
       console.error(`\nnunmai: installer exited with code ${code}. You can retry it manually:\n${manualHint()}`);

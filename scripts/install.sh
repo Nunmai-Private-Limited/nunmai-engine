@@ -1474,18 +1474,20 @@ EOF
             exit 1
         fi
     else
-        # Try SSH first (for private repo access), fall back to HTTPS
-        # GIT_SSH_COMMAND disables interactive prompts and sets a short timeout
-        # so SSH fails fast instead of hanging when no key is configured.
-        log_info "Trying SSH clone..."
-        if GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=5" \
-           git clone --depth 1 --branch "$BRANCH" "$REPO_URL_SSH" "$INSTALL_DIR" 2>/dev/null; then
-            log_success "Cloned via SSH"
+        # HTTPS first: the repo is public, and port 22 is blocked on most
+        # corporate networks, so SSH-first just burns a timeout and prints
+        # noise before the HTTPS clone that works anyway.  SSH is kept as a
+        # fallback for private forks with a key configured; GIT_SSH_COMMAND
+        # disables prompts and sets a short timeout so it fails fast.
+        log_info "Cloning repository..."
+        if git clone --depth 1 --branch "$BRANCH" "$REPO_URL_HTTPS" "$INSTALL_DIR"; then
+            log_success "Cloned via HTTPS"
         else
-            rm -rf "$INSTALL_DIR" 2>/dev/null  # Clean up partial SSH clone
-            log_info "SSH failed, trying HTTPS..."
-            if git clone --depth 1 --branch "$BRANCH" "$REPO_URL_HTTPS" "$INSTALL_DIR"; then
-                log_success "Cloned via HTTPS"
+            rm -rf "$INSTALL_DIR" 2>/dev/null  # Clean up partial clone
+            log_info "HTTPS clone failed, trying SSH..."
+            if GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=5" \
+               git clone --depth 1 --branch "$BRANCH" "$REPO_URL_SSH" "$INSTALL_DIR" 2>/dev/null; then
+                log_success "Cloned via SSH"
             else
                 log_error "Failed to clone repository"
                 exit 1
