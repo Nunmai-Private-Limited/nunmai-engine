@@ -6204,21 +6204,6 @@ def _resolve_auto_route(
     main_provider = str(runtime_provider or _read_main_provider() or "")
     main_model = str(runtime_model or _read_main_model() or "")
 
-    # Latency-critical tasks can explicitly prefer the provider's registered
-    # fast model over the main chat model. Titling is the only eligible task:
-    # it names a visible sidebar row, produces ~8 tokens, and running it on a
-    # frontier reasoning model costs seconds per new session. This remains an
-    # opt-in because every settings surface defines "auto" as using the main
-    # model; silently overriding that choice makes the selected model cosmetic.
-    if _task_prefers_fast_model(task) and main_provider and main_provider not in {"auto", ""}:
-        fast_model = _get_aux_model_for_provider(main_provider, prefer_fast=True)
-        if fast_model and fast_model != main_model:
-            logger.debug(
-                "Auxiliary task %s: preferring fast model %s over main model %s",
-                task, fast_model, main_model,
-            )
-            main_model = fast_model
-
     # MoA virtual provider: the "model" is a preset name (e.g. "opus-gpt") and
     # there is no real "moa" HTTP endpoint, so resolving an aux client against
     # provider="moa"/model=<preset> sends the preset name as the model id and
@@ -6239,6 +6224,22 @@ def _resolve_auto_route(
             runtime_base_url = ""
             runtime_api_key = ""
             runtime_api_mode = ""
+
+    # Latency-critical tasks can explicitly prefer the provider's registered
+    # fast model over the main chat model (title generation, the model-router
+    # classifier). Runs AFTER the MoA→aggregator resolution above so a MoA
+    # main model prefers the aggregator provider's fast tier instead of
+    # silently falling through to the aggregator's frontier model. Opt-in via
+    # ``auxiliary.<task>.prefer_fast_model`` because every settings surface
+    # defines "auto" as using the main model.
+    if _task_prefers_fast_model(task) and main_provider and main_provider not in {"auto", "", "moa"}:
+        fast_model = _get_aux_model_for_provider(main_provider, prefer_fast=True)
+        if fast_model and fast_model != main_model:
+            logger.debug(
+                "Auxiliary task %s: preferring fast model %s over main model %s",
+                task, fast_model, main_model,
+            )
+            main_model = fast_model
 
     if (main_provider and main_model
             and main_provider not in {"auto", ""}):

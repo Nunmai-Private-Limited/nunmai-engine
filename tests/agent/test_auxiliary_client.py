@@ -225,6 +225,40 @@ class TestResolveTaskProviderModel:
         assert api_key is None
 
 
+    def test_prefer_fast_model_applies_after_moa_aggregator_resolution(self, monkeypatch):
+        """A MoA main model + a fast-preferring task must land on the
+        aggregator provider's fast tier, not the aggregator's frontier model.
+        The fast-model preference used to run before the MoA unwrap, so it
+        asked for a fast model of provider "moa" (none) and the task then ran
+        on the aggregator model verbatim."""
+        from agent.auxiliary_client import _resolve_auto_route
+
+        preset = {"aggregator": {"provider": "anthropic", "model": "claude-fable-5"}}
+        monkeypatch.setattr("nunmai_cli.moa_config.resolve_moa_preset", lambda cfg, name: preset)
+        monkeypatch.setattr("nunmai_cli.config.load_config", lambda: {"moa": {}})
+        monkeypatch.setattr("nunmai_cli.config.load_config_readonly", lambda: {"moa": {}})
+        monkeypatch.setattr(
+            "agent.auxiliary_client._get_auxiliary_task_config",
+            lambda task: {"provider": "auto", "prefer_fast_model": True} if task == "model_router" else {},
+        )
+        monkeypatch.setattr(
+            "agent.auxiliary_client._get_aux_model_for_provider",
+            lambda provider, prefer_fast=False: "claude-haiku-4-5-20251001" if (provider == "anthropic" and prefer_fast) else None,
+        )
+        with patch("agent.auxiliary_client._read_main_provider", return_value="moa"), \
+             patch("agent.auxiliary_client._read_main_model", return_value="default"), \
+             patch("agent.auxiliary_client._is_provider_unhealthy", return_value=False), \
+             patch("agent.auxiliary_client.resolve_provider_client") as mock_resolve:
+            mock_client = MagicMock()
+            mock_resolve.return_value = (mock_client, "claude-haiku-4-5-20251001")
+
+            client, model, provider = _resolve_auto_route(task="model_router")
+
+        assert client is mock_client
+        assert provider == "anthropic"
+        assert mock_resolve.call_args.args[:2] == ("anthropic", "claude-haiku-4-5-20251001")
+        assert model == "claude-haiku-4-5-20251001"
+
     def test_provider_moa_falls_back_to_literal_when_preset_resolution_fails(self, monkeypatch):
         """If the MoA preset can't be resolved (e.g. renamed/deleted), the
         function must not raise — it degrades to the pre-fix behavior

@@ -382,6 +382,10 @@ class Router:
 
         cur_provider = str(current_runtime.get("provider") or "")
         if target["provider"] == cur_provider and target["model"] == str(current_model or ""):
+            logger.info(
+                "model_router: %s → stay on %s/%s [%s]",
+                decision.tier, cur_provider, current_model, decision.reason,
+            )
             return None  # already on the right brain — nothing to switch
 
         override = self._resolver.resolve(
