@@ -107,7 +107,7 @@ describe('the shared catalog menu, driven by an override controller', () => {
     getGlobalModelOptions.mockResolvedValue({
       providers: [
         { models: ['gemini-3.1-pro'], name: 'Google', slug: 'google' },
-        { models: ['BeastMode'], name: 'Mixture of Agents', slug: 'moa' }
+        { models: ['BeastMode'], name: 'Nunmai Agent', slug: 'moa' }
       ]
     })
 

@@ -251,7 +251,7 @@ _REFERENCE_TOOL_RESULT_BUDGET = 4000
 # as an analyst whose job is to reason about the presented state and hand its
 # best thinking to the aggregator/orchestrator that will actually act.
 _REFERENCE_SYSTEM_PROMPT = (
-    "You are a reference advisor in a Mixture of Agents (MoA) process. You are "
+    "You are a reference advisor in a Nunmai Agent (multi-model) process. You are "
     "NOT the acting agent and you do NOT execute anything: you cannot call "
     "tools, run commands, browse, or access files, repositories, or URLs, and "
     "you should not try to or apologize for being unable to. A separate "
@@ -1321,14 +1321,14 @@ def aggregate_moa_context(
         )
         notice = degraded or "[Reference models unavailable]"
         return (
-            "[Mixture of Agents context — all reference models failed. "
+            "[Nunmai Agent context — all reference models failed. "
             "Proceeding without aggregated guidance.]\n"
             f"References: {', '.join(_slot_label(slot) for slot in reference_models)}\n\n"
             f"{notice}"
         )
 
     synth_prompt = (
-        "You are the aggregator in a Mixture of Agents process. Synthesize the "
+        "You are the aggregator in a Nunmai Agent process. Synthesize the "
         "reference responses into concise, actionable guidance for the main "
         "Nunmai agent. Focus on next steps, tool-use strategy, risks, and any "
         "disagreements. Do not answer the user directly unless that is all that "
@@ -1387,7 +1387,7 @@ def aggregate_moa_context(
         synthesis = joined
 
     return (
-        "[Mixture of Agents context — use this as private guidance for the "
+        "[Nunmai Agent context — use this as private guidance for the "
         "normal Nunmai agent loop. You may call tools, continue reasoning, or "
         "finish normally.]\n"
         f"Aggregator: {agg_label}\n"
@@ -2283,7 +2283,7 @@ class MoAChatCompletions:
             )
             if degraded:
                 guidance = (
-                    "[Mixture of Agents reference context]\n"
+                    "[Nunmai Agent reference context]\n"
                     f"Preset: {self.preset_name}\n"
                     f"Aggregator/acting model: {_slot_label(aggregator)}\n\n"
                     "All reference models failed this turn — no advisory "
@@ -2295,7 +2295,7 @@ class MoAChatCompletions:
             if degraded:
                 joined = f"{joined}\n\n{degraded}" if joined else degraded
             guidance = (
-                "[Mixture of Agents reference context]\n"
+                "[Nunmai Agent reference context]\n"
                 f"Preset: {self.preset_name}\n"
                 f"Aggregator/acting model: {_slot_label(aggregator)}\n"
                 f"References: {', '.join(label for label, _, _ in _agg_refs)}\n\n"

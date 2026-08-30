@@ -312,7 +312,7 @@ def _model_flow_ai_gateway(config, current_model=""):
 
 
 def _model_flow_moa(config, current_model=""):
-    """Mixture of Agents virtual provider: pick a preset, then persist it.
+    """Nunmai Agent virtual provider: pick a preset, then persist it.
 
     Unlike the other provider flows there is no credential step — MoA is a
     virtual provider whose presets reference already-configured providers. We
@@ -347,9 +347,9 @@ def _model_flow_moa(config, current_model=""):
     try:
         from nunmai_cli.setup import _curses_prompt_choice
 
-        idx = _curses_prompt_choice("Select a Mixture of Agents preset:", rows, default_idx)
+        idx = _curses_prompt_choice("Select a Nunmai Agent preset:", rows, default_idx)
     except Exception:
-        print("Select a Mixture of Agents preset:")
+        print("Select a Nunmai Agent preset:")
         for i, row in enumerate(rows, 1):
             marker = "→" if (i - 1) == default_idx else " "
             print(f"  {marker} {i}. {row}")
@@ -392,7 +392,7 @@ def _model_flow_moa(config, current_model=""):
     deactivate_provider()
 
     print()
-    print(f"Default model set to: {selected_name} (via Mixture of Agents)")
+    print(f"Default model set to: {selected_name} (via Nunmai Agent)")
     _print_moa_preset(selected_name, preset)
 
 

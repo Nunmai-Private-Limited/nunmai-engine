@@ -77,7 +77,7 @@ def _format_slot(slot: dict[str, Any]) -> str:
 
 def _print_config(config: dict[str, Any]) -> None:
     cfg = normalize_moa_config(config.get("moa") if isinstance(config, dict) else {})
-    print("Mixture of Agents presets")
+    print("Nunmai Agent presets")
     print(f"Default: {cfg['default_preset']}")
     active = cfg.get("active_preset") or "(off)"
     print(f"Active in config: {active}")
@@ -92,7 +92,7 @@ def _print_config(config: dict[str, Any]) -> None:
 
 
 def cmd_moa(args) -> None:
-    """Manage Mixture of Agents model presets."""
+    """Manage Nunmai Agent (MoA) model presets."""
     cfg = load_config()
     sub = getattr(args, "moa_command", None) or "list"
 

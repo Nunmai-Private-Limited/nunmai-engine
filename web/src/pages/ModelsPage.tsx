@@ -824,12 +824,12 @@ function MoaModelsModal({
             id="moa-modal-title"
             className="font-mondwest text-display text-base tracking-wider"
           >
-            Configure Mixture of Agents presets
+            Configure Nunmai Agent presets
           </h2>
         </header>
         <div className="space-y-4 p-5">
           <p className="text-xs text-text-secondary">
-            Presets appear as models under the Mixture of Agents provider. References produce perspectives; the aggregator is the acting model that answers and calls tools.
+            Presets appear as models under the Nunmai Agent provider. References produce perspectives; the aggregator is the acting model that answers and calls tools.
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -907,7 +907,7 @@ function MoaModelsModal({
           title="Select MoA Model"
           onApply={async ({ provider, model }) => {
             if ((provider || "").toLowerCase() === "moa") {
-              setError("MoA presets can't reference or aggregate the Mixture of Agents provider (no recursive MoA).");
+              setError("MoA presets can't reference or aggregate the Nunmai Agent provider (no recursive MoA).");
               return;
             }
             setError(null);
@@ -1047,7 +1047,7 @@ function ModelSettingsPanel({
             <div className="flex items-center gap-2 mb-0.5">
               <Brain className="h-3 w-3 text-text-tertiary" />
               <span className="text-display text-xs font-medium tracking-wider">
-                Mixture of Agents
+                Nunmai Agent
               </span>
             </div>
             <div className="text-xs font-mono text-text-secondary truncate">

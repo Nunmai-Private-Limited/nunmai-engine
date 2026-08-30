@@ -240,7 +240,7 @@ def _slot_problem(slot: Any) -> str | None:
     if not model:
         return f"model is required (provider '{provider}' has no model selected)"
     if provider.lower() == "moa":
-        return "the Mixture of Agents provider cannot be used inside a preset (recursive MoA)"
+        return "the Nunmai Agent provider cannot be used inside a preset (recursive MoA)"
     return None
 
 
@@ -506,4 +506,4 @@ def build_moa_turn_prompt(user_prompt: str, config: Any = None, preset: str | No
 
 
 def moa_usage() -> str:
-    return "Usage: /moa <prompt>  (runs one prompt through the default MoA preset, then restores your model; pick a preset from the model picker to switch for the session)"
+    return "Usage: /moa <prompt> (alias: /nunmai)  (runs one prompt through the default Nunmai Agent preset, then restores your model; pick a preset from the model picker to switch for the session)"

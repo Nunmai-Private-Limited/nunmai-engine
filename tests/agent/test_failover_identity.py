@@ -264,7 +264,7 @@ class TestRedecoratePromptCacheOnPolicyChange:
     def test_moa_guidance_stays_outside_last_breakpoint(self):
         prompt = "sys"
         guidance = (
-            "[Mixture of Agents context — use this as private guidance for the "
+            "[Nunmai Agent context — use this as private guidance for the "
             "normal Nunmai agent loop.]\nAggregator: agg\n\nadvice"
         )
         base = [
@@ -315,7 +315,7 @@ class TestPeelReferenceGuidanceRoundTrip:
     """peel must invert every attach shape — the two live adjacent in
     moa_loop.py precisely so this contract can't drift silently."""
 
-    _GUIDANCE = "[Mixture of Agents reference context]\nAdvice body."
+    _GUIDANCE = "[Nunmai Agent reference context]\nAdvice body."
 
     def _round_trip(self, base):
         import copy

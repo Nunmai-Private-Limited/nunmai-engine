@@ -1033,9 +1033,9 @@ export function ModelSettings({ onMainModelChanged, scopeProfile }: ModelSetting
       </section>
       {moa && currentMoaPreset && (
         <section>
-          <SectionHeading icon={Cpu} title="Mixture of Agents" />
+          <SectionHeading icon={Cpu} title="Nunmai Agent" />
           <p className="mb-2 text-xs text-muted-foreground">
-            Configure named presets that appear as models under the Mixture of Agents provider. The aggregator is the
+            Configure named presets that appear as models under the Nunmai Agent provider. The aggregator is the
             acting model.
           </p>
           <div className="mb-2 flex flex-wrap items-center gap-2">

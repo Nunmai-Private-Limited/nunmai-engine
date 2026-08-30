@@ -422,7 +422,7 @@ ALIASES: Dict[str, str] = {
 # not in the catalog.
 
 _LABEL_OVERRIDES: Dict[str, str] = {
-    "moa": "Mixture of Agents",
+    "moa": "Nunmai Agent",
     "nous": "Nunmai Portal",
     "openai-codex": "ChatGPT or Codex Subscription",
     "copilot-acp": "GitHub Copilot ACP",

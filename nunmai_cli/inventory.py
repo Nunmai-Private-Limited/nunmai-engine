@@ -1003,7 +1003,7 @@ def _moa_provider_row(current_provider: str = "") -> dict | None:
             return None
         return {
             "slug": "moa",
-            "name": "Mixture of Agents",
+            "name": "Nunmai Agent",
             "is_current": (current_provider or "").lower() == "moa",
             "is_user_defined": False,
             "models": models,

@@ -37,7 +37,7 @@ vi.mock('@/nunmai', () => ({
 // MoA presets now arrive as the catalog's virtual `moa` provider row (the same
 // payload a remote gateway's model.options returns), not the /api/model/moa
 // REST config.
-const MOA_PROVIDER = { models: ['default', 'BeastMode'], name: 'Mixture of Agents', slug: 'moa' }
+const MOA_PROVIDER = { models: ['default', 'BeastMode'], name: 'Nunmai Agent', slug: 'moa' }
 
 const DEEPSEEK_PROVIDER = {
   models: ['deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner'],
@@ -112,7 +112,7 @@ describe('ModelMenuPanel MoA presets', () => {
 
     await content.findByText('MoA: BeastMode')
 
-    // The provider group header would read "Mixture of Agents"; the presets
+    // The provider group header would read "Nunmai Agent"; the presets
     // section header reads "MoA presets". Only the latter should exist.
     // Radix DropdownMenu portals its content to document.body, so assert
     // against the body (not content.container) to see the rendered items.
@@ -120,7 +120,7 @@ describe('ModelMenuPanel MoA presets', () => {
     // eslint-disable-next-line no-restricted-globals
     expect(document.body.textContent).toContain('MoA presets')
     // eslint-disable-next-line no-restricted-globals
-    expect(document.body.textContent).not.toContain('Mixture of Agents')
+    expect(document.body.textContent).not.toContain('Nunmai Agent')
   })
 
   it('renders presets from the catalog even before a session exists', async () => {

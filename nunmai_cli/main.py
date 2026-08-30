@@ -13200,8 +13200,8 @@ def main():
 
     moa_parser = subparsers.add_parser(
         "moa",
-        help="Configure Mixture of Agents provider/model slots",
-        description="Configure the provider/model set used by /moa <prompt>.",
+        help="Configure Nunmai Agent (multi-model) provider/model slots",
+        description="Configure the Nunmai Agent provider/model set used by /moa <prompt> (alias /nunmai).",
     )
     moa_subparsers = moa_parser.add_subparsers(dest="moa_command")
     moa_subparsers.add_parser("list", aliases=["ls"], help="Show current MoA model slots")
