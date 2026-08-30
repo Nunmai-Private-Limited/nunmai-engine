@@ -3191,6 +3191,9 @@ class BasePlatformAdapter(ABC):
         self._auto_tts_default: bool = False
         self._auto_tts_enabled_chats: set = set()
         self._auto_tts_disabled_chats: set = set()
+        # voice.voice_reply_only (pushed by GatewayRunner): when an auto-TTS
+        # voice reply is delivered, skip the separate text send for that turn.
+        self._voice_reply_only: bool = False
         # Per-turn streaming-TTS completion flag (#60671).  When the gateway
         # streaming-TTS consumer successfully delivers audio, it adds the
         # turn key here so the base adapter's whole-file auto-TTS path skips
@@ -6634,6 +6637,7 @@ class BasePlatformAdapter(ABC):
 
                 # Play TTS audio before text (voice-first experience)
                 _tts_caption_delivered = False
+                _tts_audio_delivered = False
                 _tts_cleanup_paths = {_tts_requested_path, *_tts_paths} - {None}
                 for _tts_index, _tts_path in enumerate(_tts_paths):
                     try:
@@ -6659,6 +6663,8 @@ class BasePlatformAdapter(ABC):
                             metadata=_final_thread_metadata,
                         )
                         _record_delivery(tts_result)
+                        if getattr(tts_result, "success", False):
+                            _tts_audio_delivered = True
                         _tts_caption_delivered = bool(
                             _tts_caption_delivered
                             or (
@@ -6682,6 +6688,20 @@ class BasePlatformAdapter(ABC):
                 # adapter while its in-flight handler was still producing a
                 # final response; that response is a new message, so resolve
                 # the current transport before sending it.
+                # voice.voice_reply_only: the voice note IS the reply — skip
+                # the separate text bubble when audio actually reached the
+                # chat. Falls through to the normal text send when TTS failed
+                # so the user never loses the answer.
+                if (
+                    text_content
+                    and _tts_audio_delivered
+                    and getattr(self, "_voice_reply_only", False)
+                ):
+                    logger.info(
+                        "[%s] voice_reply_only: audio delivered, suppressing text send to %s",
+                        self.name, event.source.chat_id,
+                    )
+                    text_content = ""
                 if text_content and not _tts_caption_delivered:
                     delivery_adapter = self._final_delivery_adapter(event.source)
                     logger.info(

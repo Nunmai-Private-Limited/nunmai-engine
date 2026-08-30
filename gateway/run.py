@@ -7753,6 +7753,12 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
             _auto_tts_default = False
         if hasattr(adapter, "_auto_tts_default"):
             adapter._auto_tts_default = _auto_tts_default
+        try:
+            _voice_reply_only = bool((_full_cfg.get("voice") or {}).get("voice_reply_only", False))
+        except Exception:
+            _voice_reply_only = False
+        if hasattr(adapter, "_voice_reply_only"):
+            adapter._voice_reply_only = _voice_reply_only
 
         prefix = f"{platform.value}:"
         if isinstance(disabled_chats, set):

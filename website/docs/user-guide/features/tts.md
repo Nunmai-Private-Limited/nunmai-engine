@@ -30,6 +30,17 @@ Convert text to speech with eleven providers:
 | **KittenTTS** | Good | Free (local) | None needed |
 | **Piper** | Good | Free (local) | None needed |
 
+### Voice-only replies
+
+By default a voice reply is sent **in addition to** the text message. Set:
+
+```yaml
+voice:
+  voice_reply_only: true
+```
+
+and when the auto-TTS voice note is actually delivered (voice input + `/voice on`), the separate text bubble is skipped — the voice note *is* the reply. If TTS fails, the text is sent as usual so the answer is never lost. The full text remains in session history.
+
 ### Platform Delivery
 
 | Platform | Delivery | Format |
