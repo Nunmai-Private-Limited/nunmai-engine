@@ -386,6 +386,19 @@ VALID_HOOKS: Set[str] = {
     #   alias_used: the exact token the user typed (str), args_raw: str,
     #   session_key: str | None (gateway), platform: str | None (gateway).
     "pre_command",
+    # Per-turn model routing (used by the bundled model-router plugin). Fired
+    # right before an agent turn is built — CLI (cli.py, before
+    # run_conversation) and gateway (GatewayRunner._resolve_turn_agent_config,
+    # executor thread) — with the user's text and the model/runtime that would
+    # otherwise be used. First valid dict wins and applies to THIS turn only;
+    # the configured default and any /model session override are untouched:
+    #   {"model": str, "runtime": {"provider", "api_key", "base_url",
+    #    "api_mode"}, "reason": str}   -> run this turn on that model/runtime
+    #   None / {}                        -> keep the configured model
+    # Kwargs: surface ("cli" | "gateway"), text, model, runtime (dict),
+    #   session_key, has_session_override (True while a /model session
+    #   override is active — routers should normally respect it).
+    "resolve_turn_model",
 }
 
 # Hooks whose return value carries a directive that the shell-hook response

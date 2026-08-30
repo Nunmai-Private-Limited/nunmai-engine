@@ -5603,7 +5603,9 @@ class TurnRunner:
                 log_message="interim_assistant_callback scheduling error",
             )
 
-        turn_route = self._runner._resolve_turn_agent_config(ctx.message, model, runtime_kwargs)
+        turn_route = self._runner._resolve_turn_agent_config(
+            ctx.message, model, runtime_kwargs, session_key=ctx.session_key
+        )
 
         # Per-platform skip_context_files — messaging platforms can opt out
         # of filesystem-heavy context-file discovery (SOUL.md, AGENTS.md,
@@ -8418,7 +8420,9 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
 
         return model, runtime_kwargs
 
-    def _resolve_turn_agent_config(self, user_message: str, model: str, runtime_kwargs: dict) -> dict:
+    def _resolve_turn_agent_config(
+        self, user_message: str, model: str, runtime_kwargs: dict, session_key: Optional[str] = None
+    ) -> dict:
         """Build the effective model/runtime config for a single turn.
 
         Always uses the session's primary model/provider.  If `/fast` is
@@ -8453,6 +8457,14 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
             ),
         }
 
+        # Per-turn model routing (resolve_turn_model hook, model-router
+        # plugin). Only for real session turns (cron/other callers pass no
+        # session_key). The override is applied to this turn's route only —
+        # the session's model_override and config default stay untouched, so
+        # nothing needs restoring afterwards.
+        if session_key:
+            self._apply_resolve_turn_model_hook(route, user_message, session_key)
+
         service_tier = getattr(self, "_service_tier", None)
         if not service_tier:
             route["request_overrides"] = {}
@@ -8464,6 +8476,58 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
             overrides = None
         route["request_overrides"] = overrides or {}
         return route
+
+    def _apply_resolve_turn_model_hook(self, route: dict, user_message: Any, session_key: str) -> None:
+        """Let a ``resolve_turn_model`` plugin pick this turn's model/runtime."""
+        try:
+            from nunmai_cli.lifecycle import has_hook, invoke_hook
+
+            if not has_hook("resolve_turn_model"):
+                return
+            _ovr_state = self._peek_session_state(session_key)
+            _has_override = bool(_ovr_state and _ovr_state.conversation.model_override)
+            _text = user_message
+            if isinstance(_text, list):  # multimodal content parts
+                _text = "\n".join(
+                    str(p.get("text") or "") for p in _text if isinstance(p, dict) and p.get("type") == "text"
+                )
+            runtime = route["runtime"]
+            results = invoke_hook(
+                "resolve_turn_model",
+                surface="gateway",
+                text=_text,
+                model=route["model"],
+                runtime=dict(runtime),
+                session_key=session_key,
+                has_session_override=_has_override,
+            )
+            for _res in results or []:
+                if not isinstance(_res, dict) or not _res.get("model"):
+                    continue
+                _rt = _res.get("runtime") or {}
+                new_provider = _rt.get("provider") or runtime.get("provider")
+                route["model"] = str(_res["model"])
+                for _k in ("provider", "api_key", "base_url", "api_mode"):
+                    if _rt.get(_k) is not None:
+                        runtime[_k] = _rt[_k]
+                runtime["requested_provider"] = new_provider
+                runtime["credential_pool"] = _credential_pool_for_provider(new_provider)
+                route["signature"] = (
+                    route["model"],
+                    runtime["provider"],
+                    runtime["requested_provider"],
+                    runtime["base_url"],
+                    runtime["api_mode"],
+                    runtime["command"],
+                    tuple(runtime["args"]),
+                )
+                logger.info(
+                    "resolve_turn_model: session=%s -> %s/%s (%s)",
+                    session_key, runtime.get("provider"), route["model"], _res.get("reason") or "",
+                )
+                break
+        except Exception:
+            logger.debug("resolve_turn_model hook failed", exc_info=True)
 
     def _sync_session_model_from_agent(self, session_id: str, agent: Any) -> None:
         """Persist the runtime model/provider actually used by a gateway turn.

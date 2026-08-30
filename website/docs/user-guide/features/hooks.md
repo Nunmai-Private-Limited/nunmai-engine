@@ -465,6 +465,7 @@ Payload fields below are the exact event-specific fields supplied by each call s
 | `pre_gateway_dispatch` | Directive/control | Incoming non-internal message before auth/pairing/dispatch; first valid `skip`, `rewrite`, or `allow` controls flow. | `event`, `gateway`, `session_store` | Extremely privileged in-process objects expose inbound user/routing data and host handles. |
 | `gateway_platform_event` | Observer | After the gateway's profile-scoped authorization succeeds, when a supported platform-native event is normalized at the gateway boundary (Telegram: reactions, message edits; Discord: message edits/deletes, thread created/renamed); return ignored. | `platform`, `event_type`, `payload` (event-type-specific dict — see the per-event contracts below) | Normalized plain-dict envelope only; raw SDK objects, adapter handles, and bot clients are never exposed. |
 | `pre_command` | Observer | Recognized slash command about to be dispatched, before the handler runs, on CLI and gateway cold-path dispatch; return ignored in v1 (directive-shaped dicts are logged at debug). Gateway running-agent intercept commands (`/stop`, `/approve` during an active run) are deliberately excluded — control-plane escape hatches must stay outside plugin reach. | `surface` (`"cli"` \| `"gateway"`), `command` (canonical name), `alias_used`, `args_raw`, `session_key`, `platform` | `args_raw` may contain user content or secrets typed after the command. |
+| `resolve_turn_model` | Directive/control | Right before an agent turn is built on the CLI and the gateway, with the user's text and the model/runtime that would be used; the first dict with a `model` runs **this turn only** on that model/runtime (the configured default and any `/model` session override are untouched). Used by the bundled [model-router](./built-in-plugins.md#model-router) plugin. | `surface` (`"cli"` \| `"gateway"`), `text`, `model`, `runtime` (dict: `provider`, `api_key`, `base_url`, `api_mode`), `session_key`, `has_session_override` | `text` is raw user content; `runtime` carries the live API key. Return `{"model", "runtime": {...}, "reason"}` or `None`. |
 | `pre_approval_request` | Observer | Before prompted or smart approval; return ignored. | `command`, `description`, `pattern_key`, `pattern_keys`, `session_key`, `surface`, `turn_id`, `tool_call_id` | Command may contain secrets; smart observer preparation force-redacts, but surfaces do not all have identical redaction. |
 | `post_approval_response` | Observer | After a decision, timeout, or gateway notification failure; return ignored. | `command`, `description`, `pattern_key`, `pattern_keys`, `session_key`, `surface`, `turn_id`, `tool_call_id`, `choice`; smart path may add `decided_by` | Same command sensitivity plus decision metadata. |
 | `kanban_task_claimed` | Observer | After claim commit, in dispatcher process before worker spawn; return ignored. | `task_id`, `profile_name`, `board`, `assignee`, `run_id` | Board/task/profile/assignee identifiers. |
@@ -1226,6 +1227,29 @@ def register(ctx):
 ```
 
 ---
+
+### `resolve_turn_model`
+
+Fires **once per user turn**, immediately before the agent for that turn is built — on the CLI (before `run_conversation`) and on the gateway (inside the executor thread that builds the turn, so a short model call in the callback does not block the event loop). It is the seam for per-turn brain selection: a plugin looks at the message and answers with the model/runtime that should handle *this* turn.
+
+**Callback signature:**
+
+```python
+def my_callback(text, model, runtime, surface, session_key, has_session_override, **kwargs):
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `text` | `str` | The user's message for this turn (multimodal turns pass the concatenated text parts). |
+| `model` | `str` | Model that would be used without the hook. |
+| `runtime` | `dict` | `provider`, `api_key`, `base_url`, `api_mode` that would be used. |
+| `surface` | `"cli"` \| `"gateway"` | Where the turn runs. |
+| `session_key` | `str` | Gateway session key / CLI session id. |
+| `has_session_override` | `bool` | `True` while a `/model … --session` override is active — routers should normally return `None` and respect it. |
+
+**Return value:** `{"model": str, "runtime": {"provider", "api_key", "base_url", "api_mode"}, "reason": str}` to run this turn on that brain, or `None` to keep the configured model. The first valid dict wins. The override lasts exactly one turn: the gateway applies it to the turn route only, and the CLI stages the same one-turn restore that `/model --once` uses.
+
+Slash commands never reach this hook, and an explicit `/model --once` for the same turn takes precedence on the CLI.
 
 ### `gateway_platform_event`
 

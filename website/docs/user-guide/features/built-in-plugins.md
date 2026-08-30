@@ -56,6 +56,7 @@ The repo ships these bundled plugins under `plugins/`. All are opt-in — enable
 | Plugin | Kind | Purpose |
 |---|---|---|
 | `disk-cleanup` | hooks + slash command | Auto-track ephemeral files and clean them on session end |
+| `model-router` | hook + slash command | Per-turn brain routing — simple messages on a fast model, normal on the main model, complex on the Nunmai Agent orchestrator |
 | `security-guidance` | hooks | Pattern-match dangerous code on `write_file`/`patch` and append a security warning (or block) — 25 rules (Apache-2.0 fork of Anthropic's `claude-plugins-official` patterns) |
 | `observability/langfuse` | hooks | Trace turns / LLM calls / tools to [Langfuse](https://langfuse.com) |
 | `teams_pipeline` | standalone | Microsoft Teams meeting pipeline — Graph-backed, transcript-first meeting summaries |
@@ -116,6 +117,37 @@ Auto-tracks and removes ephemeral files created during sessions — test scripts
 **Enabling:** `nunmai plugins enable disk-cleanup` (or check the box in `nunmai plugins`).
 
 **Disabling again:** `nunmai plugins disable disk-cleanup`.
+
+### model-router
+
+Per-turn brain routing. Every incoming message is classified as **simple**, **normal** or **complex** and the turn runs on the matching brain:
+
+| Tier | Runs on | Examples |
+|---|---|---|
+| simple | a fast, cheap model | greetings, thanks, yes/no, tiny factual questions |
+| normal | the main model | ordinary questions, short tasks, quick lookups |
+| complex | the [Nunmai Agent orchestrator](./mixture-of-agents.md) | multi-step engineering work, debugging, code changes, deployments, analysis |
+
+Cheap regex heuristics settle the obvious cases without any model call; the middle band is labelled by a fast auxiliary model (task `model_router`, defaults to the main provider's fast tier). Every failure falls back to the normal tier, so a broken classifier can never take the agent offline. The configured default model is never changed — each override lasts exactly one turn, and an explicit `/model … --session` override is respected.
+
+Tiers are derived automatically from your main model: with a single model, `normal` is that model, `simple` its fast sibling (e.g. `claude-haiku-4-5` for Anthropic, `gpt-5.4-mini` for Codex) and `complex` the default Nunmai Agent preset; with a Nunmai Agent preset as the main model, `normal` becomes the preset's aggregator. Pin your own targets under `plugins.entries.model-router.settings`:
+
+```yaml
+plugins:
+  enabled: [model-router]
+  entries:
+    model-router:
+      settings:
+        mode: auto            # auto | heuristic | off
+        tiers:
+          simple:  {provider: anthropic, model: claude-haiku-4-5-20251001}
+          normal:  {provider: anthropic, model: claude-fable-5}
+          complex: {provider: moa, model: default}
+```
+
+**Commands:** `/router` shows the mode, resolved tiers and the last decisions; `/router off|on|auto|heuristic` changes the mode.
+
+**Enabling:** `nunmai plugins enable model-router`. Works on the CLI and every gateway platform; the OpenAI-compatible API server keeps the model named in the request.
 
 ### security-guidance
 

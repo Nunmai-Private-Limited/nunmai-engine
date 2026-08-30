@@ -11188,6 +11188,73 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         self._restore_modal_input_snapshot()
         self._invalidate(min_interval=0.0)
 
+    def _apply_resolve_turn_model_hook(self, message) -> None:
+        """Let a ``resolve_turn_model`` plugin pick the model for this turn.
+
+        Mirrors ``/model --once``: the current runtime is snapshotted into
+        ``_pending_one_turn_model_restore`` and restored after the turn.
+        """
+        from nunmai_cli.lifecycle import has_hook, invoke_hook
+
+        if not has_hook("resolve_turn_model"):
+            return
+        if getattr(self, "_pending_one_turn_model_restore", None):
+            return  # an explicit /model --once already owns this turn
+        text = message
+        if isinstance(text, list):
+            text = "\n".join(
+                str(p.get("text") or "") for p in text if isinstance(p, dict) and p.get("type") == "text"
+            )
+        runtime = {
+            "provider": self.provider,
+            "api_key": self.api_key,
+            "base_url": self.base_url,
+            "api_mode": self.api_mode,
+        }
+        results = invoke_hook(
+            "resolve_turn_model",
+            surface="cli",
+            text=text,
+            model=self.model,
+            runtime=runtime,
+            session_key=self.session_id or "",
+            has_session_override=False,
+        )
+        route = next((r for r in results or [] if isinstance(r, dict) and r.get("model")), None)
+        if not route:
+            return
+        rt = route.get("runtime") or {}
+        new_model = str(route["model"])
+        new_provider = rt.get("provider") or self.provider
+        if new_model == self.model and new_provider == self.provider:
+            return
+        snapshot = self._snapshot_model_runtime()
+        if getattr(self, "agent", None) is not None:
+            try:
+                self.agent.switch_model(
+                    new_model=new_model,
+                    new_provider=new_provider,
+                    api_key=rt.get("api_key") or "",
+                    base_url=rt.get("base_url") or "",
+                    api_mode=rt.get("api_mode") or "",
+                )
+            except Exception as exc:
+                logger.debug("resolve_turn_model: switch to %s/%s failed: %s", new_provider, new_model, exc)
+                return
+        # With no agent yet (first turn / -Q), the agent is built from the CLI
+        # fields below and the one-turn restore switches it back afterwards.
+        self.model = new_model
+        self.provider = new_provider
+        self.requested_provider = new_provider
+        if rt.get("api_key"):
+            self.api_key = rt["api_key"]
+        if rt.get("base_url"):
+            self.base_url = rt["base_url"]
+        if rt.get("api_mode"):
+            self.api_mode = rt["api_mode"]
+        self._pending_one_turn_model_restore = snapshot
+        logger.info("resolve_turn_model: cli -> %s/%s (%s)", new_provider, new_model, route.get("reason") or "")
+
     def _snapshot_model_runtime(self) -> dict:
         """Capture current CLI and agent model runtime for one-turn restore."""
         agent = getattr(self, "agent", None)
@@ -16855,6 +16922,13 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 _persist_clean_user_message = (
                     message if (_voice_prefix or agent_message != message) else None
                 )
+                # Per-turn model routing (resolve_turn_model hook / model-router
+                # plugin). Stages a one-turn restore exactly like /model --once,
+                # so the finally below puts the configured model back.
+                try:
+                    self._apply_resolve_turn_model_hook(agent_message)
+                except Exception:
+                    logging.debug("resolve_turn_model hook failed", exc_info=True)
                 _one_turn_model_restore = getattr(
                     self, "_pending_one_turn_model_restore", None
                 )
