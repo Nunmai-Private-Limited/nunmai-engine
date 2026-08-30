@@ -2174,12 +2174,13 @@ DEFAULT_CONFIG = {
         #               the aggregator prompt (issue #59959).
         "privacy_filter": "",
         "presets": {
+            # Credential-aware: resolves at read time to aggregator = your
+            # main model, references = your main model + up to two other
+            # providers you have authenticated (their flagship model). Add
+            # explicit reference_models / aggregator here (or via the
+            # Dashboard / `nunmai moa configure`) to pin specific brains.
             "default": {
-                "reference_models": [
-                    {"provider": "openai-codex", "model": "gpt-5.5"},
-                    {"provider": "openrouter", "model": "deepseek/deepseek-v4-pro"},
-                ],
-                "aggregator": {"provider": "openrouter", "model": "anthropic/claude-opus-4.8"},
+                "auto": True,
                 "max_tokens": 4096,
                 "enabled": True,
             }

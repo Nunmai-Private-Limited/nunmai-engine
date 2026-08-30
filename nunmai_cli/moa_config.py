@@ -5,6 +5,8 @@ from __future__ import annotations
 import base64
 import json
 import math
+import threading
+import time
 from copy import deepcopy
 from typing import Any
 
@@ -22,6 +24,97 @@ DEFAULT_MOA_AGGREGATOR: dict[str, str] = {
 }
 
 DEFAULT_MOA_REFERENCE_TIMEOUT: float | None = None
+
+# Credential-aware default preset ("auto"). The shipped ``default`` preset
+# carries ``auto: true`` and no explicit slots; at read time it resolves to
+# aggregator = the user's main model, references = the main model plus up to
+# AUTO_DEFAULT_EXTRA_REFERENCES other providers the user has authenticated
+# (each one's flagship curated model). So "Nunmai Agent" works out of the box
+# with whatever brains the user actually wired up, instead of the fixed
+# openai-codex + openrouter pair that only a few accounts can run. Explicit
+# slots saved from the Dashboard / ``nunmai moa configure`` always win; the
+# static DEFAULT_MOA_* constants remain the last-resort fallback.
+AUTO_DEFAULT_EXTRA_REFERENCES = 2
+_AUTO_DEFAULT_CACHE_TTL_SECONDS = 60.0
+# Providers that make poor silent advisors: the virtual MoA provider itself,
+# and free/preview tiers that rate-limit or rotate models without notice.
+_AUTO_DEFAULT_SKIP_PROVIDERS = frozenset({"moa", "opencode-free"})
+_auto_default_cache: tuple[float, dict[str, Any] | None] | None = None
+_auto_default_lock = threading.Lock()
+
+
+def build_auto_default_slots(*, use_cache: bool = True) -> dict[str, Any] | None:
+    """Resolve the credential-aware slots for the ``auto`` default preset.
+
+    Returns ``{"reference_models": [...], "aggregator": {...}}`` or ``None``
+    when the main model is not configured yet (fresh install before setup),
+    in which case callers fall back to the static defaults. Cached for a
+    short TTL because provider detection touches credential stores and
+    ``normalize_moa_config`` runs on every model-picker open.
+    """
+    global _auto_default_cache
+    now = time.monotonic()
+    if use_cache:
+        with _auto_default_lock:
+            cached = _auto_default_cache
+        if cached is not None and now - cached[0] < _AUTO_DEFAULT_CACHE_TTL_SECONDS:
+            return deepcopy(cached[1])
+
+    result: dict[str, Any] | None = None
+    try:
+        from nunmai_cli.config import load_config
+
+        model_cfg = (load_config() or {}).get("model") or {}
+        main_provider = str(model_cfg.get("provider") or "").strip()
+        main_model = str(model_cfg.get("default") or "").strip()
+    except Exception:  # pragma: no cover - defensive; config trouble must not break MoA
+        main_provider, main_model = "", ""
+
+    if main_provider and main_model and main_provider.lower() not in {"auto", "moa"}:
+        refs: list[dict[str, Any]] = [
+            {"provider": main_provider, "model": main_model, "enabled": True}
+        ]
+        try:
+            from nunmai_cli.model_switch import list_authenticated_providers
+
+            rows = list_authenticated_providers(
+                current_provider=main_provider,
+                current_model=main_model,
+                max_models=1,
+                probe_custom_providers=False,
+            )
+        except Exception:  # pragma: no cover - defensive; detection is best effort
+            rows = []
+        seen = {main_provider.lower()}
+        for row in rows or []:
+            if len(refs) >= 1 + AUTO_DEFAULT_EXTRA_REFERENCES:
+                break
+            if not isinstance(row, dict):
+                continue
+            slug = str(row.get("slug") or "").strip()
+            models = [m for m in (row.get("models") or []) if isinstance(m, str) and m.strip()]
+            if not slug or not models:
+                continue
+            key = slug.lower()
+            if key in seen or key in _AUTO_DEFAULT_SKIP_PROVIDERS:
+                continue
+            seen.add(key)
+            refs.append({"provider": slug, "model": models[0].strip(), "enabled": True})
+        result = {
+            "reference_models": refs,
+            "aggregator": {"provider": main_provider, "model": main_model},
+        }
+
+    with _auto_default_lock:
+        _auto_default_cache = (now, deepcopy(result))
+    return deepcopy(result)
+
+
+def reset_auto_default_cache() -> None:
+    """Drop the cached auto-default resolution (credentials/model changed)."""
+    global _auto_default_cache
+    with _auto_default_lock:
+        _auto_default_cache = None
 
 
 def _default_reference_models() -> list[dict[str, Any]]:
@@ -276,6 +369,11 @@ def validate_moa_payload(raw: Any) -> list[str]:
         refs = preset.get("reference_models")
         if not isinstance(refs, list):
             refs = [refs] if isinstance(refs, dict) else []
+        # An ``auto: true`` preset with no slots at all resolves at read time
+        # from the user's credentials (see build_auto_default_slots); it is a
+        # complete, intentional configuration, not a half-filled one.
+        if _coerce_bool(preset.get("auto"), False) and not refs and not preset.get("aggregator"):
+            continue
         complete_refs = 0
         for index, slot in enumerate(refs):
             issue = _slot_problem(slot)
@@ -328,12 +426,25 @@ def _normalize_preset(raw: Any) -> dict[str, Any]:
         raw_refs = [raw_refs] if isinstance(raw_refs, dict) else []
     refs = [_clean_slot(item, include_enabled=True) for item in raw_refs]
     refs = [item for item in refs if item is not None]
+    aggregator = _clean_slot(raw.get("aggregator"))
+
+    # ``auto: true`` with no explicit slots → credential-aware default
+    # (aggregator = main model, references = main + other authenticated
+    # providers). Explicit slots always win over auto resolution.
+    auto = _coerce_bool(raw.get("auto"), False)
+    if auto and not refs and aggregator is None:
+        resolved = build_auto_default_slots()
+        if resolved:
+            refs = list(resolved["reference_models"])
+            aggregator = dict(resolved["aggregator"])
+
     if not refs:
         refs = _default_reference_models()
-
-    aggregator = _clean_slot(raw.get("aggregator")) or deepcopy(DEFAULT_MOA_AGGREGATOR)
+    if aggregator is None:
+        aggregator = deepcopy(DEFAULT_MOA_AGGREGATOR)
 
     return {
+        "auto": auto,
         "enabled": _coerce_bool(raw.get("enabled"), True),
         "reference_models": refs,
         "aggregator": aggregator,

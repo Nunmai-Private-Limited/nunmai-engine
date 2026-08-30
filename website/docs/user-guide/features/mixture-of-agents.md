@@ -94,7 +94,16 @@ moa:
       enabled: true
 ```
 
-Default preset:
+### The shipped `default` preset is credential-aware
+
+Out of the box the `default` preset carries `auto: true` and no explicit slots. At read time it resolves to:
+
+- **aggregator / acting model:** your main model (`model.provider` + `model.default` in `config.yaml`)
+- **references:** your main model, plus up to two other providers you have authenticated (`nunmai auth add …`), each using its flagship curated model
+
+So selecting the Nunmai Agent provider works immediately with whatever brains you have wired up — no preset editing required. The resolution is re-checked shortly after you add or remove provider credentials or change your main model. If no main model is configured yet, it falls back to the static defaults below. Add explicit `reference_models` / `aggregator` to the preset (Dashboard, Desktop, or `nunmai moa configure`) to pin specific models; explicit slots always win over `auto`.
+
+Static fallback (used only when nothing can be detected):
 
 - reference: `openai-codex:gpt-5.5`
 - reference: `openrouter:deepseek/deepseek-v4-pro`
