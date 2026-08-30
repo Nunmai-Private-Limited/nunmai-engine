@@ -860,8 +860,53 @@ function Install-Uv {
 # is stale and the binary appears missing.  This helper re-reads PATH
 # from the registry so every Invoke-Stage starts from a fresh, up-to-date
 # PATH view.  Cheap (registry reads, no I/O elsewhere) and idempotent.
+# Windows caps a single environment variable at 32,767 characters.  Machines
+# with a bloated User + Machine PATH (corporate laptops with many SDKs,
+# repeated installer runs, duplicated entries) blow through that when the
+# two hives are concatenated, and the assignment throws "Environment
+# variable name or value is too long" -- which killed installs right after
+# Stage-Uv.  Every PATH string this installer builds therefore goes through
+# Join-PathEntries: blanks dropped, case/trailing-slash-insensitive dedupe
+# (first occurrence wins, so priority order is preserved), and -- for the
+# in-process PATH only -- a hard cap that keeps the highest-priority entries
+# and drops the tail.  The persisted User PATH is deduped but never
+# truncated: silently dropping a user's own entries from the registry is
+# not something an installer may do.
+$script:MaxEnvValueLength = 32000
+
+function Join-PathEntries {
+    param(
+        [string[]]$Entries,
+        [int]$MaxLength = 0
+    )
+    $seen = @{}
+    $out  = New-Object System.Collections.Generic.List[string]
+    $len  = 0
+    foreach ($e in @($Entries)) {
+        if ($null -eq $e) { continue }
+        $t = "$e".Trim()
+        if (-not $t) { continue }
+        $k = $t.TrimEnd('\', '/').ToLowerInvariant()
+        if ($seen.ContainsKey($k)) { continue }
+        if ($MaxLength -gt 0 -and ($len + $t.Length + 1) -gt $MaxLength) { break }
+        $seen[$k] = $true
+        $out.Add($t)
+        $len += $t.Length + 1
+    }
+    return ($out -join ";")
+}
+
+# Prepend $Dir to the current process PATH (deduped, capped).
+function Push-ProcessPath {
+    param([string]$Dir)
+    if (-not $Dir) { return }
+    $env:Path = Join-PathEntries -Entries (@($Dir) + @("$env:Path" -split ";")) -MaxLength $script:MaxEnvValueLength
+}
+
 function Sync-EnvPath {
-    $env:Path = [Environment]::GetEnvironmentVariable("Path", "User") + ";" + [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $user    = [Environment]::GetEnvironmentVariable("Path", "User")
+    $machine = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $env:Path = Join-PathEntries -Entries (@("$user" -split ";") + @("$machine" -split ";")) -MaxLength $script:MaxEnvValueLength
 }
 
 # npm lifecycle scripts on Windows spawn ``cmd.exe /d /s /c node <script>``.
@@ -877,10 +922,7 @@ function Ensure-NodeExeOnPath {
     $nodeExeDir = Split-Path $nodeCmd.Source -Parent
     if (-not $nodeExeDir) { return $false }
 
-    $pathParts = $env:Path -split ";"
-    if ($pathParts -notcontains $nodeExeDir) {
-        $env:Path = "$nodeExeDir;$env:Path"
-    }
+    Push-ProcessPath -Dir $nodeExeDir
     return $true
 }
 
@@ -1536,7 +1578,7 @@ function Install-Git {
         }
 
         # Add to session PATH so the rest of this install run can use git.
-        $env:Path = "$gitDir\cmd;$env:Path"
+        Push-ProcessPath -Dir "$gitDir\cmd"
 
         # Persist to User PATH so fresh shells see it.  PortableGit needs
         # cmd\ (for git.exe), bin\ (for bash.exe + core tools), and
@@ -1716,7 +1758,7 @@ function Test-Node {
     $managedNode = "$NunmaiHome\node\node.exe"
     if ((Test-Path $managedNode) -and (Test-NodeVersionOk (& $managedNode --version))) {
         $version = & $managedNode --version
-        $env:Path = "$NunmaiHome\node;$env:Path"
+        Push-ProcessPath -Dir "$NunmaiHome\node"
         Set-ManagedNodeFirstOnUserPath "$NunmaiHome\node"
         Write-Success "Node.js $version found (Nunmai-managed)"
         # A tree from an older install still has that Node major's bundled
@@ -1829,7 +1871,7 @@ function Test-Node {
                 }
 
                 # Session PATH so the rest of this run sees node/npm.
-                $env:Path = "$NunmaiHome\node;$env:Path"
+                Push-ProcessPath -Dir "$NunmaiHome\node"
 
                 # Persist to User PATH so fresh shells (and future stages
                 # in cross-process driver mode) see it.  Matches the
@@ -3187,11 +3229,13 @@ function Set-PathVariable {
     }
     
     if ($currentPath -notlike "*$nunmaiBin*") {
-        [Environment]::SetEnvironmentVariable(
-            "Path",
-            "$nunmaiBin;$currentPath",
-            "User"
-        )
+        $newUserPath = Join-PathEntries -Entries (@($nunmaiBin) + @("$currentPath" -split ";"))
+        if ($newUserPath.Length -gt $script:MaxEnvValueLength) {
+            throw ("Your user PATH is $($newUserPath.Length) characters after adding $nunmaiBin; " +
+                   "Windows allows at most 32,767. Remove unused entries from your user PATH " +
+                   "(Settings > System > About > Advanced system settings > Environment Variables) and rerun the installer.")
+        }
+        [Environment]::SetEnvironmentVariable("Path", $newUserPath, "User")
         Write-Success "Added to user PATH: $nunmaiBin"
     } else {
         Write-Info "PATH already configured"
@@ -3208,7 +3252,7 @@ function Set-PathVariable {
     $env:NUNMAI_HOME = $NunmaiHome
     
     # Update current session
-    $env:Path = "$nunmaiBin;$env:Path"
+    Push-ProcessPath -Dir $nunmaiBin
     
     Write-Success "nunmai command ready"
 }

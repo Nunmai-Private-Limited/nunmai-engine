@@ -21,8 +21,10 @@ def _install_ps1() -> str:
 def test_install_ps1_defines_ensure_node_exe_on_path_helper() -> None:
     text = _install_ps1()
     assert "function Ensure-NodeExeOnPath" in text
+    # Prepends go through Push-ProcessPath (deduped + capped under Windows'
+    # 32,767-char env limit) rather than a raw `$env:Path = "dir;$env:Path"`.
     assert re.search(
-        r"\$env:Path\s*=\s*\"\$nodeExeDir;\$env:Path\"",
+        r"Push-ProcessPath\s+-Dir\s+\$nodeExeDir",
         text,
     ), "Ensure-NodeExeOnPath must prepend node.exe's directory to PATH"
 
