@@ -2811,6 +2811,65 @@ class APIServerAdapter(BasePlatformAdapter):
             )
         return None
 
+    @staticmethod
+    def _apply_resolve_turn_model_hook(
+        user_message: Any,
+        model: str,
+        runtime_kwargs: Dict[str, Any],
+        *,
+        session_key: str = "",
+        has_session_override: bool = False,
+    ) -> tuple:
+        """Let a ``resolve_turn_model`` plugin pick this request's model/runtime."""
+        try:
+            from nunmai_cli.lifecycle import has_hook, invoke_hook
+
+            if not has_hook("resolve_turn_model"):
+                return model, runtime_kwargs
+            text = user_message
+            if isinstance(text, list):
+                text = "\n".join(
+                    str(p.get("text") or "") for p in text if isinstance(p, dict) and p.get("type") == "text"
+                )
+            results = invoke_hook(
+                "resolve_turn_model",
+                surface="gateway",
+                text=text,
+                model=model,
+                runtime={
+                    "provider": runtime_kwargs.get("provider"),
+                    "api_key": runtime_kwargs.get("api_key"),
+                    "base_url": runtime_kwargs.get("base_url"),
+                    "api_mode": runtime_kwargs.get("api_mode"),
+                },
+                session_key=session_key,
+                has_session_override=has_session_override,
+            )
+            for res in results or []:
+                if not isinstance(res, dict) or not res.get("model"):
+                    continue
+                rt = res.get("runtime") or {}
+                new_provider = rt.get("provider") or runtime_kwargs.get("provider")
+                model = str(res["model"])
+                for key in ("provider", "api_key", "base_url", "api_mode"):
+                    if rt.get(key) is not None:
+                        runtime_kwargs[key] = rt[key]
+                runtime_kwargs["requested_provider"] = new_provider
+                try:
+                    from gateway.run import _credential_pool_for_provider
+
+                    runtime_kwargs["credential_pool"] = _credential_pool_for_provider(new_provider)
+                except Exception:
+                    runtime_kwargs.pop("credential_pool", None)
+                logger.info(
+                    "resolve_turn_model: api_server session=%s -> %s/%s (%s)",
+                    session_key, new_provider, model, res.get("reason") or "",
+                )
+                break
+        except Exception:
+            logger.debug("resolve_turn_model hook failed (api_server)", exc_info=True)
+        return model, runtime_kwargs
+
     def _create_agent(
         self,
         ephemeral_system_prompt: Optional[str] = None,
@@ -2826,6 +2885,7 @@ class APIServerAdapter(BasePlatformAdapter):
         route: Optional[Dict[str, Any]] = None,
         session_model: Optional[str] = None,
         confirmed_runtime_lock: bool = False,
+        user_message: Optional[Any] = None,
     ) -> Any:
         """
         Create an AIAgent instance using the gateway's runtime config.
@@ -3102,6 +3162,20 @@ class APIServerAdapter(BasePlatformAdapter):
             if confirmed_runtime_lock
             else GatewayRunner._load_fallback_model()
         )
+
+        # Per-turn model routing (resolve_turn_model hook / model-router
+        # plugin) — same seam the native gateway applies in
+        # _resolve_turn_agent_config. Runs only when the caller passed the
+        # user's message (chat/responses via _run_agent, which executes on an
+        # executor thread) and never against a confirmed runtime lock.
+        if user_message is not None and not confirmed_runtime_lock:
+            model, runtime_kwargs = self._apply_resolve_turn_model_hook(
+                user_message,
+                model,
+                runtime_kwargs,
+                session_key=gateway_session_key or session_id or "",
+                has_session_override=bool(session_override),
+            )
 
         # Resolve reasoning against the model this request will actually
         # run. Per-model ``agent.reasoning_overrides`` key off that model,
@@ -7311,6 +7385,7 @@ class APIServerAdapter(BasePlatformAdapter):
                         route=route,
                         session_model=session_model,
                         confirmed_runtime_lock=confirmed_runtime_lock,
+                        user_message=user_message,
                     )
                     if agent_ref is not None:
                         agent_ref[0] = agent

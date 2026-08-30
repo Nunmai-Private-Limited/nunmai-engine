@@ -1230,7 +1230,7 @@ def register(ctx):
 
 ### `resolve_turn_model`
 
-Fires **once per user turn**, immediately before the agent for that turn is built — on the CLI (before `run_conversation`) and on the gateway (inside the executor thread that builds the turn, so a short model call in the callback does not block the event loop). It is the seam for per-turn brain selection: a plugin looks at the message and answers with the model/runtime that should handle *this* turn.
+Fires **once per user turn**, immediately before the agent for that turn is built — on the CLI (before `run_conversation`), on the gateway (inside the executor thread that builds the turn, so a short model call in the callback does not block the event loop), and on the API server's chat/responses requests. It is the seam for per-turn brain selection: a plugin looks at the message and answers with the model/runtime that should handle *this* turn.
 
 **Callback signature:**
 

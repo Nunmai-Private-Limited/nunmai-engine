@@ -147,7 +147,7 @@ plugins:
 
 **Commands:** `/router` shows the mode, resolved tiers and the last decisions; `/router off|on|auto|heuristic` changes the mode.
 
-**Enabling:** `nunmai plugins enable model-router`. Works on the CLI and every gateway platform; the OpenAI-compatible API server keeps the model named in the request.
+**Enabling:** `nunmai plugins enable model-router`. Works on the CLI, every gateway platform, and the OpenAI-compatible API server (`/v1/chat/completions`, `/v1/responses`).
 
 ### security-guidance
 

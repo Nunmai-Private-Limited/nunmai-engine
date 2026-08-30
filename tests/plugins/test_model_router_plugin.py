@@ -273,6 +273,38 @@ class TestGatewaySeam:
 
 
 # ---------------------------------------------------------------------------
+# API-server seam
+# ---------------------------------------------------------------------------
+
+class TestApiServerSeam:
+    def test_override_applied(self, monkeypatch):
+        from gateway.platforms.api_server import APIServerAdapter
+
+        monkeypatch.setattr("nunmai_cli.lifecycle.has_hook", lambda name: True)
+        captured = {}
+
+        def fake_invoke(name, **kw):
+            captured.update(kw)
+            return [{"model": "claude-haiku-4-5-20251001", "runtime": {"provider": "anthropic", "api_key": "k", "api_mode": "anthropic_messages"}, "reason": "simple"}]
+
+        monkeypatch.setattr("nunmai_cli.lifecycle.invoke_hook", fake_invoke)
+        monkeypatch.setattr("gateway.run._credential_pool_for_provider", lambda p: f"pool:{p}")
+        model, rk = APIServerAdapter._apply_resolve_turn_model_hook(
+            "hi", "default", {"provider": "moa", "api_key": "moa-virtual-provider"}, session_key="agent:1:user:2", has_session_override=False
+        )
+        assert captured["surface"] == "gateway" and captured["text"] == "hi"
+        assert model == "claude-haiku-4-5-20251001"
+        assert rk["provider"] == "anthropic" and rk["requested_provider"] == "anthropic" and rk["credential_pool"] == "pool:anthropic"
+
+    def test_no_hook_untouched(self, monkeypatch):
+        from gateway.platforms.api_server import APIServerAdapter
+
+        monkeypatch.setattr("nunmai_cli.lifecycle.has_hook", lambda name: False)
+        model, rk = APIServerAdapter._apply_resolve_turn_model_hook("hi", "default", {"provider": "moa"})
+        assert model == "default" and rk == {"provider": "moa"}
+
+
+# ---------------------------------------------------------------------------
 # CLI seam
 # ---------------------------------------------------------------------------
 
