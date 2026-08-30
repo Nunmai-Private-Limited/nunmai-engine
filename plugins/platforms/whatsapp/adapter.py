@@ -1164,6 +1164,41 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             metadata=metadata,
         )
 
+    async def send_exec_approval(
+        self,
+        chat_id: str,
+        command: str,
+        session_key: str,
+        description: str = "dangerous command",
+        metadata: Optional[Dict[str, Any]] = None,
+        allow_permanent: bool = True,
+        allow_session: bool = True,
+        smart_denied: bool = False,
+    ) -> SendResult:
+        """Render a dangerous-command approval as a native WhatsApp poll.
+
+        The poll question carries only the human reason — never the raw
+        command (that stays in logs/session history). The option labels are
+        exactly the plain-text approval words the gateway already resolves
+        ("approve"/"always"/"deny" via the blocking-approval text intercept),
+        so a poll vote flows back as a normal text message and resolves the
+        waiting agent with no extra plumbing. On any poll failure the caller's
+        text fallback takes over.
+        """
+        del command, session_key, metadata  # poll carries the reason only
+        reason = " ".join(str(description or "").split()).strip() or "a risky action"
+        if len(reason) > 220:
+            reason = reason[:217] + "..."
+        if smart_denied:
+            question = f"⚠️ I was stopped before doing this: {reason} — allow it once?"
+            options = ["Approve", "Deny"]
+        else:
+            question = f"⚠️ Approval needed: {reason}"
+            options = ["Approve", "Deny"]
+            if allow_permanent or allow_session:
+                options.insert(1, "Always")
+        return await self.send_poll(chat_id, question, options, selectable_count=1)
+
     async def send_location(
         self,
         chat_id: str,

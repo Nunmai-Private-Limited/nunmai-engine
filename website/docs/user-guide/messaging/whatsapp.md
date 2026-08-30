@@ -167,6 +167,10 @@ with reconnection logic.
 
 ---
 
+## Approval Polls
+
+When the agent needs approval for a risky command, WhatsApp shows a **native poll** — a one-line human reason with **Approve / Always / Deny** options. Tap to answer; the vote resolves the waiting agent exactly like typing `/approve`. The raw command never appears in the chat (it stays in logs and session history). If the poll can't be sent, the classic text prompt is used as a fallback.
+
 ## Voice Messages
 
 Nunmai supports voice on WhatsApp:
