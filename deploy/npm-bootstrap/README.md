@@ -24,11 +24,17 @@ Gemini, OpenRouter).
   `npm install nunmai --allow-scripts=nunmai`.
 - If npm skipped the install script (`--ignore-scripts`, `CI` set, or the
   allow-scripts policy above), the install simply happens on the first run.
-- After `nunmai uninstall`, the `nunmai` command falls back to this launcher —
-  running `nunmai` again reinstalls the engine.
 - Lightweight install (no browser/computer-use): `NUNMAI_INSTALL_LITE=1 npm i -g nunmai`.
 - Extra installer flags: `NUNMAI_INSTALL_ARGS="--branch dev" npm i -g nunmai`.
-- Updates: `nunmai update`. Remove: `nunmai uninstall`, then `npm uninstall -g nunmai`.
+- Updates: `nunmai update`.
+- Remove: `nunmai uninstall` — one confirmation, then everything goes: the engine,
+  `~/.nunmai` (config, keys, sessions, managed Node/uv), the gateway service,
+  browser/uv caches **and this npm package**. `nunmai uninstall --keep-data`
+  keeps `~/.nunmai` for a later reinstall; `--yes` skips the prompt;
+  `--dry-run` only shows the plan. Running `nunmai uninstall` when the engine
+  is not installed says so, offers to clear any leftovers from an earlier or
+  failed install, and removes the launcher itself — so the next `nunmai` is a
+  plain "command not found".
 
 This package only contains the launcher; the engine's source lives at
 https://github.com/Nunmai-Private-Limited/nunmai-engine.
