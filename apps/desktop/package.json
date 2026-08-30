@@ -286,7 +286,7 @@
     },
     "linux": {
       "category": "Development",
-      "maintainer": "Nunmai Research <support@nousresearch.com>",
+      "maintainer": "Nunmai Research <support@nunmai.in>",
       "synopsis": "Native desktop shell for Nunmai Engine.",
       "target": [
         "AppImage",

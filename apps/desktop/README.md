@@ -2,9 +2,9 @@
 
 <p align="center">
   <a href="https://github.com/Nunmai-Private-Limited/nunmai-engine/releases"><img src="https://img.shields.io/badge/Download-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-FFD700?style=for-the-badge" alt="Download"></a>
-  <a href="https://nunmai.in/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://nunmai.in/docs/"><img src="https://img.shields.io/badge/Docs-nunmai.in-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://nunmai.in/community"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://github.com/Nunmai-Private-Limited/nunmai-engine/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
 **The native desktop app for [Nunmai Engine](../../README.md) — the self-improving AI agent from [Nunmai Research](https://nunmai.in).** Same agent, same skills, same memory as the CLI and gateway, in a polished native window — chat with streaming tool output, side-by-side previews, a file browser, voice, and settings, no terminal required. Available for **macOS, Windows, and Linux**.
@@ -156,7 +156,7 @@ Electron `userData/connection.json` remote block:
 {
   "mode": "remote",
   "remote": {
-    "url": "https://hermes.example.com",
+    "url": "https://gateway.example.com",
     "authMode": "token",
     "token": { "encoding": "safeStorage", "value": "..." },
     "headers": {
@@ -231,9 +231,9 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\nunmai\nunmai-engine\venv"
 
 ## Community
 
-- 💬 [Discord](https://discord.gg/NousResearch)
+- 💬 [Community](https://nunmai.in/community)
 - 📖 [Documentation](https://nunmai.in/docs/)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
+- 🐛 [Issues](https://github.com/Nunmai-Private-Limited/nunmai-engine/issues)
 
 ---
 
