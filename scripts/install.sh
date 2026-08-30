@@ -1937,10 +1937,10 @@ exec "$NUNMAI_BIN" "\$@"
 EOF
     fi
     # Installed through the npm package (`npm install nunmai`)? Record the
-    # shim's path inside the launcher so `nunmai uninstall` can put the shim
-    # back in its place — then a plain `nunmai` (or `npm install nunmai`)
-    # reinstalls the engine instead of "command not found". The line sits
-    # after `exec`, so bash never reaches it.
+    # shim's path inside the launcher so `nunmai uninstall` can also remove
+    # that npm package (clean uninstall), or — if that fails — put the shim
+    # back in place so `nunmai` still works to retry. The line sits after
+    # `exec`, so bash never reaches it.
     if [ -n "${NUNMAI_NPM_SHIM_PATH:-}" ]; then
         printf '# nunmai-npm-shim: %s\n' "$NUNMAI_NPM_SHIM_PATH" >> "$command_link_dir/nunmai"
     fi

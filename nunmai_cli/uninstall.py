@@ -41,6 +41,7 @@ def find_shell_configs() -> list:
         home / ".profile",
         home / ".zshrc",
         home / ".zprofile",
+        home / ".config" / "fish" / "config.fish",  # installer writes fish_add_path here
     ]
     
     for config in candidates:
@@ -69,7 +70,10 @@ def remove_path_from_shell_configs():
                 if '# Nunmai Engine' in line or '# nunmai-engine' in line:
                     skip_next = True
                     continue
-                if skip_next and ('nunmai' in line.lower() and 'PATH' in line):
+                # The line right after our marker comment is always the PATH
+                # export we wrote (it names ~/.local/bin or /usr/local/bin,
+                # not "nunmai" — so don't require the word).
+                if skip_next and ('PATH' in line or 'fish_add_path' in line):
                     skip_next = False
                     continue
                 skip_next = False
@@ -231,6 +235,84 @@ def remove_npm_package(shim: Path, nunmai_home: Path) -> "bool | None":
         if r.returncode == 0 and not shim.exists():
             return True
     return False
+
+
+def _npm_global_node_modules(nunmai_home: Path) -> "list[Path]":
+    """npm global ``node_modules`` dirs the installer may have touched."""
+    dirs: list[Path] = []
+    if _is_windows():
+        appdata = Path(os.environ.get("APPDATA") or (Path.home() / "AppData" / "Roaming"))
+        dirs += [appdata / "npm" / "node_modules", nunmai_home / "node" / "node_modules"]
+    else:
+        dirs += [
+            Path("/usr/local/lib/node_modules"),
+            Path.home() / ".local" / "lib" / "node_modules",
+            nunmai_home / "node" / "lib" / "node_modules",
+        ]
+        prefix = os.environ.get("PREFIX", "")
+        if prefix and "com.termux" in prefix:
+            dirs.append(Path(prefix) / "lib" / "node_modules")
+    npm = shutil.which("npm.cmd" if _is_windows() else "npm")
+    if npm:
+        try:
+            r = subprocess.run([npm, "root", "-g"], capture_output=True, text=True, timeout=30,
+                               shell=_is_windows() and npm.lower().endswith(".cmd"))
+            if r.returncode == 0 and r.stdout.strip():
+                dirs.append(Path(r.stdout.strip()))
+        except Exception:
+            pass
+    seen, out = set(), []
+    for d in dirs:
+        if d not in seen:
+            seen.add(d); out.append(d)
+    return out
+
+
+def _is_link(p: Path) -> bool:
+    try:
+        return p.is_symlink() or (hasattr(p, "is_junction") and p.is_junction())
+    except Exception:
+        return False
+
+
+def remove_npm_global_links(project_root: Path, nunmai_home: Path) -> "list[Path]":
+    """Remove links npm left in its global ``node_modules`` that point into the engine.
+
+    On root FHS installs the engine lives at ``/usr/local/lib/nunmai-engine``,
+    a sibling of npm's global ``/usr/local/lib/node_modules``. ``npm install``
+    inside ``ui-tui`` then walks up, mistakes the global tree for the
+    workspace root and links the workspaces (``nunmai-engine``, ``nunmai-tui``)
+    into it. Those links dangle once the engine is gone and keep showing up in
+    ``npm ls -g``. Only links that resolve inside ``project_root`` are touched.
+    """
+    try:
+        root = project_root.resolve()
+    except Exception:
+        root = project_root
+    removed: list[Path] = []
+    for nm in _npm_global_node_modules(nunmai_home):
+        try:
+            entries = list(nm.iterdir()) if nm.is_dir() else []
+        except Exception:
+            continue
+        for entry in entries:
+            if entry.name == "nunmai" or not _is_link(entry):
+                continue  # the npm launcher package is handled by remove_npm_package
+            try:
+                target = Path(os.readlink(entry))
+                if not target.is_absolute():
+                    target = entry.parent / target
+                target = Path(os.path.normpath(target))
+                try:
+                    target = target.resolve()
+                except Exception:
+                    pass
+                if target == root or root in target.parents:
+                    entry.unlink()
+                    removed.append(entry)
+            except Exception as e:
+                log_warn(f"Could not remove {entry}: {e}")
+    return removed
 
 
 def _cache_base() -> Path:
@@ -1011,6 +1093,8 @@ def _perform_uninstall(
 
     for link in remove_node_symlinks(nunmai_home):
         _did(f"Removed {link}")
+    for link in remove_npm_global_links(project_root, nunmai_home):
+        _did(f"Removed npm link {link}")
 
     # 3c. Desktop Chat GUI artifacts (packaged app + Electron userData live
     #     outside NUNMAI_HOME, so they need explicit cleanup in both modes).

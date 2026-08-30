@@ -112,6 +112,7 @@ def _quiet_perform(monkeypatch):
     for name in ("remove_path_from_shell_configs", "remove_wrapper_script"):
         monkeypatch.setattr(u, name, lambda: [])
     monkeypatch.setattr(u, "remove_node_symlinks", lambda h: [])
+    monkeypatch.setattr(u, "remove_npm_global_links", lambda r, h: [])
     monkeypatch.setattr(u, "find_npm_shim_path", lambda: None)
     monkeypatch.setattr(u, "_is_windows", lambda: False)
     monkeypatch.setattr(u, "playwright_browsers_dir", lambda: None)
@@ -254,3 +255,38 @@ def test_uv_cache_only_when_uv_is_ours(monkeypatch, tmp_path):
     assert u.uv_cache_dir(home) is not None
     monkeypatch.setenv("UV_CACHE_DIR", "/x")
     assert u.uv_cache_dir(home) is None
+
+
+def test_npm_global_links_into_engine_are_removed(monkeypatch, tmp_path):
+    monkeypatch.setattr(u, "_is_windows", lambda: False)
+    root = tmp_path / "usr" / "local" / "lib" / "nunmai-engine"; (root / "ui-tui").mkdir(parents=True)
+    nm = tmp_path / "usr" / "local" / "lib" / "node_modules"; nm.mkdir()
+    (nm / "nunmai-engine").symlink_to(root)
+    (nm / "nunmai-tui").symlink_to(root / "ui-tui")
+    (nm / "nunmai").mkdir()  # the npm launcher package — not ours to touch here
+    other = tmp_path / "elsewhere"; other.mkdir()
+    (nm / "somepkg").symlink_to(other)
+    (nm / "real").mkdir()
+    monkeypatch.setattr(u, "_npm_global_node_modules", lambda h: [nm])
+    removed = u.remove_npm_global_links(root, tmp_path / ".nunmai")
+    assert sorted(p.name for p in removed) == ["nunmai-engine", "nunmai-tui"]
+    assert (nm / "somepkg").is_symlink() and (nm / "real").is_dir() and (nm / "nunmai").is_dir()
+
+
+def test_path_sweep_removes_marker_and_following_export(monkeypatch, tmp_path):
+    rc = tmp_path / ".bashrc"
+    rc.write_text('alias ll="ls -l"\n\n# Nunmai Engine — ensure ~/.local/bin is on PATH\nexport PATH="$HOME/.local/bin:$PATH"\n\nexport EDITOR=vim\n')
+    monkeypatch.setattr(u, "find_shell_configs", lambda: [rc])
+    assert u.remove_path_from_shell_configs() == [rc]
+    out = rc.read_text()
+    assert "Nunmai" not in out and ".local/bin" not in out
+    assert 'alias ll="ls -l"' in out and "export EDITOR=vim" in out
+
+
+def test_fish_config_is_swept(monkeypatch, tmp_path):
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    fish = tmp_path / ".config" / "fish" / "config.fish"; fish.parent.mkdir(parents=True)
+    fish.write_text("set -g fish_greeting\n# Nunmai Engine — ensure ~/.local/bin is on PATH\nfish_add_path $HOME/.local/bin\n")
+    assert fish in u.find_shell_configs()
+    u.remove_path_from_shell_configs()
+    assert "fish_add_path" not in fish.read_text() and "fish_greeting" in fish.read_text()
