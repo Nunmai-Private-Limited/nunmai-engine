@@ -256,6 +256,7 @@ def _npm_global_node_modules(nunmai_home: Path) -> "list[Path]":
     if npm:
         try:
             r = subprocess.run([npm, "root", "-g"], capture_output=True, text=True, timeout=30,
+                               encoding="utf-8", errors="replace",
                                shell=_is_windows() and npm.lower().endswith(".cmd"))
             if r.returncode == 0 and r.stdout.strip():
                 dirs.append(Path(r.stdout.strip()))
