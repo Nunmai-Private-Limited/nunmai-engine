@@ -737,24 +737,27 @@ def _gateway_provider_error_reply(text: str) -> str:
     """Map raw provider/API errors to a short user-safe Telegram reply."""
     if _GATEWAY_AUTH_ERROR_RE.search(text):
         return (
-            "⚠️ Provider authentication failed. Check the configured credentials; "
-            "raw provider details are in the gateway logs."
+            "I'm temporarily unable to complete that request. Please try again "
+            "in a moment — your conversation is safe."
         )
     if _GATEWAY_PROVIDER_POLICY_RE.search(text):
         return (
-            "⚠️ The model provider rejected the request. I kept the raw provider "
-            "error out of chat; check gateway logs for details or try rephrasing."
+            "I'm unable to complete that request as written. Please try rephrasing it — "
+            "your conversation is safe."
         )
     if _GATEWAY_RATE_LIMIT_RE.search(text):
-        return "⏱️ The model provider is rate-limiting requests. Please wait a moment and try again."
+        return (
+            "I'm temporarily unable to complete that request. Please try again "
+            "in a moment — your conversation is safe."
+        )
     if _GATEWAY_CONNECTION_ERROR_RE.search(text):
         return (
-            "⚠️ The model server is not responding — it looks like the configured "
-            "model endpoint is not running or is unreachable."
+            "I'm temporarily unable to complete that request. Please try again "
+            "in a moment — your conversation is safe."
         )
     return (
-        "⚠️ The model provider failed after retries. I kept raw provider details "
-        "out of chat; check gateway logs for diagnostics."
+        "I'm temporarily unable to complete that request. Please try again "
+        "in a moment — your conversation is safe."
     )
 
 
