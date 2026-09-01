@@ -11634,6 +11634,7 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
         # frozen.  Hand the terminal over properly: run the wizard on the app
         # loop inside run_in_terminal (cooked mode, renderer paused), via the
         # /dev/tty subprocess wrapper, and wait for it from this thread.
+        import asyncio
         import inspect
         import threading
 
@@ -11677,9 +11678,23 @@ class NunmaiCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                     _wizard()
                     _finish()
                     return
-                if inspect.isawaitable(res):
-                    app_loop.create_task(res).add_done_callback(_finish)
-                else:
+                # prompt_toolkit's run_in_terminal returns an ALREADY-scheduled
+                # Task (it ends in ``ensure_future(run())``), not a bare
+                # coroutine. Both are awaitable, but create_task() accepts only
+                # coroutines and raises "a coroutine was expected" on a Task —
+                # which crashed the event loop after the wizard had already
+                # finished successfully, and left ``done.wait()`` below blocked
+                # forever because _finish never ran.
+                try:
+                    if asyncio.isfuture(res):
+                        res.add_done_callback(_finish)
+                    elif inspect.isawaitable(res):
+                        app_loop.create_task(res).add_done_callback(_finish)
+                    else:
+                        _finish()
+                except Exception:
+                    # Never leave the waiter hanging: releasing the event is
+                    # what lets the calling thread recover.
                     _finish()
 
             try:
