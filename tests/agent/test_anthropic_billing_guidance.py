@@ -127,3 +127,52 @@ def test_content_filter_caveat_is_anthropic_only():
     ).lower()
     assert "content filter" not in msg
     assert "nunmai auth reset" not in msg
+
+
+# ── credits-required wall (distinct from quota exhaustion) ────────────────────
+
+def test_credits_required_does_not_claim_exhaustion():
+    """A credits wall must not be reported as spent quota.
+
+    Anthropic's ``credits_required`` 429 carries
+    ``exhausted_included_allowance: false`` — the included allowance is
+    untouched; the model itself is gated behind usage credits. Telling the
+    user to wait for a billing cycle sends them to a reset that never
+    unblocks this model.
+    """
+    msg = _billing_or_entitlement_message(
+        capability="model access",
+        provider="anthropic",
+        base_url="https://api.anthropic.com",
+        model="claude-fable-5",
+        credits_required=True,
+    )
+    assert "exhausted" not in msg.lower()
+    assert "wait for the billing cycle" not in msg.lower()
+    assert "usage credits" in msg.lower()
+    assert "claude-fable-5" in msg
+
+
+def test_credits_required_suggests_a_recoverable_next_step():
+    """The guidance names actions that actually clear the wall."""
+    msg = _billing_or_entitlement_message(
+        capability="model access",
+        provider="anthropic",
+        base_url="https://api.anthropic.com",
+        model="claude-fable-5",
+        credits_required=True,
+    )
+    assert "/model" in msg          # switch to a covered model
+    assert "nunmai brain" in msg    # configure a fallback account
+
+
+def test_exhaustion_wording_unchanged_without_the_flag():
+    """The pre-existing subscription-exhaustion branch is untouched."""
+    msg = _billing_or_entitlement_message(
+        capability="model access",
+        provider="anthropic",
+        base_url="https://api.anthropic.com",
+        model="claude-opus-4-7",
+    )
+    assert "exhausted" in msg.lower()
+    assert "claude.ai/settings/usage" in msg

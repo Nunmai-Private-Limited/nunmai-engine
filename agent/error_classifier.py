@@ -112,6 +112,17 @@ class ClassifiedError:
         """
         return bool(self.error_context.get("billing_unverified"))
 
+    @property
+    def credits_required(self) -> bool:
+        """True when the provider needs paid credits enabled for this model.
+
+        Distinct from quota exhaustion: the account's included allowance may
+        be untouched (``exhausted_included_allowance: false``) while the model
+        itself is gated behind usage credits. Surfaces must not tell the user
+        to wait for a billing cycle that will never unblock them.
+        """
+        return bool(self.error_context.get("credits_required"))
+
 
 
 # ── Provider-specific patterns ──────────────────────────────────────────
@@ -1448,6 +1459,7 @@ def _classify_by_status(
                 retryable=False,
                 should_rotate_credential=True,
                 should_fallback=True,
+                error_context={"credits_required": True},
             )
         has_usage_limit = (
             error_code.lower() == "usage_limit_reached"

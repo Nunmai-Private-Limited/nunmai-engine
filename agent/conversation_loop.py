@@ -664,6 +664,7 @@ def _billing_or_entitlement_message(
     base_url: str,
     model: str,
     unverified: bool = False,
+    credits_required: bool = False,
 ) -> str:
     if _is_nous_inference_route(provider, base_url):
         return _nous_entitlement_message(capability)
@@ -677,6 +678,24 @@ def _billing_or_entitlement_message(
     # option, since the generic "add credits with that provider" line doesn't
     # apply to a subscription — the user waits for the reset or switches to an
     # API key.
+    # A credits-required wall is NOT quota exhaustion: the account's included
+    # allowance can be entirely untouched while the model itself is gated
+    # behind usage credits (or disabled org-wide). Telling the user to wait
+    # for a billing cycle to reset would send them to a reset that never
+    # unblocks this model.
+    if credits_required:
+        return "\n".join([
+            f"{provider_label} requires usage credits to be enabled for "
+            f"{model_label} — this is not a spent-quota problem, so waiting "
+            "for a billing cycle to reset will not clear it.",
+            "Enable usage credits for this model, or pick a model your plan "
+            "already covers with /model <model>.",
+            "If your organisation disabled the model centrally, an org admin "
+            "has to turn it back on.",
+            "Add another AI account with `nunmai brain` so a wall like this "
+            "fails over instead of stopping the turn.",
+        ])
+
     if (provider or "").strip().lower() == "anthropic":
         # ``unverified`` (ClassifiedError.billing_unverified, #82154): the
         # "out of extra usage" 400 is ambiguous — Anthropic returns the same
@@ -804,6 +823,7 @@ def _billing_failure_result(
             base_url=str(base_url),
             model=model,
             unverified=unverified,
+            credits_required=bool(getattr(classified, "credits_required", False)),
         )
     final = _billing_terminal_label(summary, unverified)
     if guidance:
@@ -837,6 +857,7 @@ def _print_billing_or_entitlement_guidance(
     base_url: str,
     model: str,
     unverified: bool = False,
+    credits_required: bool = False,
 ) -> bool:
     message = _billing_or_entitlement_message(
         capability=capability,
@@ -844,6 +865,7 @@ def _print_billing_or_entitlement_guidance(
         base_url=base_url,
         model=model,
         unverified=unverified,
+        credits_required=credits_required,
     )
     if not message:
         return False
@@ -6258,6 +6280,7 @@ def run_conversation(
                             base_url=str(_base),
                             model=_model,
                             unverified=classified.billing_unverified,
+                            credits_required=classified.credits_required,
                         ):
                             pass
                         elif _provider == "nous" and _print_nous_entitlement_guidance(
@@ -6442,6 +6465,11 @@ def run_conversation(
                                 "❌ Provider reported usage/credit exhaustion "
                                 f"(unverified — may be a content-filter rejection) — {_final_summary}"
                             )
+                        elif classified.credits_required:
+                            agent._emit_status(
+                                "❌ Usage credits required for this model — "
+                                f"{_final_summary}"
+                            )
                         else:
                             agent._emit_status(f"❌ Billing or credits exhausted — {_final_summary}")
                         _billing_guidance = _billing_or_entitlement_message(
@@ -6450,6 +6478,7 @@ def run_conversation(
                             base_url=str(_base),
                             model=_model,
                             unverified=classified.billing_unverified,
+                            credits_required=classified.credits_required,
                         )
                         _print_billing_or_entitlement_guidance(
                             agent,
@@ -6458,6 +6487,7 @@ def run_conversation(
                             base_url=str(_base),
                             model=_model,
                             unverified=classified.billing_unverified,
+                            credits_required=classified.credits_required,
                         )
                     elif is_rate_limited:
                         agent._emit_status(f"❌ Rate limited after {max_retries} retries — {_final_summary}")
