@@ -1937,10 +1937,10 @@ exec "$NUNMAI_BIN" "\$@"
 EOF
     fi
     # Installed through the npm package (`npm install nunmai`)? Record the
-    # shim's path inside the launcher so `nunmai uninstall` can put the shim
-    # back in its place — then a plain `nunmai` (or `npm install nunmai`)
-    # reinstalls the engine instead of "command not found". The line sits
-    # after `exec`, so bash never reaches it.
+    # shim's path inside the launcher so `nunmai uninstall` can also remove
+    # that npm package (clean uninstall), or — if that fails — put the shim
+    # back in place so `nunmai` still works to retry. The line sits after
+    # `exec`, so bash never reaches it.
     if [ -n "${NUNMAI_NPM_SHIM_PATH:-}" ]; then
         printf '# nunmai-npm-shim: %s\n' "$NUNMAI_NPM_SHIM_PATH" >> "$command_link_dir/nunmai"
     fi
@@ -2728,8 +2728,12 @@ install_computer_use_driver() {
     # _CUA_INSTALLER_TIMEOUT (660s).
     local cua_log
     cua_log="$(mktemp)"
+    # pipefail: without it the inner shell exits 0 on empty stdin, so a 403
+    # or 429 from raw.githubusercontent.com is reported as a successful
+    # install (the `curl | sh` masking documented at install_uv above). The
+    # graceful failure branch below is unreachable without this.
     if run_with_timeout 660 /bin/bash -c \
-        'curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh | /bin/bash' \
+        'set -o pipefail; curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh | /bin/bash' \
         >"$cua_log" 2>&1; then
         log_success "Computer Use driver installed (enable via 'nunmai tools' → Computer Use)"
     else

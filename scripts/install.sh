@@ -2728,8 +2728,12 @@ install_computer_use_driver() {
     # _CUA_INSTALLER_TIMEOUT (660s).
     local cua_log
     cua_log="$(mktemp)"
+    # pipefail: without it the inner shell exits 0 on empty stdin, so a 403
+    # or 429 from raw.githubusercontent.com is reported as a successful
+    # install (the `curl | sh` masking documented at install_uv above). The
+    # graceful failure branch below is unreachable without this.
     if run_with_timeout 660 /bin/bash -c \
-        'curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh | /bin/bash' \
+        'set -o pipefail; curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh | /bin/bash' \
         >"$cua_log" 2>&1; then
         log_success "Computer Use driver installed (enable via 'nunmai tools' → Computer Use)"
     else
