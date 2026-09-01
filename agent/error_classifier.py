@@ -1368,6 +1368,23 @@ def _classify_by_status(
                 retryable=False,
                 should_fallback=False,
             )
+        # Anthropic's canonical unknown-model 404 carries the type
+        # ``not_found_error`` and a message that is only ``model: <id>`` — it
+        # never contains the words "not found", so none of the patterns below
+        # matched and a permanently-bad model id fell through to a retryable
+        # ``unknown``: three backoff retries on a name that can never resolve,
+        # reported as an outage rather than a bad model. OpenAI's equivalent
+        # (``model_not_found``) was already handled; this closes the gap for
+        # Anthropic and the Anthropic-transport providers that mirror it.
+        #
+        # Scoped to model-referencing bodies so a 404 for some other resource
+        # (a batch or file id) keeps its previous, retryable classification.
+        if error_code.lower() == "not_found_error" and "model" in error_msg:
+            return result_fn(
+                FailoverReason.model_not_found,
+                retryable=False,
+                should_fallback=True,
+            )
         if any(p in error_msg for p in _MODEL_NOT_FOUND_PATTERNS):
             return result_fn(
                 FailoverReason.model_not_found,

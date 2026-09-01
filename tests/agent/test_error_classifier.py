@@ -1646,3 +1646,57 @@ class TestCreditsRequiredNotRetried:
         )
         assert result.reason == FailoverReason.rate_limit
         assert result.retryable is True
+
+
+# ── Test: Anthropic unknown-model 404 (type not_found_error) ─────────────────
+
+class TestAnthropicUnknownModel404:
+    """Anthropic answers an unknown model id with HTTP 404, type
+    ``not_found_error``, and a message that is only ``model: <id>``.
+
+    It contains none of the _MODEL_NOT_FOUND_PATTERNS phrases, so it used to
+    fall through to a retryable ``unknown`` — three backoff retries on a name
+    that can never resolve, surfaced as an outage instead of a bad model.
+    OpenAI's ``model_not_found`` was already handled correctly.
+    """
+
+    def test_unknown_model_is_not_retried(self):
+        body = {"type": "error",
+                "error": {"type": "not_found_error", "message": "model: claude-fable-9"}}
+        result = classify_api_error(
+            MockAPIError("HTTP 404", status_code=404, body=body),
+            provider="anthropic", model="claude-fable-9",
+        )
+        assert result.reason == FailoverReason.model_not_found
+        assert result.retryable is False
+        assert result.should_fallback is True
+
+    def test_non_model_not_found_404_stays_retryable(self):
+        """A 404 for another resource must keep its previous classification."""
+        body = {"type": "error",
+                "error": {"type": "not_found_error", "message": "Batch msgbatch_013 not found."}}
+        result = classify_api_error(
+            MockAPIError("HTTP 404", status_code=404, body=body),
+            provider="anthropic", model="claude-fable-5",
+        )
+        assert result.reason != FailoverReason.model_not_found
+        assert result.retryable is True
+
+    def test_generic_endpoint_404_stays_retryable(self):
+        """A misconfigured local endpoint URL is still a retryable unknown."""
+        result = classify_api_error(
+            MockAPIError("HTTP 404", status_code=404, body={"error": {"message": "404 page not found"}}),
+            provider="ollama", model="llama3",
+        )
+        assert result.retryable is True
+
+    def test_openai_model_not_found_unchanged(self):
+        """The pre-existing OpenAI path is untouched."""
+        body = {"error": {"message": "The model 'gpt-9' does not exist",
+                          "type": "invalid_request_error", "code": "model_not_found"}}
+        result = classify_api_error(
+            MockAPIError("HTTP 404", status_code=404, body=body),
+            provider="openai", model="gpt-9",
+        )
+        assert result.reason == FailoverReason.model_not_found
+        assert result.retryable is False
