@@ -1580,3 +1580,69 @@ class TestServerInjectedParameterRejection:
         assert result.retryable is False
 
 
+
+# ── Test: Anthropic credits-required wall returned as HTTP 429 ────────────────
+
+class TestCreditsRequiredNotRetried:
+    """Anthropic returns a hard credits wall as HTTP 429 with an outer type of
+    ``rate_limit_error``; the real cause is only in
+    ``error.details.error_code == "credits_required"``.
+
+    Classifying that as a rate limit sent a wall that never clears through
+    three backoff retries (~10s and three provider-error dumps) before giving
+    up, instead of failing over to the next configured brain immediately.
+    """
+
+    def _credits_error(self, *, details=True, message="Usage credits are required for this model."):
+        body = {"type": "error", "error": {"type": "rate_limit_error", "message": message}}
+        if details:
+            body["error"]["details"] = {
+                "error_code": "credits_required",
+                "exhausted_included_allowance": False,
+                "disabled_reason": "org_level_disabled",
+                "can_user_purchase_credits": True,
+            }
+        return MockAPIError(f"HTTP 429: {message}", status_code=429, body=body)
+
+    def test_structured_credits_code_is_billing_and_not_retryable(self):
+        """The nested details.error_code is authoritative over the outer type."""
+        result = classify_api_error(
+            self._credits_error(), provider="anthropic", model="claude-fable-5"
+        )
+        assert result.reason == FailoverReason.billing
+        assert result.retryable is False
+        assert result.should_fallback is True
+
+    def test_credits_prose_alone_is_billing(self):
+        """Providers that omit the structured code are caught by the prose."""
+        result = classify_api_error(
+            self._credits_error(details=False), provider="anthropic", model="claude-fable-5"
+        )
+        assert result.reason == FailoverReason.billing
+        assert result.retryable is False
+
+    def test_structured_code_outranks_rate_limit_prose(self):
+        """A credits code wins even when the message reads like a throttle.
+
+        Without this the ``_RATE_LIMIT_PATTERNS`` guard vetoes the billing
+        verdict and the wall goes back to being retried.
+        """
+        result = classify_api_error(
+            self._credits_error(message="Rate limit exceeded: usage credits are required."),
+            provider="anthropic",
+            model="claude-fable-5",
+        )
+        assert result.reason == FailoverReason.billing
+        assert result.retryable is False
+
+    def test_genuine_rate_limit_still_retryable(self):
+        """A real throttle carrying no credits code must stay retryable."""
+        body = {"error": {"type": "rate_limit_error",
+                          "message": "Rate limit exceeded, try again in 30s"}}
+        result = classify_api_error(
+            MockAPIError("HTTP 429: Rate limit exceeded", status_code=429, body=body),
+            provider="anthropic",
+            model="claude-fable-5",
+        )
+        assert result.reason == FailoverReason.rate_limit
+        assert result.retryable is True

@@ -125,6 +125,12 @@ _BILLING_PATTERNS = [
     "credits exhausted",
     "credits have been exhausted",
     "requires available credits",
+    # Anthropic surfaces a credits wall as HTTP 429 with the prose
+    # "Usage credits are required for this model." — no "insufficient"
+    # or "exhausted" wording, so none of the patterns above matched and
+    # the wall was retried three times as a rate limit.
+    "credits are required",
+    "credits_required",
     "account balance is too low",
     "no usable credits",
     "top up your credits",
@@ -152,6 +158,38 @@ _BILLING_PATTERNS = [
 # short cooldown instead of the one-hour billing bench (a content-filter
 # rejection leaves the credential perfectly healthy).
 _UNVERIFIED_BILLING_PATTERNS = ("out of extra usage",)
+
+# Structured error codes that mean "this model needs paid credits" — a hard
+# wall that no amount of backoff will clear. Anthropic nests this under
+# ``error.details.error_code`` while the OUTER ``error.type`` still reads
+# ``rate_limit_error``, so neither the prose nor the top-level code reveals
+# the real cause.
+_CREDITS_REQUIRED_CODES = frozenset({"credits_required", "credit_required"})
+
+
+def _has_credits_required_signal(body: dict) -> bool:
+    """True when the body carries a structured credits-required error code.
+
+    Checks ``error.details.error_code`` (Anthropic's shape) plus the
+    top-level ``details``/``error_code`` variants other providers use, so a
+    credits wall is recognised from the machine-readable code rather than
+    from prose that a provider is free to reword.
+    """
+    if not isinstance(body, dict):
+        return False
+
+    def _code_of(payload) -> str:
+        if not isinstance(payload, dict):
+            return ""
+        code = payload.get("error_code") or payload.get("code") or ""
+        return str(code).strip().lower() if isinstance(code, (str, int)) else ""
+
+    candidates = [body, body.get("details")]
+    error_obj = body.get("error")
+    if isinstance(error_obj, dict):
+        candidates += [error_obj, error_obj.get("details")]
+
+    return any(_code_of(c) in _CREDITS_REQUIRED_CODES for c in candidates)
 
 
 def _billing_ambiguity_context(error_msg: str) -> Dict[str, Any]:
@@ -1399,6 +1437,18 @@ def _classify_by_status(
         # not itself an explicit rate-limit phrase. Without that guard,
         # "Rate limit exceeded" ("limit exceeded" substring) would wrongly
         # promote to non-retryable billing. (broadening + guard credit #39441)
+        # A structured credits-required code is authoritative and outranks
+        # both guards below: Anthropic wraps this wall in ``rate_limit_error``
+        # with a ``details.error_code`` of ``credits_required``, so the
+        # rate-limit prose guard would otherwise veto the billing verdict and
+        # send a permanent wall back through three backoff retries.
+        if _has_credits_required_signal(body):
+            return result_fn(
+                FailoverReason.billing,
+                retryable=False,
+                should_rotate_credential=True,
+                should_fallback=True,
+            )
         has_usage_limit = (
             error_code.lower() == "usage_limit_reached"
             or "usage_limit_reached" in error_msg
