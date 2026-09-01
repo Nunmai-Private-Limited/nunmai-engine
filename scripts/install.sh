@@ -2462,6 +2462,69 @@ configure_browser_env_from_system_browser() {
     log_success "Configured browser tools to use $browser_path"
 }
 
+# Warn when the lockfile carries a package with an install script that
+# package.json's allowScripts does not mention. Such a package stays blocked,
+# which is the safe default — but if it is a native module the omission would
+# otherwise surface much later as a mysterious runtime failure, so name it.
+warn_undeclared_install_scripts() {
+    [ -f "$INSTALL_DIR/package-lock.json" ] || return 0
+    local undeclared
+    undeclared="$(node -e '
+      const lock = require("./package-lock.json");
+      const allow = require("./package.json").allowScripts || {};
+      const base = k => k.startsWith("@") ? "@" + k.slice(1).split("@")[0] : k.split("@")[0];
+      const declared = new Set(Object.keys(allow).map(base));
+      const scripted = new Set();
+      for (const [p, meta] of Object.entries(lock.packages || {})) {
+        if (!p || !meta.hasInstallScript) continue;
+        scripted.add(p.split("node_modules/").pop());
+      }
+      console.log([...scripted].filter(n => !declared.has(n)).join(" "));
+    ' 2>/dev/null)" || undeclared=""
+    if [ -n "$undeclared" ]; then
+        log_warn "Dependencies with install scripts missing from package.json allowScripts: $undeclared"
+        log_warn "They stayed blocked. If one is a native module, add it to allowScripts."
+    fi
+}
+
+# Re-run the install scripts that package.json explicitly allows.
+#
+# allowScripts maps "<name>" or "<name>@<version>" to true/false; only the true
+# entries are rebuilt and everything else stays blocked. The list is derived at
+# run time instead of hardcoded here so the two can never drift apart.
+run_allowed_install_scripts() {
+    local allowed rebuild_log
+    allowed="$(node -e '
+      const a = require("./package.json").allowScripts || {};
+      const base = k => k.startsWith("@") ? "@" + k.slice(1).split("@")[0] : k.split("@")[0];
+      console.log([...new Set(Object.keys(a).filter(k => a[k]).map(base))].join(" "));
+    ' 2>/dev/null)" || allowed=""
+
+    if [ -z "$allowed" ]; then
+        log_warn "package.json declares no allowed install scripts; native modules were not built"
+        return 0
+    fi
+
+    warn_undeclared_install_scripts
+
+    local pkgs
+    read -ra pkgs <<< "$allowed"
+    log_info "Building native modules (${pkgs[*]})..."
+    rebuild_log="$(mktemp)"
+    if ! run_with_timeout "$NODE_DEPS_TIMEOUT" npm rebuild --silent "${pkgs[@]}" \
+            >"$rebuild_log" 2>&1; then
+        log_error "npm rebuild failed for: ${pkgs[*]}"
+        if [ -s "$rebuild_log" ]; then
+            log_error "npm output:"
+            cat "$rebuild_log" >&2
+        fi
+        rm -f "$rebuild_log"
+        return 1
+    fi
+    rm -f "$rebuild_log"
+    return 0
+}
+
 install_node_deps() {
     if [ "$HAS_NODE" = false ]; then
         log_info "Skipping Node.js dependencies (Node not installed)"
@@ -2486,7 +2549,16 @@ install_node_deps() {
         # Capture npm output so failures are diagnosable (#87340).
         local npm_log
         npm_log="$(mktemp)"
-        if ! run_with_timeout "$NODE_DEPS_TIMEOUT" npm install --silent \
+        # --ignore-scripts: an install script is arbitrary code run at install
+        # time, and unicode-animations uses its to print a 3-second animated
+        # advert. It opens /dev/tty directly, so the redirection here cannot
+        # suppress it and it scribbles over the installer's own output.
+        # package.json already declares which packages may run scripts
+        # (allowScripts), but that is a LavaMoat convention and nothing honoured
+        # it — the block was dead config. Block everything, then re-run only the
+        # allowed entries via npm rebuild below. That also stops a future
+        # dependency from silently gaining install-time code execution.
+        if ! run_with_timeout "$NODE_DEPS_TIMEOUT" npm install --silent --ignore-scripts \
                 >"$npm_log" 2>&1; then
             log_error "npm install failed or timed out; Node.js dependencies were not installed"
             if [ -s "$npm_log" ]; then
@@ -2498,6 +2570,14 @@ install_node_deps() {
             return 1
         fi
         rm -f "$npm_log"
+
+        # The allowed scripts are the native builds (node-pty, esbuild, ...);
+        # without them the TUI and desktop app are broken, so a failure here is
+        # fatal exactly like a failed install.
+        if ! run_allowed_install_scripts; then
+            restore_dirty_lockfiles "$INSTALL_DIR"
+            return 1
+        fi
         log_success "Node.js dependencies installed"
 
         # Install Playwright browser + system dependencies.
