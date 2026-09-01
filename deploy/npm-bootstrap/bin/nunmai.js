@@ -6,20 +6,35 @@
  * Nunmai Engine is a Python application (managed by uv), so this package is a
  * small launcher around the official installer (https://nunmai-engine.nunmai.in):
  *
- *   npm install nunmai      -> (with or without -g) postinstall runs the FULL, non-interactive install
- *                              (engine, Python, git, Node, browser + computer-use
- *                              tools). Nothing on the system is modified — every
- *                              dependency is provisioned into Nunmai's own dirs.
- *                              A `nunmai` command is always left on PATH
- *                              (~/.local/bin), even for local, non -g installs.
- *   nunmai                  -> launches the installed engine (first run opens the
- *                              AI-account wizard). If the engine is missing (e.g.
- *                              npm ran with --ignore-scripts), it installs first.
+ * This package deliberately ships NO install lifecycle script. It installs
+ * nothing at `npm install` time; all it does is put a `nunmai` command on PATH
+ * via npm's own bin shim. The engine is installed on the first `nunmai` run.
+ *
+ * That is not a limitation, it is the fix. A postinstall here has to invoke
+ * node by bare name through a shell npm spawns, and on any machine where that
+ * PATH lookup fails ('node' is not recognized...) the whole `npm install`
+ * aborts — before a single line of this file runs, so none of the defensive
+ * process.execPath handling below can help. Deferring also makes behaviour
+ * identical across npm versions (npm >= 11.19 skips dependency install
+ * scripts anyway) and under --ignore-scripts.
+ *
+ *   npm install -g nunmai   -> installs this launcher only. Always succeeds;
+ *                              nothing is downloaded, nothing is compiled.
+ *   nunmai                  -> installs the engine on first run if missing
+ *                              (Python, git, Node, browser + computer-use
+ *                              tools), then starts it and opens the
+ *                              AI-account wizard. Nothing on the system is
+ *                              modified — every dependency is provisioned
+ *                              into Nunmai's own dirs. The launcher also puts
+ *                              a plain `nunmai` on PATH (~/.local/bin, or
+ *                              %LOCALAPPDATA%\nunmai\bin on Windows) so it
+ *                              works from a new terminal even after a local,
+ *                              non -g install.
  *
  *   NUNMAI_HOME                  respected (Windows launchers: %NUNMAI_HOME%\bin)
  *   NUNMAI_INSTALL_LITE=1        lightweight install instead of --full
  *   NUNMAI_INSTALL_ARGS="..."    extra installer flags (appended)
- *   NUNMAI_NPM_NO_POSTINSTALL=1  skip the install at `npm install` time
+ *   NUNMAI_NPM_NO_POSTINSTALL=1  honoured by --bootstrap-postinstall (manual only)
  *   NUNMAI_BOOTSTRAP_DRY_RUN=1   print what would run instead of installing
  */
 const fs = require("fs");
@@ -192,7 +207,9 @@ function install(nonInteractive) {
   } else {
     const sh = `curl -fsSL ${INSTALL_SH} | bash -s -- ${flags}`.trim();
     cmd = "bash";
-    args = ["-c", sh];
+    // pipefail so a failed download (e.g. a 403 from the CDN) exits non-zero
+    // instead of being masked by the status of the bash on the right of the pipe.
+    args = ["-c", `set -o pipefail; ${sh}`];
     shown = sh;
   }
   console.log(nonInteractive
@@ -207,9 +224,12 @@ function manualHint() {
   return IS_WIN ? `  irm ${INSTALL_PS1} | iex` : `  curl -fsSL ${INSTALL_SH} | bash`;
 }
 
+// Retained for manual invocation only (`node bin/nunmai.js --bootstrap-postinstall`)
+// and for anyone still on <=0.1.5, whose package.json wires it to npm. It is no
+// longer referenced by this package's own package.json — see the header.
 function postinstall() {
-  // Runs from `npm install -g nunmai`. Must never fail the npm install: on any
-  // problem we exit 0 and the first `nunmai` run retries interactively.
+  // Must never fail the npm install: on any problem we exit 0 and the first
+  // `nunmai` run retries interactively.
   if (process.env.NUNMAI_NPM_NO_POSTINSTALL === "1" || process.env.CI) {
     if (!findLauncher()) ensureFallbackLauncher();
     console.log("nunmai: engine install deferred to first run.");

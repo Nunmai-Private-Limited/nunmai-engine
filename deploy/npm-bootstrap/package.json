@@ -1,7 +1,7 @@
 {
   "name": "nunmai",
-  "version": "0.1.5",
-  "description": "Nunmai Engine — `npm i nunmai` (global or local) installs the engine with all features and dependencies; run `nunmai` to start.",
+  "version": "0.1.6",
+  "description": "Nunmai Engine — `npm i -g nunmai` installs the launcher; run `nunmai` to install the engine (all features and dependencies) and start it.",
   "license": "MIT",
   "homepage": "https://nunmai.in",
   "repository": {
@@ -40,8 +40,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "scripts": {
-    "postinstall": "node bin/nunmai.js --bootstrap-postinstall"
   }
 }

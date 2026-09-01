@@ -7,25 +7,28 @@ npm install -g nunmai
 nunmai
 ```
 
-`npm install` runs the official installer (https://nunmai-engine.nunmai.in) in
-**full, non-interactive** mode: the engine, Python, git, Node.js, browser and
-computer-use tools are all provisioned automatically into Nunmai's own
-directories — your system toolchain is never modified. Then `nunmai` starts the
-engine; the first run opens the AI-account wizard (Claude, ChatGPT, Kimi,
-Gemini, OpenRouter).
+The first command installs the launcher only — it downloads nothing and cannot
+fail. The second one does the real work: it runs the official installer
+(https://nunmai-engine.nunmai.in) in **full, non-interactive** mode, so the
+engine, Python, git, Node.js, browser and computer-use tools are all
+provisioned automatically into Nunmai's own directories — your system
+toolchain is never modified. The engine then starts, and the first run opens
+the AI-account wizard (Claude, ChatGPT, Kimi, Gemini, OpenRouter).
+
+Later runs of `nunmai` skip straight to starting the engine.
 
 - macOS, Linux, Windows 10/11 (PowerShell), Android (Termux).
-- **Local install** (`npm install nunmai`, no `-g`): run it once with `npx nunmai`.
-  npm ≥ 11.19 blocks dependency install scripts by default, so the engine is
-  installed on that first run. The launcher then puts a plain `nunmai` command
-  on your PATH itself — `~/.local/bin` on macOS/Linux, `%LOCALAPPDATA%\nunmai\bin`
+- **No install scripts.** This package ships no `postinstall`, so
+  `npm install` behaves identically on every npm version, under
+  `--ignore-scripts`, and in CI. Installing the engine is always the first
+  `nunmai` run.
+- **Local install** (`npm install nunmai`, no `-g`): run it once with
+  `npx nunmai`. The launcher then puts a plain `nunmai` command on your PATH
+  itself — `~/.local/bin` on macOS/Linux, `%LOCALAPPDATA%\nunmai\bin`
   (registered on the user PATH) on Windows — so after opening a new terminal
-  `nunmai` just works. To skip even that first `npx`, allow the script:
-  `npm install nunmai --allow-scripts=nunmai`.
-- If npm skipped the install script (`--ignore-scripts`, `CI` set, or the
-  allow-scripts policy above), the install simply happens on the first run.
-- Lightweight install (no browser/computer-use): `NUNMAI_INSTALL_LITE=1 npm i -g nunmai`.
-- Extra installer flags: `NUNMAI_INSTALL_ARGS="--branch dev" npm i -g nunmai`.
+  `nunmai` just works.
+- Lightweight install (no browser/computer-use): `NUNMAI_INSTALL_LITE=1 nunmai`.
+- Extra installer flags: `NUNMAI_INSTALL_ARGS="--branch dev" nunmai`.
 - Updates: `nunmai update`.
 - Remove: `nunmai uninstall` — one confirmation, then everything goes: the engine,
   `~/.nunmai` (config, keys, sessions, managed Node/uv), the gateway service,
