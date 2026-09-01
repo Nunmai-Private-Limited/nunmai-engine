@@ -205,12 +205,40 @@ function install(nonInteractive) {
     args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps];
     shown = `powershell -NoProfile -ExecutionPolicy Bypass -Command "${ps}"`;
   } else {
-    const sh = `curl -fsSL ${INSTALL_SH} | bash -s -- ${flags}`.trim();
+    // Download first, then run — rather than `curl | bash`. Three reasons,
+    // all seen in the field:
+    //   1. A piped curl's failure is masked by the exit status of the bash on
+    //      the right, so a 403 reported a successful install that had not
+    //      happened. (`set -o pipefail` fixes only that symptom.)
+    //   2. Cloudflare bot protection answers a bare curl from a datacenter IP
+    //      with 403 — so the first run on a fresh VPS routinely fails while a
+    //      retry succeeds. Send the same browser-prefixed UA the
+    //      deploy-installer-site workflow uses for its own live check.
+    //   3. With the download separated, a transient 403/429/network blip can
+    //      simply be retried; nothing has executed yet, so a retry is safe.
+    // A download that never succeeds exits 22 (curl's HTTP-error status) with
+    // a real message instead of handing an empty script to bash.
+    const ua = "Mozilla/5.0 (X11; Linux x86_64) nunmai-npm-launcher";
+    const sh = [
+      'ua="' + ua + '"',
+      'f="$(mktemp)" || { echo "nunmai: could not create a temp file" >&2; exit 1; }',
+      'ok=0',
+      'for i in 1 2 3; do',
+      '  if curl -fsSL -A "$ua" -o "$f" ' + INSTALL_SH + '; then ok=1; break; fi',
+      '  if [ "$i" != 3 ]; then echo "nunmai: installer download failed (attempt $i/3); retrying..." >&2; sleep "$((i * 3))"; fi',
+      'done',
+      'if [ "$ok" != 1 ]; then',
+      '  echo "nunmai: could not download the installer from ' + INSTALL_SH + '" >&2',
+      '  rm -f "$f"; exit 22',
+      'fi',
+      'bash "$f" ' + flags,
+      'rc=$?; rm -f "$f"; exit "$rc"',
+    ].join("\n");
     cmd = "bash";
-    // pipefail so a failed download (e.g. a 403 from the CDN) exits non-zero
-    // instead of being masked by the status of the bash on the right of the pipe.
-    args = ["-c", `set -o pipefail; ${sh}`];
-    shown = sh;
+    args = ["-c", sh];
+    // Show the canonical one-liner: it is what the docs give and what a user
+    // would run by hand, and it stays correct for a manual retry.
+    shown = `curl -fsSL ${INSTALL_SH} | bash -s -- ${flags}`.trim();
   }
   console.log(nonInteractive
     ? "Installing Nunmai Engine and all of its dependencies (this can take a few minutes)…"

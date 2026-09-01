@@ -1,7 +1,7 @@
 {
   "name": "nunmai",
-  "version": "0.1.6",
-  "description": "Nunmai Engine — `npm i -g nunmai` installs the launcher; run `nunmai` to install the engine (all features and dependencies) and start it.",
+  "version": "0.1.7",
+  "description": "Nunmai Engine \u2014 `npm i -g nunmai` installs the launcher; run `nunmai` to install the engine (all features and dependencies) and start it.",
   "license": "MIT",
   "homepage": "https://nunmai.in",
   "repository": {
