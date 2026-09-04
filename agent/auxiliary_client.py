@@ -2053,13 +2053,18 @@ class _CodexCompletionsAdapter:
 
             resp_usage = getattr(final, "usage", None)
             if resp_usage:
+                def _ug(obj, key, default=0):
+                    if isinstance(obj, dict):
+                        return obj.get(key, default) or default
+                    return getattr(obj, key, default) or default
+                _details = _ug(resp_usage, "input_tokens_details", None)
+                _cached = _ug(_details, "cached_tokens", 0) if _details else 0
                 usage = SimpleNamespace(
-                    prompt_tokens=getattr(resp_usage, "input_tokens", 0)
-                        or (resp_usage.get("input_tokens", 0) if isinstance(resp_usage, dict) else 0),
-                    completion_tokens=getattr(resp_usage, "output_tokens", 0)
-                        or (resp_usage.get("output_tokens", 0) if isinstance(resp_usage, dict) else 0),
-                    total_tokens=getattr(resp_usage, "total_tokens", 0)
-                        or (resp_usage.get("total_tokens", 0) if isinstance(resp_usage, dict) else 0),
+                    prompt_tokens=_ug(resp_usage, "input_tokens", 0),          # Responses: includes cached tokens
+                    completion_tokens=_ug(resp_usage, "output_tokens", 0),
+                    total_tokens=_ug(resp_usage, "total_tokens", 0),
+                    # Surface the cache split so downstream accounting can price it.
+                    prompt_tokens_details=SimpleNamespace(cached_tokens=_cached),
                 )
         except Exception as exc:
             if timed_out.is_set():
@@ -2363,13 +2368,28 @@ class _AnthropicCompletionsAdapter:
 
         usage = None
         if hasattr(response, "usage") and response.usage:
-            prompt_tokens = getattr(response.usage, "input_tokens", 0) or 0
-            completion_tokens = getattr(response.usage, "output_tokens", 0) or 0
-            total_tokens = getattr(response.usage, "total_tokens", 0) or (prompt_tokens + completion_tokens)
+            # Anthropic bills input_tokens (uncached) + cache_read_input_tokens +
+            # cache_creation_input_tokens. OpenAI's prompt_tokens is the TOTAL
+            # prompt, so the shim must add the cache buckets back or every
+            # cached call (the common case with prompt caching on) reports a
+            # tiny prompt and MoA advisor/aggregator accounting undercounts.
+            _u = response.usage
+            input_tokens = getattr(_u, "input_tokens", 0) or 0
+            cache_read = getattr(_u, "cache_read_input_tokens", 0) or 0
+            cache_write = getattr(_u, "cache_creation_input_tokens", 0) or 0
+            prompt_tokens = input_tokens + cache_read + cache_write
+            completion_tokens = getattr(_u, "output_tokens", 0) or 0
             usage = SimpleNamespace(
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
-                total_tokens=total_tokens,
+                total_tokens=prompt_tokens + completion_tokens,
+                # Keep the native buckets so normalize_usage() (generic branch,
+                # Anthropic-style fallback) can split cache reads/writes.
+                prompt_tokens_details=SimpleNamespace(cached_tokens=cache_read),
+                input_tokens=input_tokens,
+                output_tokens=completion_tokens,
+                cache_read_input_tokens=cache_read,
+                cache_creation_input_tokens=cache_write,
             )
 
         choice = SimpleNamespace(

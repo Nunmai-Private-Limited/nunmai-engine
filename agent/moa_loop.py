@@ -483,6 +483,44 @@ def _maybe_apply_moa_cache_control(
         return messages
 
 
+def _normalize_reference_usage(raw_usage: Any, runtime: dict[str, Any]) -> "CanonicalUsage":
+    """Canonicalize a reference response's usage regardless of wire shape.
+
+    ``call_llm`` returns usage in OpenAI chat-completions shape
+    (``prompt_tokens``/``completion_tokens``) for EVERY provider — the
+    Anthropic and Codex adapters translate their native usage before
+    returning. Normalizing that with the slot's native ``api_mode``
+    (anthropic_messages / codex_responses) reads ``input_tokens`` and finds
+    nothing, so every advisor used to report zero tokens and the whole
+    fan-out vanished from accounting. Try the native shape first (a raw
+    provider response), then fall back to the generic OpenAI-style branch
+    when the native read comes back empty but OpenAI-style counts exist.
+    """
+    from agent.usage_pricing import CanonicalUsage, normalize_usage
+
+    def _get(key: str) -> int:
+        try:
+            v = raw_usage.get(key, 0) if isinstance(raw_usage, dict) else getattr(raw_usage, key, 0)
+            return int(v or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    try:
+        usage = normalize_usage(
+            raw_usage,
+            provider=runtime.get("provider"),
+            api_mode=runtime.get("api_mode"),
+        )
+    except Exception:  # pragma: no cover - defensive
+        usage = CanonicalUsage()
+    if usage.total_tokens == 0 and (_get("prompt_tokens") or _get("completion_tokens")):
+        try:
+            usage = normalize_usage(raw_usage, provider=None, api_mode="chat_completions")
+        except Exception:  # pragma: no cover - defensive
+            usage = CanonicalUsage()
+    return usage
+
+
 def _run_reference(
     slot: dict[str, Any],
     ref_messages: list[dict[str, Any]],
@@ -599,14 +637,7 @@ def _run_reference(
         usage = CanonicalUsage()
         raw_usage = getattr(response, "usage", None)
         if raw_usage:
-            try:
-                usage = normalize_usage(
-                    raw_usage,
-                    provider=runtime.get("provider"),
-                    api_mode=runtime.get("api_mode"),
-                )
-            except Exception:  # pragma: no cover - defensive
-                usage = CanonicalUsage()
+            usage = _normalize_reference_usage(raw_usage, runtime)
         # Price this advisor at ITS OWN model/provider rate (with correct
         # cache-read/cache-write split), not the aggregator's. This is why
         # advisor cost is summed as dollars rather than by folding tokens into
