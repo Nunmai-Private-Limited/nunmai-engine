@@ -526,6 +526,12 @@ class NunmaiTokenStorage:
 
     async def set_tokens(self, tokens: "OAuthToken") -> None:
         payload = tokens.model_dump(mode="json", exclude_none=True)
+        # A refresh response may omit refresh_token (RFC 6749 §6 makes it optional; Zoho's MCP servers do this). Keep the
+        # refresh token already on disk, otherwise the next expiry strands the server in "re-authenticate in a browser".
+        if not payload.get("refresh_token"):
+            previous = _read_json(self._tokens_path()) or {}
+            if previous.get("refresh_token"):
+                payload["refresh_token"] = previous["refresh_token"]
         # Persist an absolute ``expires_at`` so a process restart can
         # reconstruct the correct remaining TTL. Without this the MCP SDK's
         # ``_initialize`` reloads a relative ``expires_in`` which has no
