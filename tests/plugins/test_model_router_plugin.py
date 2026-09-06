@@ -211,6 +211,14 @@ class TestRouter:
         router = _make_router(r, settings={"tiers": {"simple": node1, "normal": node1, "complex": None}})
         assert router.route("thanks!", current_model="nunmai-mail", current_runtime={"provider": "node1"}) is None
         assert router.route("Summarise the emails from this week in one line each.", current_model="nunmai-mail", current_runtime={"provider": "node1"}) is None
+        # At runtime a user-configured provider is reported as "custom" + base_url: match by the requested name or the URL.
+        cfg = {"model": {"provider": "kimi-coding", "default": "k3"}, "providers": {"node1": {"api": "http://127.0.0.1:8000/v1", "transport": "chat_completions"}}}
+        router = _make_router(r, settings={"tiers": {"simple": node1, "normal": node1, "complex": None}}, config=cfg)
+        assert router.route("thanks!", current_model="nunmai-mail", current_runtime={"provider": "custom", "requested_provider": "node1"}) is None
+        assert router.route("thanks!", current_model="nunmai-mail", current_runtime={"provider": "custom", "base_url": "http://127.0.0.1:8000/v1/"}) is None
+        # a different custom provider (other URL) is still routed
+        out = router.route("thanks!", current_model="foo", current_runtime={"provider": "custom", "base_url": "http://10.0.0.9:9000/v1"})
+        assert out is None or out["model"] == "nunmai-local"
 
     def test_respects_session_override(self):
         r = _load_router()

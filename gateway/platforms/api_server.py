@@ -2862,6 +2862,8 @@ class APIServerAdapter(BasePlatformAdapter):
                     "api_key": runtime_kwargs.get("api_key"),
                     "base_url": runtime_kwargs.get("base_url"),
                     "api_mode": runtime_kwargs.get("api_mode"),
+                    # the name the caller asked for (a user-configured provider resolves to provider="custom")
+                    "requested_provider": runtime_kwargs.get("requested_provider"),
                 },
                 session_key=session_key,
                 has_session_override=has_session_override,

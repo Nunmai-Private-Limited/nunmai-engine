@@ -359,6 +359,30 @@ class Router:
         settings = {"tiers": self._settings("tiers", None)}
         return resolve_tiers(settings, self._load_config() or {})
 
+    def _same_provider(self, target_provider: str, current_runtime: Dict[str, Any]) -> bool:
+        """Is the current turn already served by ``target_provider``?
+
+        A user-configured provider (``providers:`` in config.yaml, e.g. ``node1``) resolves at runtime to the generic
+        name ``custom`` plus its base URL, so the name alone is not enough: match the requested provider name when the
+        caller passed it, otherwise the base URL of the configured provider.
+        """
+        cur = str(current_runtime.get("provider") or "")
+        if cur == target_provider:
+            return True
+        if str(current_runtime.get("requested_provider") or "") == target_provider:
+            return True
+        if cur != "custom":
+            return False
+        cur_url = str(current_runtime.get("base_url") or "").strip().rstrip("/").lower()
+        if not cur_url:
+            return False
+        providers = (self._load_config() or {}).get("providers") or {}
+        spec = providers.get(target_provider) if isinstance(providers, dict) else None
+        if not isinstance(spec, dict):
+            return False
+        url = str(spec.get("api") or spec.get("base_url") or "").strip().rstrip("/").lower()
+        return bool(url) and url == cur_url
+
     # -- main entry -----------------------------------------------------
     def route(
         self,
@@ -390,7 +414,7 @@ class Router:
             return None
 
         cur_provider = str(current_runtime.get("provider") or "")
-        if target["provider"] == cur_provider:
+        if self._same_provider(target["provider"], current_runtime):
             # Already on the tier's provider: either the exact brain, or a sibling the caller chose on purpose (e.g. a
             # fine-tuned local model such as node1/nunmai-mail). Routing exists to move work between providers, never to
             # swap one local model for another, so the caller's choice stands.
