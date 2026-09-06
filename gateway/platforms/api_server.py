@@ -486,6 +486,27 @@ def _resolve_request_runtime_agent_kwargs(provider: str, target_model: Optional[
     }
 
 
+def _answered_runtime(*sources: Any) -> Dict[str, Any]:
+    """The provider/model that actually answered (per-turn routing may differ from the request), safe for clients."""
+    rt: Dict[str, Any] = {}
+    for src in sources:
+        if isinstance(src, dict) and isinstance(src.get("runtime"), dict):
+            rt = src["runtime"]; break
+    if not rt:
+        return {}
+    out: Dict[str, Any] = {}
+    for k in ("provider", "model", "route_source"):
+        v = rt.get(k)
+        if isinstance(v, str) and v:
+            out[k] = v
+    if rt.get("routed"):
+        out["routed"] = True
+    req = rt.get("requested")
+    if isinstance(req, dict):
+        out["requested"] = {k: v for k, v in req.items() if k in ("provider", "model") and isinstance(v, str) and v}
+    return out
+
+
 def _request_agent_overrides(
     body: Any,
     *,
@@ -3168,6 +3189,8 @@ class APIServerAdapter(BasePlatformAdapter):
         # _resolve_turn_agent_config. Runs only when the caller passed the
         # user's message (chat/responses via _run_agent, which executes on an
         # executor thread) and never against a confirmed runtime lock.
+        turn_routed = False
+        pre_turn_model, pre_turn_provider = model, runtime_kwargs.get("provider")
         if user_message is not None and not confirmed_runtime_lock:
             model, runtime_kwargs = self._apply_resolve_turn_model_hook(
                 user_message,
@@ -3175,6 +3198,9 @@ class APIServerAdapter(BasePlatformAdapter):
                 runtime_kwargs,
                 session_key=gateway_session_key or session_id or "",
                 has_session_override=bool(session_override),
+            )
+            turn_routed = (model != pre_turn_model) or (
+                (runtime_kwargs.get("provider") or "") != (pre_turn_provider or "")
             )
 
         # Resolve reasoning against the model this request will actually
@@ -3228,6 +3254,14 @@ class APIServerAdapter(BasePlatformAdapter):
                 else "global"
             ),
         }
+        if turn_routed:
+            # The resolve_turn_model hook (model-router plugin) moved this turn to another brain: say so, and remember what
+            # the caller asked for, so metering and "answered by" can be truthful.
+            agent._nunmai_api_runtime["routed"] = True
+            agent._nunmai_api_runtime["requested"] = {
+                "provider": self._clean_runtime_id(request_provider or pre_turn_provider or "", max_len=80),
+                "model": self._clean_runtime_id(request_model or pre_turn_model or ""),
+            }
         return agent
 
     # ------------------------------------------------------------------
@@ -5394,6 +5428,9 @@ class APIServerAdapter(BasePlatformAdapter):
                 )
 
         final_response = _resolve_media_to_data_urls(result.get("final_response") or "")
+        answered = _answered_runtime(result, usage)
+        if answered.get("model"):
+            model_name = answered["model"]
         is_partial = bool(result.get("partial"))
         is_failed = bool(result.get("failed"))
         completed = bool(result.get("completed", True))
@@ -5458,8 +5495,11 @@ class APIServerAdapter(BasePlatformAdapter):
                 "total_tokens": usage.get("total_tokens", 0),
             },
         }
+        if answered:
+            response_data["nunmai"] = {"runtime": answered}
         if is_partial or is_failed or not completed:
             response_data["nunmai"] = {
+                **(response_data.get("nunmai") or {}),
                 "completed": completed,
                 "partial": is_partial,
                 "failed": is_failed,
@@ -5603,10 +5643,11 @@ class APIServerAdapter(BasePlatformAdapter):
             else:
                 finish_reason = "stop"
 
-            # Finish chunk
+            # Finish chunk: "model" is the model that actually answered (per-turn routing may differ from the request)
+            answered = _answered_runtime(result if isinstance(result, dict) else None, usage)
             finish_chunk = {
                 "id": completion_id, "object": "chat.completion.chunk",
-                "created": created, "model": model,
+                "created": created, "model": answered.get("model") or model,
                 "choices": [{"index": 0, "delta": {}, "finish_reason": finish_reason}],
                 "usage": {
                     "prompt_tokens": usage.get("input_tokens", 0),
@@ -5622,12 +5663,15 @@ class APIServerAdapter(BasePlatformAdapter):
                         "type": type(agent_error).__name__ if agent_error else "agent_error",
                     }
                 finish_chunk["nunmai"] = {
+                    **(finish_chunk.get("nunmai") or {}),
                     "completed": completed,
                     "partial": is_partial,
                     "failed": is_failed,
                     "error": err_msg,
                     "error_code": "output_truncated" if finish_reason == "length" else "agent_error",
                 }
+            if answered:
+                finish_chunk["nunmai"] = {**(finish_chunk.get("nunmai") or {}), "runtime": answered}
             await response.write(_sse_frame(finish_chunk))
             await response.write(b"data: [DONE]\n\n")
         except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, OSError):
@@ -7438,6 +7482,7 @@ class APIServerAdapter(BasePlatformAdapter):
                         or route
                         or confirmed_runtime_lock
                         or (route_source and route_source != "global")
+                        or (getattr(agent, "_nunmai_api_runtime", {}) or {}).get("routed")
                     )
                     if include_runtime:
                         runtime = dict(getattr(agent, "_nunmai_api_runtime", {}) or {})

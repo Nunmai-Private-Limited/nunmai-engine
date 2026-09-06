@@ -144,6 +144,15 @@ _CLASSIFIER_SYSTEM = (
 )
 
 
+def classifier_user_prompt(snippet: str) -> str:
+    """Wrap the user's message so the classifier labels it instead of answering it."""
+    return (
+        "Classify the message between the markers. Do not answer it. "
+        "Reply with exactly one word: SIMPLE, NORMAL or COMPLEX.\n\n"
+        f"<message>\n{snippet}\n</message>\n\nTier:"
+    )
+
+
 def parse_tier(raw: Any) -> Optional[str]:
     """Extract a tier name from a classifier reply; ``None`` if unparseable."""
     if not isinstance(raw, str):

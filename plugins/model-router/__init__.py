@@ -57,15 +57,18 @@ def _load_config() -> Dict[str, Any]:
 def _classify_with_llm(snippet: str) -> str:
     """Ask the fast auxiliary model for SIMPLE / NORMAL / COMPLEX."""
     timeout = float(_get_setting("classifier_timeout", 8) or 8)
+    # The message goes inside a delimited block with the instruction repeated after it: an instruction-following model
+    # otherwise treats the message itself as the request (a local Qwen answered "Say hello in one sentence." with
+    # "Hello!" instead of a tier).
     messages = [
         {"role": "system", "content": _router._CLASSIFIER_SYSTEM},
-        {"role": "user", "content": snippet},
+        {"role": "user", "content": _router.classifier_user_prompt(snippet)},
     ]
     if _ctx is not None and getattr(_ctx, "llm", None) is not None:
         result = _ctx.llm.complete(
             messages,
             task=_router.AUX_TASK,
-            max_tokens=5,
+            max_tokens=8,
             temperature=0,
             timeout=timeout,
             purpose="model-router tier classification",
@@ -77,7 +80,7 @@ def _classify_with_llm(snippet: str) -> str:
     response = call_llm(
         task=_router.AUX_TASK,
         messages=messages,
-        max_tokens=5,
+        max_tokens=8,
         temperature=0,
         timeout=timeout,
     )

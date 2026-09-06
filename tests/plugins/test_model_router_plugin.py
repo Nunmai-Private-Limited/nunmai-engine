@@ -399,3 +399,16 @@ class TestPluginDiscovery:
         mgr = _ensure_plugins_discovered(force=True)
         assert "model-router" in set(getattr(mgr, "_plugins", {}).keys())
         assert mgr.has_hook("resolve_turn_model") if hasattr(mgr, "has_hook") else True
+
+
+# --------------------------------------------------------------------------
+# Classifier prompt: the message is labelled, never answered
+# --------------------------------------------------------------------------
+
+def test_classifier_user_prompt_wraps_message_and_asks_for_a_tier():
+    r = _load_router()
+    text = r.classifier_user_prompt("Say hello in one short sentence.")
+    assert "<message>\nSay hello in one short sentence.\n</message>" in text
+    assert "Do not answer it" in text
+    assert text.rstrip().endswith("Tier:")
+    assert r.parse_tier("SIMPLE") == "simple"
