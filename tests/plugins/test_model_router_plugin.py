@@ -203,6 +203,15 @@ class TestRouter:
         # complex on a MoA-default session → already on moa/default
         assert router.route("```py\nx=1\n```", current_model="default", current_runtime={"provider": "moa"}) is None
 
+    def test_stays_on_sibling_model_of_the_tier_provider(self):
+        # The caller chose a fine-tuned local model (node1/nunmai-mail); the simple/normal tiers point at node1/nunmai-local.
+        # Same provider → the caller's choice stands; routing moves work between providers, never between local siblings.
+        r = _load_router()
+        node1 = {"provider": "node1", "model": "nunmai-local"}
+        router = _make_router(r, settings={"tiers": {"simple": node1, "normal": node1, "complex": None}})
+        assert router.route("thanks!", current_model="nunmai-mail", current_runtime={"provider": "node1"}) is None
+        assert router.route("Summarise the emails from this week in one line each.", current_model="nunmai-mail", current_runtime={"provider": "node1"}) is None
+
     def test_respects_session_override(self):
         r = _load_router()
         router = _make_router(r)
