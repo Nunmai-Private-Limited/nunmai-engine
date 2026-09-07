@@ -313,6 +313,11 @@ def _get_backend(session_id: str = "") -> ComputerUseBackend:
                     backend = CuaDriverBackend(permission_mode=permission_mode)
                 elif backend_name == "noop":  # pragma: no cover
                     backend = _NoopBackend()
+                elif backend_name == "nunmai-desktop":
+                    # a desktop owned by another service (the Nunmai platform's agent desktops), driven over HTTP
+                    from tools.computer_use.nunmai_desktop_backend import NunmaiDesktopBackend
+
+                    backend = NunmaiDesktopBackend(permission_mode=permission_mode)
                 else:
                     raise RuntimeError(
                         f"Unknown NUNMAI_COMPUTER_USE_BACKEND={backend_name!r}"
@@ -1687,6 +1692,9 @@ def check_computer_use_requirements() -> bool:
     """
     if sys.platform not in ("darwin", "win32", "linux"):
         return False
+    if os.environ.get("NUNMAI_COMPUTER_USE_BACKEND", "").lower() == "nunmai-desktop":
+        from tools.computer_use.nunmai_desktop_backend import nunmai_desktop_configured
+        return nunmai_desktop_configured()
     from tools.computer_use.cua_backend import cua_driver_binary_available
     return cua_driver_binary_available()
 
