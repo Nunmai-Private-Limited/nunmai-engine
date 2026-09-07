@@ -10,7 +10,7 @@ from gateway.run import (
 
 
 class TestGatewayConnectionErrorReply:
-    def test_connection_error_strings_produce_specific_reply(self):
+    def test_connection_error_strings_produce_customer_safe_reply(self):
         samples = [
             "openai.APIConnectionError",
             "httpx.ConnectError: connection refused",
@@ -21,17 +21,19 @@ class TestGatewayConnectionErrorReply:
         for text in samples:
             assert _looks_like_gateway_provider_error(text), text
             reply = _gateway_provider_error_reply(text)
-            assert "not responding" in reply.lower(), text
-            assert "not running or is unreachable" in reply, text
+            assert "try again" in reply.lower(), text
+            assert "conversation is safe" in reply.lower(), text
 
-    def test_broad_connection_phrases_still_map_once_classified(self):
-        """Reply selector keeps the full phrase set; the gate does not."""
+    def test_broad_connection_phrases_are_customer_safe_once_classified(self):
         for text in (
             "cannot connect to http://127.0.0.1:8033/v1",
             "failed to establish a new connection",
         ):
             reply = _gateway_provider_error_reply(text)
-            assert "not running or is unreachable" in reply, text
+            assert "try again" in reply.lower(), text
+            assert "provider" not in reply.lower(), text
+            assert "gateway" not in reply.lower(), text
+            assert "logs" not in reply.lower(), text
 
     def test_prose_cannot_connect_is_not_a_provider_error(self):
         text = (
@@ -54,10 +56,29 @@ class TestGatewayConnectionErrorReply:
         assert not _GATEWAY_CONNECTION_ERROR_RE.search("Rate limited after 3 retries")
         assert not _GATEWAY_CONNECTION_ERROR_RE.search("Provider authentication failed")
 
-    def test_auth_and_rate_limit_preserved(self):
-        assert "authentication" in _gateway_provider_error_reply(
-            "provider authentication failed"
-        ).lower()
-        assert "rate-limiting" in _gateway_provider_error_reply(
-            "rate limited after 3 retries"
-        ).lower()
+    def test_auth_and_rate_limit_are_customer_safe(self):
+        for text in (
+            "provider authentication failed",
+            "rate limited after 3 retries",
+        ):
+            reply = _gateway_provider_error_reply(text)
+            assert "try again" in reply.lower()
+            assert "conversation is safe" in reply.lower()
+            for internal_term in ("provider", "gateway", "logs", "retries"):
+                assert internal_term not in reply.lower()
+
+    def test_policy_rejection_is_customer_safe(self):
+        reply = _gateway_provider_error_reply("request was rejected")
+        assert "rephrasing" in reply.lower()
+        assert "provider" not in reply.lower()
+        assert "logs" not in reply.lower()
+
+    def test_exhausted_provider_reply_is_customer_safe(self):
+        reply = _gateway_provider_error_reply(
+            "API call failed after retries: HTTP 500 internal server error"
+        )
+        lower = reply.lower()
+        assert "try again" in lower
+        assert "conversation is safe" in lower
+        for internal_term in ("provider", "gateway", "logs", "retries", "diagnostics"):
+            assert internal_term not in lower

@@ -818,7 +818,7 @@ def maybe_auto_update(argv: list) -> None:
         return
     # Reset the cache first so a failed update does not loop on every launch.
     try:
-        cache_file.write_text(json.dumps({"ts": time.time(), "behind": 0, "rev": cached.get("rev"), "ver": VERSION}))
+        cache_file.write_text(json.dumps({"ts": time.time(), "behind": 0, "rev": cached.get("rev"), "ver": VERSION}), encoding="utf-8")
     except Exception:
         pass
     print("⬆ Nunmai Engine update available — installing (takes ~1 min)…", flush=True)
