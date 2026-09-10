@@ -88,6 +88,44 @@ def _prefix_names_served_profile(profile: str) -> bool:
 _api_request_profile: ContextVar[Optional[str]] = ContextVar(
     "api_server_request_profile", default=None
 )
+# MCP toolsets requested for the current request (header ``X-Nunmai-Toolsets``, comma-separated ``mcp-<server>`` names).
+# ``None`` = header absent = the platform's configured toolsets, unchanged. Set by the profile-prefix middleware; read by
+# _run_agent and handed to _create_agent explicitly (ContextVars do not follow the executor hop).
+_api_request_toolsets: ContextVar[Optional[List[str]]] = ContextVar(
+    "api_server_request_toolsets", default=None
+)
+
+
+def _parse_toolsets_header(request: Any) -> Optional[List[str]]:
+    try:
+        raw = request.headers.get("X-Nunmai-Toolsets")
+    except Exception:
+        return None
+    if raw is None:
+        return None
+    return [t.strip() for t in str(raw).split(",") if t.strip()][:200]
+
+
+def _apply_request_toolsets(
+    enabled: List[str], requested: List[str], profile: Optional[str]
+) -> List[str]:
+    """Per-request MCP toolset selection (used by the Nunmai Platform for its per-agent tool picker and for personal
+    connectors). Non-MCP toolsets are untouched. An ``mcp-*`` toolset is honoured when it is already enabled for this
+    platform, or when it belongs to the request's own profile namespace (``mcp-<profile>__...``), which is how the platform
+    names an organisation's servers, including one person's own connectors (``mcp-<profile>__<system>__u<id>``). Anything
+    else is dropped, so a caller can never reach another profile's servers. An empty list means "no MCP tools this turn"."""
+    keep = [t for t in enabled if not str(t).startswith("mcp-")]
+    own_prefix = f"mcp-{profile}__" if profile else None
+    allowed = set()
+    for t in requested:
+        t = str(t)
+        if not t.startswith("mcp-"):
+            continue
+        if t in enabled or (own_prefix and t.startswith(own_prefix)):
+            allowed.add(t)
+    return sorted(set(keep) | allowed)
+
+
 _api_request_browser_control_principal: ContextVar[str] = ContextVar(
     "api_server_browser_control_principal", default=""
 )
@@ -2213,6 +2251,7 @@ class APIServerAdapter(BasePlatformAdapter):
                     status=404,
                 )
             token = _api_request_profile.set(profile)
+            toolsets_token = _api_request_toolsets.set(_parse_toolsets_header(request))
             try:
                 with self._profile_scope(profile):
                     resolved_profile = profile or "default"
@@ -2229,6 +2268,7 @@ class APIServerAdapter(BasePlatformAdapter):
                         _api_request_browser_control_principal.reset(principal_token)
             finally:
                 _api_request_profile.reset(token)
+                _api_request_toolsets.reset(toolsets_token)
 
         return profile_prefix_middleware
 
@@ -2909,6 +2949,8 @@ class APIServerAdapter(BasePlatformAdapter):
         session_model: Optional[str] = None,
         confirmed_runtime_lock: bool = False,
         user_message: Optional[Any] = None,
+        request_toolsets: Optional[List[str]] = None,
+        request_profile: Optional[str] = None,
     ) -> Any:
         """
         Create an AIAgent instance using the gateway's runtime config.
@@ -3175,6 +3217,10 @@ class APIServerAdapter(BasePlatformAdapter):
 
         user_config = _load_gateway_config()
         enabled_toolsets = sorted(_get_platform_tools(user_config, "api_server"))
+        if request_toolsets is not None:
+            enabled_toolsets = _apply_request_toolsets(
+                enabled_toolsets, request_toolsets, request_profile
+            )
 
         max_iterations = _current_max_iterations()
 
@@ -7395,6 +7441,7 @@ class APIServerAdapter(BasePlatformAdapter):
         # run_in_executor threads, so the profile scope must be re-entered
         # inside _run() from this explicit value.
         request_profile = _api_request_profile.get()
+        request_toolsets = _api_request_toolsets.get()
         request_browser_control_principal = (
             _api_request_browser_control_principal.get()
         )
@@ -7432,6 +7479,8 @@ class APIServerAdapter(BasePlatformAdapter):
                         session_model=session_model,
                         confirmed_runtime_lock=confirmed_runtime_lock,
                         user_message=user_message,
+                        request_toolsets=request_toolsets,
+                        request_profile=request_profile,
                     )
                     if agent_ref is not None:
                         agent_ref[0] = agent
