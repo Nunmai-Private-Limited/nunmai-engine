@@ -102,6 +102,20 @@ def is_binary(data: bytes) -> bool:
     return b"\x00" in data[:8000]
 
 
+# The MoA provider is what Nunmai sells as its multi-model brain, so its DISPLAY name is the product
+# name. This cannot be a POST_REPLACEMENT: the result, "Nunmai Agent", is exactly what the
+# "Nunmai Agent" -> "Nunmai Engine" rule below rewrites, so a second run of this script would turn the
+# MoA name into "Nunmai Engine". Instead the phrase is swapped for its final value and stashed BEFORE
+# the brand pass, and restored after — which also makes it idempotent, because an already-renamed
+# "Nunmai Agent" is stashed on the next run too. The `moa` slug, the /moa command and every _moa_
+# identifier are untouched; only what a person reads changes.
+MOA_DISPLAY = [
+    (re.compile(r"Mixture of Agents \(MoA\)"), "Nunmai Agent (multi-model)"),
+    (re.compile(r"\bMixture of Agents\b"), "Nunmai Agent"),
+    (re.compile(r"\bNunmai Agent\b"), "Nunmai Agent"),
+]
+
+
 def rebrand_text(text: str) -> str:
     keep: list[str] = []
 
@@ -109,6 +123,12 @@ def rebrand_text(text: str) -> str:
         keep.append(m.group(0))
         return f"\x00KEEP{len(keep) - 1}\x00"
 
+    def stash_literal(value: str) -> str:
+        keep.append(value)
+        return f"\x00KEEP{len(keep) - 1}\x00"
+
+    for rx, final in MOA_DISPLAY:
+        text = rx.sub(lambda _m, _f=final: stash_literal(_f), text)
     text = PROTECT_RE.sub(stash, text)
     for rx, rep in REPLACEMENTS:
         text = rx.sub(rep, text)
@@ -141,7 +161,9 @@ def main() -> int:
                 data = p.read_bytes()
             except OSError:
                 continue
-            if is_binary(data) or not re.search(rb"hermes|nunmai[ -]agent|nous", data, re.IGNORECASE):
+            # "mixture of agents" is here because a file may carry ONLY that phrase and no old name at all;
+            # without it those files are never opened and the MoA display rename silently misses them.
+            if is_binary(data) or not re.search(rb"hermes|nunmai[ -]agent|nous|mixture of agents", data, re.IGNORECASE):
                 continue
             try:
                 text = data.decode("utf-8")

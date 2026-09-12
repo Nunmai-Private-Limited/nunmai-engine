@@ -8,7 +8,7 @@ def build_moa_parser(subparsers) -> None:
     from nunmai_cli.moa_cmd import cmd_moa
 
     moa_parser = subparsers.add_parser(
-        "moa", help="Configure Mixture of Agents provider/model slots",
+        "moa", help="Configure Nunmai Agent provider/model slots",
         description="Configure the provider/model set used by /moa <prompt>.")
     moa_subparsers = moa_parser.add_subparsers(dest="moa_command")
     moa_subparsers.add_parser("list", aliases=["ls"], help="Show current MoA model slots")

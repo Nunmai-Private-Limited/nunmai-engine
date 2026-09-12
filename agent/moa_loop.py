@@ -179,7 +179,7 @@ _REFERENCE_TOOL_RESULT_BUDGET = 4000
 # Reference system prompt: without this framing a reference assumes it is the acting
 # agent and refuses ("I can't access repositories") or tries to call tools.
 _REFERENCE_SYSTEM_PROMPT = (
-    "You are a reference advisor in a Mixture of Agents (MoA) process. You are "
+    "You are a reference advisor in a Nunmai Agent (multi-model) process. You are "
     "NOT the acting agent and you do NOT execute anything: you cannot call "
     "tools, run commands, browse, or access files, repositories, or URLs, and "
     "you should not try to or apologize for being unable to. A separate "
@@ -844,14 +844,14 @@ def aggregate_moa_context(
         # Skip the aggregator: synthesizing over nothing can block for the full provider timeout.
         logger.warning("MoA: all %d reference(s) failed — skipping aggregator synthesis", len(reference_outputs))
         return (
-            "[Mixture of Agents context — all reference models failed. "
+            "[Nunmai Agent context — all reference models failed. "
             "Proceeding without aggregated guidance.]\n"
             f"References: {_slot_labels(reference_models)}\n\n"
             f"{degraded or '[Reference models unavailable]'}"
         )
 
     synth_prompt = (
-        "You are the aggregator in a Mixture of Agents process. Synthesize the "
+        "You are the aggregator in a Nunmai Agent process. Synthesize the "
         "reference responses into concise, actionable guidance for the main "
         "Nunmai agent. Focus on next steps, tool-use strategy, risks, and any "
         "disagreements. Do not answer the user directly unless that is all that "
@@ -878,7 +878,7 @@ def aggregate_moa_context(
         synthesis = ""
 
     return (
-        "[Mixture of Agents context — use this as private guidance for the "
+        "[Nunmai Agent context — use this as private guidance for the "
         "normal Nunmai agent loop. You may call tools, continue reasoning, or "
         "finish normally.]\n"
         f"Aggregator: {agg_label}\n"
@@ -1282,7 +1282,7 @@ class MoAChatCompletions:
             reference_outputs, self._privacy_mode == "full", degraded_reference_policy
         )
         header = (
-            "[Mixture of Agents reference context]\n"
+            "[Nunmai Agent reference context]\n"
             f"Preset: {self.preset_name}\n"
             f"Aggregator/acting model: {_slot_label(aggregator)}\n"
         )

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 7
-title: "Mixture of Agents"
-description: "Create named MoA presets that appear as selectable models under the Mixture of Agents provider"
+title: "Nunmai Agent"
+description: "Create named MoA presets that appear as selectable models under the Nunmai Agent provider"
 ---
 
-# Mixture of Agents
+# Nunmai Agent
 
-Mixture of Agents is a virtual model provider. Each named MoA preset appears as a selectable model under the `moa` provider.
+Nunmai Agent is a virtual model provider. Each named MoA preset appears as a selectable model under the `moa` provider.
 
 When you select a MoA preset, the preset's aggregator is the acting model. It is the model that writes the assistant response and emits tool calls. Reference models run first and provide analysis for the aggregator to use.
 
@@ -24,7 +24,7 @@ You can select a preset through the normal model picker surfaces:
 MoA presets are selectable on **every Nunmai surface**, because MoA is a normal provider in the model system:
 
 - **CLI / gateway / TUI `/model`** — `/model <preset> --provider moa`, or `/model --provider moa` for the default preset. A bare `/model <preset>` also works when the name exactly matches a configured preset.
-- **`nunmai model`** and the **Dashboard model picker** — a `Mixture of Agents` provider row appears with your preset names as its models.
+- **`nunmai model`** and the **Dashboard model picker** — a `Nunmai Agent` provider row appears with your preset names as its models.
 - **Desktop GUI app** — the model dropdown shows an `MoA presets` section; selecting one (`MoA: <preset>`) switches the active model to that preset. The Desktop settings panel also creates and edits presets.
 
 Configured presets therefore show up wherever you would pick any other model.
@@ -45,7 +45,7 @@ Nunmai temporarily switches to the default MoA preset for that one turn, sends t
 
 Bare `/moa` (no prompt) just prints usage.
 
-To **switch** to a MoA preset for the rest of the session, select it from the model picker — MoA presets appear under a `Mixture of Agents` provider in every model-selection surface (see above). `/moa` is deliberately not a model switch, so a normal prompt can never accidentally change your model.
+To **switch** to a MoA preset for the rest of the session, select it from the model picker — MoA presets appear under a `Nunmai Agent` provider in every model-selection surface (see above). `/moa` is deliberately not a model switch, so a normal prompt can never accidentally change your model.
 
 ## How it works in the agent loop
 
@@ -65,8 +65,8 @@ Because MoA is selected through the normal model system, it composes automatical
 
 You can configure named MoA presets from:
 
-- Dashboard → Models → Model Settings → Mixture of Agents
-- Desktop app → Settings → Model → Mixture of Agents
+- Dashboard → Models → Model Settings → Nunmai Agent
+- Desktop app → Settings → Model → Nunmai Agent
 - `nunmai moa configure [name]`
 - `config.yaml`
 

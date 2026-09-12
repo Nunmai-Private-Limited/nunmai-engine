@@ -101,7 +101,7 @@ def _model_flow_ai_gateway(config, current_model=""):
 
 
 def _model_flow_moa(config, current_model=""):
-    """Mixture of Agents virtual provider: pick a preset (list always shown, even with one entry),
+    """Nunmai Agent virtual provider: pick a preset (list always shown, even with one entry),
     persist it, print the breakdown. No credential step — presets reference configured providers."""
     from nunmai_cli.auth import _save_model_choice
     from nunmai_cli.moa_config import normalize_moa_config
@@ -123,7 +123,7 @@ def _model_flow_moa(config, current_model=""):
         rows.append(f"{n}  (agg {agg_label}, {ref_count} refs){suffix}")
     default_idx = names.index(default_name) if default_name in names else 0
 
-    title = "Select a Mixture of Agents preset:"
+    title = "Select a Nunmai Agent preset:"
     idx = _curses_choice(title, rows, default_idx)
     if idx is None:
         _print_numbered(title, rows, default_idx)
@@ -151,7 +151,7 @@ def _model_flow_moa(config, current_model=""):
     _save_model_choice(selected_name)
 
     preset = presets[selected_name]
-    _say("", f"Default model set to: {selected_name} (via Mixture of Agents)", f"  Preset: {selected_name}", "  Reference models:")
+    _say("", f"Default model set to: {selected_name} (via Nunmai Agent)", f"  Preset: {selected_name}", "  Reference models:")
     for i, slot in enumerate(preset.get("reference_models") or [], start=1):
         print(f"    {i}. {slot.get('provider')}:{slot.get('model')}")
     agg = preset.get("aggregator") or {}

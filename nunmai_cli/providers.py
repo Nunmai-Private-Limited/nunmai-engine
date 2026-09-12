@@ -142,7 +142,7 @@ ALIASES: Dict[str, str] = {alias: canon for canon, aliases in _ALIAS_GROUPS.item
 # -- Display labels for providers not in the models.dev catalog ---------------
 
 _LABEL_OVERRIDES: Dict[str, str] = {
-    "moa": "Mixture of Agents", "nous": "Nunmai Portal", "openai-codex": "ChatGPT or Codex Subscription",
+    "moa": "Nunmai Agent", "nous": "Nunmai Portal", "openai-codex": "ChatGPT or Codex Subscription",
     "copilot-acp": "GitHub Copilot ACP", "stepfun": "StepFun Step Plan", "xiaomi": "Xiaomi MiMo", "gmi": "GMI Cloud",
     "upstage": "Upstage Solar", "actual": "Actual Computer", "tencent-tokenhub": "Tencent TokenHub",
     "nebius-token-factory": "Nebius Token Factory", "tencent-tokenplan": "Tencent TokenPlan", "lmstudio": "LM Studio",

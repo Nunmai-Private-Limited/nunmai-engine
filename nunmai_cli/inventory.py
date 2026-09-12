@@ -742,7 +742,7 @@ def _moa_provider_row(current_provider: str = "") -> dict | None:
         if not models:
             return None
         return _row(
-            "moa", "Mixture of Agents", (current_provider or "").lower() == "moa", models=models,
+            "moa", "Nunmai Agent", (current_provider or "").lower() == "moa", models=models,
             total_models=len(models), source="virtual", authenticated=True, auth_type="virtual",
             warning="Aggregator acts as the selected model; references provide analysis before each call.")
     except Exception:

@@ -881,7 +881,7 @@ class GatewayInboundMixin:
     async def _hm_cmd_moa(self, event, source, _quick_key):
         # /moa is one-shot sugar only: run a single prompt through the default MoA preset, then
         # restore the prior model. To *switch* to a MoA preset for the session, pick it from the
-        # model picker (MoA presets surface as a virtual "Mixture of Agents" provider).
+        # model picker (MoA presets surface as a virtual "Nunmai Agent" provider).
         from nunmai_cli.moa_config import moa_usage, normalize_moa_config
         from nunmai_cli.config import load_config
 

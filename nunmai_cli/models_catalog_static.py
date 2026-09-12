@@ -313,7 +313,7 @@ CANONICAL_PROVIDERS: list[ProviderEntry] = [ProviderEntry(*row) for row in (
     ("nous", "Nunmai Portal", "Nunmai Portal (Everything your agent needs, 300+ models with bundled tool use)"),
     ("fireworks", "Fireworks AI", "Fireworks AI (OpenAI-compatible direct model API)"),
     ("openrouter", "OpenRouter", "OpenRouter (Pay-per-use API aggregator)"),
-    ("moa", "Mixture of Agents", "Mixture of Agents (named presets; aggregator acts after reference models)"),
+    ("moa", "Nunmai Agent", "Nunmai Agent (named presets; aggregator acts after reference models)"),
     ("novita", "NovitaAI", "NovitaAI (Cloud: Model API, Agent Sandbox, GPU Cloud)"),
     ("lmstudio", "LM Studio", "LM Studio (Local desktop app with built-in model server)"),
     ("anthropic", "Anthropic", "Anthropic (Claude models via API key or Claude Code)"),

@@ -40,7 +40,7 @@ nunmai [global-options] <command> [subcommand/options]
 |---------|---------|
 | `nunmai chat` | Interactive or one-shot chat with the agent. |
 | `nunmai model` | Interactively choose the default provider and model. |
-| `nunmai moa` | Configure named Mixture of Agents presets selectable from the model picker. |
+| `nunmai moa` | Configure named Nunmai Agent presets selectable from the model picker. |
 | `nunmai fallback` | Manage fallback providers tried when the primary model errors. |
 | `nunmai gateway` | Run or manage the messaging gateway service. |
 | `nunmai proxy` | Local OpenAI-compatible proxy that attaches OAuth provider credentials. See [Subscription Proxy](../user-guide/features/subscription-proxy.md). |
@@ -1359,7 +1359,7 @@ See [Curator](../user-guide/features/curator.md) for behavior and config.
 
 ## `nunmai moa`
 
-Configure named Mixture of Agents presets. Presets appear as selectable models under a `Mixture of Agents` provider in every model picker; `/moa <prompt>` runs one prompt through the default preset.
+Configure named Nunmai Agent presets. Presets appear as selectable models under a `Nunmai Agent` provider in every model picker; `/moa <prompt>` runs one prompt through the default preset.
 
 ```bash
 nunmai moa list

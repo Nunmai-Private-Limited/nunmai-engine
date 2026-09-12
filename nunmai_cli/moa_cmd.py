@@ -1,4 +1,4 @@
-"""CLI helpers for configuring Mixture of Agents."""
+"""CLI helpers for configuring Nunmai Agent."""
 
 from __future__ import annotations
 
@@ -71,7 +71,7 @@ def _format_slot(slot: dict[str, Any]) -> str:
 
 def _print_config(config: dict[str, Any]) -> None:
     cfg = _moa_section(config)
-    print("Mixture of Agents presets")
+    print("Nunmai Agent presets")
     print(f"Default: {cfg['default_preset']}")
     print(f"Active in config: {cfg.get('active_preset') or '(off)'}")
     for name, preset in cfg["presets"].items():
@@ -148,7 +148,7 @@ _SUBCOMMANDS = {
 
 
 def cmd_moa(args) -> None:
-    """Manage Mixture of Agents model presets."""
+    """Manage Nunmai Agent model presets."""
     cfg = load_config()
     sub = getattr(args, "moa_command", None) or "list"
     handler = _SUBCOMMANDS.get(sub)

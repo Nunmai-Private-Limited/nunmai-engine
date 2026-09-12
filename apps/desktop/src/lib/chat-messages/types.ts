@@ -167,11 +167,11 @@ export type GatewayEventPayload = {
   // Lets the desktop app map runtime→stored for background sessions it hasn't
   // opened, so the sidebar working indicator updates without opening the chat.
   stored_session_id?: string
-  // moa.reference / moa.aggregating (Mixture of Agents per-model relay)
+  // moa.reference / moa.aggregating (Nunmai Agent per-model relay)
   label?: string
   index?: number
   aggregator?: string
-  // moa.progress / moa.phase (Mixture of Agents fan-out progress relay)
+  // moa.progress / moa.phase (Nunmai Agent fan-out progress relay)
   refs_done?: number
   refs_total?: number
   phase?: string

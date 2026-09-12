@@ -444,7 +444,7 @@ Profiles 使用 `~/.nunmai/profiles/<name>/`，布局相同。
 | `feishu_drive` | 飞书云盘工具 |
 | `yuanbao` | 元宝集成工具 |
 | `rl` | 强化学习工具（默认关闭） |
-| `moa` | Mixture of Agents（默认关闭） |
+| `moa` | Nunmai Agent（默认关闭） |
 
 完整枚举位于 `toolsets.py` 的 `TOOLSETS` 字典中；`_NUNMAI_CORE_TOOLS` 是大多数平台继承的默认工具包。
 

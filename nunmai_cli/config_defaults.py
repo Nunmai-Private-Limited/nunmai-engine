@@ -1294,7 +1294,7 @@ DEFAULT_CONFIG = {
         "self_paced_floor_seconds": 60,  # Self-paced cadence bounds (seconds).
         "self_paced_ceiling_seconds": 900,
     },
-    # Mixture of Agents — named presets used by /moa. A preset is an execution mode around the main
+    # Nunmai Agent — named presets used by /moa. A preset is an execution mode around the main
     # model, not a model itself: references + aggregator synthesize private guidance before each
     # main-model iteration.
     "moa": {

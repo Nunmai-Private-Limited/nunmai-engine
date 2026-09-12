@@ -28,7 +28,7 @@ describe('requestModelOptions', () => {
     const gatewayPayload = {
       model: 'BeastMode',
       provider: 'moa',
-      providers: [{ models: ['BeastMode'], name: 'Mixture of Agents', slug: 'moa' }]
+      providers: [{ models: ['BeastMode'], name: 'Nunmai Agent', slug: 'moa' }]
     }
 
     const gateway = {
@@ -278,7 +278,7 @@ describe('reconcileSelectionAfterCatalogRefresh', () => {
     models: ['deepseek-v4-flash', 'doubao-seed-2.0-pro']
   }
 
-  const moa = { name: 'Mixture of Agents', slug: 'moa', models: ['default'] }
+  const moa = { name: 'Nunmai Agent', slug: 'moa', models: ['default'] }
 
   const openrouter = {
     models: ['glm-4.5-air', 'gpt-5.5'],

@@ -234,7 +234,7 @@ def _slot_problem(slot: Any) -> str | None:
     # MoA is a virtual provider whose presets are themselves MoA runs; allowing one as a slot
     # would create a recursive MoA tree that the runtime guards only catch mid-turn.
     if provider.lower() == "moa":
-        return "the Mixture of Agents provider cannot be used inside a preset (recursive MoA)"
+        return "the Nunmai Agent provider cannot be used inside a preset (recursive MoA)"
     return None
 
 
