@@ -341,34 +341,155 @@ class CLIAgentSetupMixin:
             return bool(base_url)
         return _keyless_custom_base(base_url)
 
+    def _run_brain_wizard(self) -> None:
+        """Run the `brain` wizard on the real terminal.
+
+        Spawned as a subprocess bound to /dev/tty so its prompts are immune to whatever state the chat
+        process left stdin in (terminal probes, prompt_toolkit). Falls back to in-process when there is
+        no controlling tty (tests, CI, Windows without a console)."""
+        import os as _os
+        import subprocess as _sp
+        import sys as _sys
+        from types import SimpleNamespace
+        in_proc = "pytest" in _sys.modules or _os.environ.get("NUNMAI_BRAIN_INPROC") == "1"
+        if not in_proc and _os.name != "nt" and _os.path.exists("/dev/tty"):
+            try:
+                with open("/dev/tty", "rb", buffering=0) as tty_in:
+                    rc = _sp.call(
+                        [_sys.executable, "-m", "nunmai_cli.main", "brain"],
+                        stdin=tty_in,
+                        env={**_os.environ, "NUNMAI_NO_AUTO_UPDATE": "1"},
+                    )
+                if rc != 0:
+                    raise SystemExit("")
+                return
+            except OSError:
+                pass          # no usable tty - fall through to in-process
+        from nunmai_cli.brain_cmd import cmd_brain
+        cmd_brain(SimpleNamespace(providers=None, skip_connect=False))
+
+    def _handle_brain_command(self):
+        """/brain — connect AI accounts (primary + fallbacks), then switch the live session."""
+        # The wizard reads from the terminal with plain input().  Slash commands
+        # run on the process_loop daemon thread while prompt_toolkit still owns
+        # stdin (raw mode + its own reader), so a bare input() there blocks
+        # forever and every later message queues behind it — the chat looks
+        # frozen.  Hand the terminal over properly: run the wizard on the app
+        # loop inside run_in_terminal (cooked mode, renderer paused), via the
+        # /dev/tty subprocess wrapper, and wait for it from this thread.
+        import asyncio
+        from cli import _cprint
+        import inspect
+        import threading
+
+        outcome: dict = {}
+
+        def _wizard() -> None:
+            try:
+                self._run_brain_wizard()
+            except SystemExit as exc:
+                outcome["error"] = str(exc.code) if exc.code else ""
+            except (KeyboardInterrupt, EOFError):
+                outcome["error"] = "Cancelled."
+            except Exception as exc:  # pragma: no cover - defensive
+                outcome["error"] = f"Setup failed: {exc}"
+
+        app = getattr(self, "_app", None)
+        try:
+            app_loop = app.loop if app else None
+        except Exception:
+            app_loop = None
+        in_main_thread = threading.current_thread() is threading.main_thread()
+
+        if app and app_loop is not None and not in_main_thread:
+            done = threading.Event()
+
+            def _schedule() -> None:
+                from prompt_toolkit.application import run_in_terminal
+
+                was_visible = self._status_bar_visible
+                self._status_bar_visible = False
+                self._invalidate()
+
+                def _finish(*_a) -> None:
+                    self._status_bar_visible = was_visible
+                    self._invalidate()
+                    done.set()
+
+                try:
+                    res = run_in_terminal(_wizard)
+                except Exception:
+                    _wizard()
+                    _finish()
+                    return
+                # prompt_toolkit's run_in_terminal returns an ALREADY-scheduled
+                # Task (it ends in ``ensure_future(run())``), not a bare
+                # coroutine. Both are awaitable, but create_task() accepts only
+                # coroutines and raises "a coroutine was expected" on a Task —
+                # which crashed the event loop after the wizard had already
+                # finished successfully, and left ``done.wait()`` below blocked
+                # forever because _finish never ran.
+                try:
+                    if asyncio.isfuture(res):
+                        res.add_done_callback(_finish)
+                    elif inspect.isawaitable(res):
+                        app_loop.create_task(res).add_done_callback(_finish)
+                    else:
+                        _finish()
+                except Exception:
+                    # Never leave the waiter hanging: releasing the event is
+                    # what lets the calling thread recover.
+                    _finish()
+
+            try:
+                app_loop.call_soon_threadsafe(_schedule)
+            except Exception:
+                _wizard()
+            else:
+                done.wait()
+        elif app and in_main_thread:
+            from prompt_toolkit.application import run_in_terminal
+            try:
+                run_in_terminal(_wizard)
+            except Exception:
+                _wizard()
+        else:
+            _wizard()
+
+        if "error" in outcome:
+            if outcome["error"]:
+                _cprint(f"  ✗ {outcome['error']}")
+            return
+        try:
+            from nunmai_cli.config import load_config
+            m = load_config().get("model") or {}
+            if m.get("default") and m.get("provider"):
+                self._handle_model_switch(f"/model {m['default']} --provider {m['provider']} --session")
+        except Exception as exc:
+            _cprint(f"  Restart nunmai to start using the new brain ({exc}).")
+
     def _offer_first_run_setup(self) -> bool:
         """Offer the provider picker when no provider is configured at all (interactive
         startup, TTY). Runs the same flow as ``nunmai model`` so onboarding has a single
         source of truth. True when a provider was configured."""
         from cli import _cprint, logger
         _cprint("")
-        _cprint("◆ No inference provider is configured yet — let's fix that.")
-        _cprint("  You'll pick a provider (Nunmai Portal OAuth is the fastest; "
-                "no API key needed) and a model.")
+        _cprint("◆ No AI connected yet. Let's connect your AI account (Ctrl+C to skip).")
         try:
-            answer = input("  Set up a provider now? [Y/n]: ").strip().lower()
+            self._run_brain_wizard()
         except (KeyboardInterrupt, EOFError):
             print()
-            answer = "n"
-        if answer in {"n", "no"}:
-            _cprint("  Skipped. Run 'nunmai model' or 'nunmai setup' any time.")
+            _cprint("  Skipped. Type /brain any time to connect an AI account.")
             return False
-        try:
-            from nunmai_cli.main import select_provider_and_model
-            select_provider_and_model()
-        except (KeyboardInterrupt, EOFError, SystemExit):
-            print()
-            _cprint("  Setup cancelled. Run 'nunmai model' any time.")
+        except SystemExit as exc:
+            if exc.code:
+                _cprint(f"  {exc.code}")
+            _cprint("  Type /brain any time to connect an AI account.")
             return False
         except Exception as exc:
-            logger.debug("first-run provider setup failed: %s", exc)
-            _cprint(f"  ⚠️  Provider setup failed: {exc}")
-            _cprint("  Run 'nunmai model' to try again.")
+            logger.debug("first-run brain setup failed: %s", exc)
+            _cprint(f"  ⚠️  Setup failed: {exc}")
+            _cprint("  Type /brain to try again.")
             return False
 
         # Re-sync CLI state from what the picker persisted so the next turn uses it without a restart.
@@ -387,7 +508,7 @@ class CLIAgentSetupMixin:
         if self._runtime_credentials_ready():
             _cprint("  ✓ Provider configured — you're ready to chat.")
             return True
-        _cprint("  Provider setup didn't complete. Run 'nunmai model' to retry.")
+        _cprint("  Setup didn't complete. Type /brain to retry.")
         return False
 
     def _resolve_turn_agent_config(self, user_message: str) -> dict:
