@@ -1796,11 +1796,25 @@ class _AnthropicCompletionsAdapter:
         _nr = get_transport("anthropic_messages").normalize_response(response, strip_tool_prefix=self._is_oauth)
         usage = None
         if hasattr(response, "usage") and response.usage:
-            prompt_tokens = getattr(response.usage, "input_tokens", 0) or 0
-            completion_tokens = getattr(response.usage, "output_tokens", 0) or 0
+            # Anthropic bills input_tokens (uncached) + cache_read_input_tokens +
+            # cache_creation_input_tokens, but OpenAI's prompt_tokens is the TOTAL prompt. Without
+            # adding the cache buckets back, every cached call — the common case once prompt caching
+            # is on — reports a tiny prompt, and MoA advisor/aggregator accounting undercounts.
+            _u = response.usage
+            input_tokens = getattr(_u, "input_tokens", 0) or 0
+            cache_read = getattr(_u, "cache_read_input_tokens", 0) or 0
+            cache_write = getattr(_u, "cache_creation_input_tokens", 0) or 0
+            prompt_tokens = input_tokens + cache_read + cache_write
+            completion_tokens = getattr(_u, "output_tokens", 0) or 0
             usage = SimpleNamespace(
                 prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
-                total_tokens=getattr(response.usage, "total_tokens", 0) or (prompt_tokens + completion_tokens),
+                total_tokens=prompt_tokens + completion_tokens,
+                # Keep the native buckets so normalize_usage() can split cache reads and writes.
+                prompt_tokens_details=SimpleNamespace(cached_tokens=cache_read),
+                input_tokens=input_tokens,
+                output_tokens=completion_tokens,
+                cache_read_input_tokens=cache_read,
+                cache_creation_input_tokens=cache_write,
             )
         # ToolCall already duck-types as OpenAI shape via properties.
         choice = SimpleNamespace(
