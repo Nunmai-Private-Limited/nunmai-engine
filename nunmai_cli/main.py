@@ -362,6 +362,7 @@ from nunmai_cli.subcommands.mcp import build_mcp_parser
 from nunmai_cli.subcommands.claw import build_claw_parser
 from nunmai_cli.subcommands.vault import build_vault_parser
 from nunmai_cli.subcommands.moa import build_moa_parser
+from nunmai_cli.subcommands.brain import build_brain_parser
 from nunmai_cli.subcommands.fallback import build_fallback_parser
 from nunmai_cli.subcommands.worktree import build_worktree_parser
 from nunmai_cli.subcommands.browser import build_browser_parser
@@ -2633,6 +2634,7 @@ _BUILTIN_SUBCOMMANDS = frozenset(
     {
         "acp", "approvals", "auth", "backup", "bundles", "checkpoints", "claw", "completion",
         "computer-use",
+        "brain",
         "config", "console", "cron", "curator", "dashboard", "serve", "debug", "doctor",
         "dump", "egress", "fallback", "gateway", "hooks", "import", "import-agent", "insights",
         "gui", "desktop", "kanban", "login", "logout", "logs", "lsp", "mcp", "memory", "migrate", "moa",
@@ -3208,6 +3210,7 @@ def _build_cli_parser():
 
     build_model_parser(subparsers, cmd_model=cmd_model)
     build_moa_parser(subparsers)
+    build_brain_parser(subparsers)
     build_fallback_parser(subparsers)
     build_worktree_parser(subparsers)
     build_browser_parser(subparsers)
