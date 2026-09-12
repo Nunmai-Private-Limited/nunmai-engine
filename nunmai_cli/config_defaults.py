@@ -1310,11 +1310,12 @@ DEFAULT_CONFIG = {
         "privacy_filter": "",
         "presets": {
             "default": {
-                "reference_models": [
-                    {"provider": "openai-codex", "model": "gpt-5.5"},
-                    {"provider": "openrouter", "model": "deepseek/deepseek-v4-pro"},
-                ],
-                "aggregator": {"provider": "openrouter", "model": "anthropic/claude-opus-4.8"},
+                # Credential-aware: resolves at read time to aggregator = your main model, references =
+                # your main model plus up to two other providers you have authenticated (their flagship
+                # model). Add explicit reference_models / aggregator here (or via the Dashboard or
+                # `nunmai moa configure`) to pin specific brains. The fixed openai-codex + openrouter
+                # pair only a few accounts can actually run was the old default.
+                "auto": True,
 
                 "enabled": True,
             }
