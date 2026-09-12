@@ -1,0 +1,27 @@
+name: model-router
+version: "0.1.0"
+manifest_version: 2
+description: "Per-turn brain routing: classify each user message (simple / normal / complex) and run the turn on a fast model, the main model, or the Nunmai Agent orchestrator — so small talk never pays orchestrator cost. Works on the CLI and every gateway platform."
+author: "Nunmai Research"
+hooks:
+  - resolve_turn_model
+config_schema:
+  enabled:
+    type: bool
+    default: true
+    description: "Master switch. When false the configured model is always used."
+  mode:
+    type: str
+    default: auto
+    description: "auto = heuristics + fast-model classifier; heuristic = heuristics only (no classifier call); off = disabled."
+  classifier_timeout:
+    type: float
+    default: 8
+    description: "Seconds to wait for the classifier model before falling back to the normal tier."
+  respect_session_override:
+    type: bool
+    default: true
+    description: "Skip routing while a /model session override is active for the session."
+  tiers:
+    type: dict
+    description: "Optional explicit targets: {simple: {provider, model}, normal: {provider, model}, complex: {provider, model}}. Omitted tiers are derived from the main model (simple = its fast sibling, normal = the main model, complex = the Nunmai Agent default preset)."
