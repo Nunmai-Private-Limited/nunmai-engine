@@ -3750,7 +3750,12 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         _session_rotated = isinstance(_eff_sid, str) and isinstance(session_id, str) and _eff_sid != session_id
         if getattr(agent, "_last_compaction_in_place", False) or _session_rotated:
             result["_compressed"] = True
-        if requested_runtime or route or confirmed_runtime_lock or (route_source and route_source != "global"):
+        # ...or when the resolve_turn_model hook moved this turn to another brain: nobody *asked* for
+        # that model, so none of the conditions above fire, and without this the response would name
+        # the requested model while a different one actually answered.
+        if (requested_runtime or route or confirmed_runtime_lock
+                or (route_source and route_source != "global")
+                or (getattr(agent, "_nunmai_api_runtime", {}) or {}).get("routed")):
             runtime = self._turn_runtime_metadata(
                 agent, route=route, requested_runtime=requested_runtime,
                 route_source=route_source, confirmed_runtime_lock=confirmed_runtime_lock)
