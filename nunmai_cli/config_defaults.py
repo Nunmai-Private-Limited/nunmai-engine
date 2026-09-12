@@ -1204,6 +1204,10 @@ DEFAULT_CONFIG = {
         "submit_mode": "direct",  # TUI: direct submits immediately; draft = editable transcript
         "max_recording_seconds": 120,
         "auto_tts": False,
+        # When a voice reply is delivered (auto-TTS on voice input, /voice on), suppress the separate
+        # text message: the user hears the answer and the chat is not doubled with a text wall. The
+        # full text stays in session history. Telegram captions still ride on the audio when eligible.
+        "voice_reply_only": False,
         # Desktop remote clients call STT/TTS providers DIRECTLY (config + key fetched over
         # authenticated REST at session start) instead of relaying via the gateway.
         "client_direct": True,

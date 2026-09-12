@@ -1899,6 +1899,10 @@ class BasePlatformAdapter(ABC):
     gateway_runner = None  # type: ignore[assignment]
 
     def __init__(self, config: PlatformConfig, platform: Platform):
+        # voice.voice_reply_only (pushed by GatewayRunner): when an auto-TTS voice reply is
+        # delivered, skip the separate text send for that turn.
+        self._voice_reply_only: bool = False
+        self._tts_audio_delivered_this_turn: bool = False
         self.config = config
         self.platform = platform
         self._message_handler: Optional[MessageHandler] = None
@@ -4116,6 +4120,8 @@ class BasePlatformAdapter(ABC):
         tts_result = await self.play_tts(
             chat_id=event.source.chat_id, audio_path=tts_path, caption=caption, metadata=metadata)
         record_delivery(tts_result)
+        if getattr(tts_result, "success", False):
+            self._tts_audio_delivered_this_turn = True
         return bool(caption and getattr(tts_result, "success", False))
 
     async def _record_delivery_obligation(
@@ -4480,6 +4486,7 @@ class BasePlatformAdapter(ABC):
                     _tts_paths, _tts_requested_path = await self._synthesize_auto_tts(text_content)
                 # TTS plays before text; generated files are removed afterwards.
                 _tts_caption_delivered = False
+                self._tts_audio_delivered_this_turn = False
                 for _tts_index, _tts_path in enumerate(_tts_paths):
                     try:
                         _tts_caption_delivered |= await self._play_tts_file(
@@ -4491,6 +4498,13 @@ class BasePlatformAdapter(ABC):
                 if not _tts_paths and _tts_requested_path is not None:
                     with contextlib.suppress(OSError):
                         os.remove(_tts_requested_path)
+                # voice.voice_reply_only: the voice note IS the reply, so skip the separate text
+                # bubble when audio actually reached the chat. Falls through to the normal text send
+                # when TTS failed, so the user never loses the answer.
+                if text_content and self._tts_audio_delivered_this_turn and self._voice_reply_only:
+                    logger.info("[%s] voice_reply_only: audio delivered, suppressing text send to %s",
+                                self.name, event.source.chat_id)
+                    text_content = ""
                 # Suspend the typing refresh before the first delivery attempt, not just in
                 # the turn's finally (#117300): if the final send stalls (platform accepted it
                 # but the HTTP ack never returns), control never reaches the finally, and

@@ -790,6 +790,18 @@ class GatewayAdapterLifecycleMixin:
         self.adapters[platform] = adapter
         self._sync_voice_mode_state_to_adapter(adapter)
         self._bind_voice_input_callback(adapter)
+        self._sync_voice_reply_only_to_adapter(adapter)
+
+    def _sync_voice_reply_only_to_adapter(self, adapter) -> None:
+        """Push ``voice.voice_reply_only`` onto the adapter: when a voice reply is delivered, the
+        adapter skips the separate text bubble for that turn."""
+        try:
+            from nunmai_cli.config import load_config
+            value = bool((load_config().get("voice") or {}).get("voice_reply_only", False))
+        except Exception:
+            value = False
+        if hasattr(adapter, "_voice_reply_only"):
+            adapter._voice_reply_only = value
 
     def _schedule_planned_restart_replay(self) -> None:
         """Replay the owed planned-restart notice after a reconnect, in the background: notification delivery
