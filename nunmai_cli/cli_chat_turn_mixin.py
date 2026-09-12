@@ -20,6 +20,60 @@ from typing import Optional
 
 
 class CLIChatTurnMixin:
+
+    def _apply_resolve_turn_model_hook(self, message) -> None:
+        """Let a ``resolve_turn_model`` plugin pick the model for this turn.
+
+        Mirrors ``/model --once``: the current runtime is snapshotted into
+        ``_pending_one_turn_model_restore`` and restored after the turn."""
+        from nunmai_cli.lifecycle import has_hook, invoke_hook
+        _log = logging.getLogger(__name__)
+
+        if not has_hook("resolve_turn_model"):
+            return
+        if getattr(self, "_pending_one_turn_model_restore", None):
+            return                      # an explicit /model --once already owns this turn
+        text = message
+        if isinstance(text, list):
+            text = "\n".join(
+                str(p.get("text") or "") for p in text
+                if isinstance(p, dict) and p.get("type") == "text"
+            )
+        results = invoke_hook(
+            "resolve_turn_model", surface="cli", text=text, model=self.model,
+            runtime={"provider": self.provider, "api_key": self.api_key,
+                     "base_url": self.base_url, "api_mode": self.api_mode},
+            session_key=self.session_id or "", has_session_override=False,
+        )
+        route = next((r for r in results or [] if isinstance(r, dict) and r.get("model")), None)
+        if not route:
+            return
+        rt = route.get("runtime") or {}
+        new_model = str(route["model"])
+        new_provider = rt.get("provider") or self.provider
+        if new_model == self.model and new_provider == self.provider:
+            return
+        snapshot = self._snapshot_model_runtime()
+        if getattr(self, "agent", None) is not None:
+            try:
+                self.agent.switch_model(
+                    new_model=new_model, new_provider=new_provider,
+                    api_key=rt.get("api_key") or "", base_url=rt.get("base_url") or "",
+                    api_mode=rt.get("api_mode") or "",
+                )
+            except Exception as exc:
+                _log.debug("resolve_turn_model: switch to %s/%s failed: %s", new_provider, new_model, exc)
+                return
+        # With no agent yet (first turn / -Q) the agent is built from these fields below, and the
+        # one-turn restore switches it back afterwards.
+        self.model = new_model
+        self.provider = new_provider
+        self.requested_provider = new_provider
+        for _k, _attr in (("api_key", "api_key"), ("base_url", "base_url"), ("api_mode", "api_mode")):
+            if rt.get(_k):
+                setattr(self, _attr, rt[_k])
+        self._pending_one_turn_model_restore = snapshot
+        _log.info("resolve_turn_model: cli -> %s/%s (%s)", new_provider, new_model, route.get("reason") or "")
     """chat() and its per-turn phase helpers."""
 
     def chat(self, message, images: list = None, voice_input: bool = False) -> Optional[str]:
@@ -311,6 +365,12 @@ class CLIChatTurnMixin:
         # Notes and voice prefix are API-local: the staged input stays the durable transcript
         # value so a close-path marker follows the same dict instead of a second user row.
         _persist_clean_user_message = message if (turn.voice_prefix or agent_message != message) else None
+        # Per-turn model routing (resolve_turn_model hook / model-router plugin). It stages a one-turn
+        # restore exactly like /model --once, so the restore below puts the configured model back.
+        try:
+            self._apply_resolve_turn_model_hook(agent_message)
+        except Exception:
+            logging.getLogger(__name__).debug("resolve_turn_model hook failed", exc_info=True)
         _one_turn_model_restore = getattr(self, "_pending_one_turn_model_restore", None)
         self._pending_one_turn_model_restore = None
         try:
