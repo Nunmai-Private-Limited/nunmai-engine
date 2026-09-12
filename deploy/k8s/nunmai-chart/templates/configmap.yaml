@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nunmai.name" . }}-seed
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+{{ .Values.config.configYaml | indent 4 }}
+{{- if .Values.config.soulMd }}
+  SOUL.md: |
+{{ .Values.config.soulMd | indent 4 }}
+{{- end }}
+{{- range $name, $content := .Values.config.extraFiles }}
+  {{ $name | replace "/" "__" }}: |
+{{ $content | indent 4 }}
+{{- end }}
+  seed.sh: |
+    #!/bin/sh
+    # Copy seed files into the data volume only when absent (engine owns them after).
+    set -e
+    cd /seed
+    for f in *; do
+      [ "$f" = "seed.sh" ] && continue
+      dest="/opt/data/$(echo "$f" | sed 's#__#/#g')"
+      if [ ! -e "$dest" ]; then mkdir -p "$(dirname "$dest")"; cp "$f" "$dest"; echo "seeded $dest"; fi
+    done
+    chown -R {{ .Values.uid }}:{{ .Values.gid }} /opt/data

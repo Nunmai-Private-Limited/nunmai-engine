@@ -1,0 +1,66 @@
+# One release == one customer. Install into its own namespace:
+#   helm upgrade --install acme deploy/k8s/nunmai-chart -n cust-acme --create-namespace -f deploy/k8s/customers/acme.yaml
+customer: demo
+
+image:
+  repository: ghcr.io/nunmai-private-limited/nunmai-engine
+  tag: "0.20.6"
+  pullPolicy: IfNotPresent
+imagePullSecrets: []          # e.g. [{name: ghcr-pull}] for a private image
+
+# API keys / messaging tokens. Either inline (rendered into a Secret) or an
+# existing Secret name. Keys become environment variables in the gateway.
+secrets:
+  existingSecret: ""
+  env: {}
+  # The engine talks ONLY to the Nunmai Portal (deploy/k8s/portal). Put the
+  # customer's portal virtual key here — the custom provider reads it from
+  # OPENROUTER_API_KEY (its default key slot). No vendor keys in customer pods.
+  #  OPENROUTER_API_KEY: sk-nunmai-portal-key-for-this-customer
+  #  TELEGRAM_BOT_TOKEN: ...
+
+# Seeded into /opt/data on first start only (the engine owns the files after
+# that; re-seed by deleting the file on the volume). Customisation lives here.
+config:
+  configYaml: |
+    _config_version: 39     # current schema; without it the engine treats the file as legacy
+    model:
+      provider: custom
+      base_url: http://litellm.nunmai-portal.svc.cluster.local:4000/v1
+      default: nunmai-smart          # alias routed by the portal (see deploy/k8s/portal)
+  soulMd: ""                  # persona / branding (SOUL.md); empty = engine default
+  extraFiles: {}              # filename -> content, e.g. "skills/acme-faq/SKILL.md": |...
+
+gateway:
+  enabled: true
+  args: ["gateway", "run"]
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits:   { cpu: "1",  memory: 1536Mi }
+  extraEnv: {}
+  nodeSelector: {}
+
+dashboard:
+  enabled: false              # web dashboard for the customer at https://<host>/
+  host: ""                    # e.g. acme.platform.nunmai.in (wildcard TLS from deploy/k8s/platform)
+  port: 9119
+  authSecret: ""              # Secret with NUNMAI_DASHBOARD_BASIC_AUTH_USERNAME / _PASSWORD (required)
+  ingress:
+    className: traefik
+    annotations: {}
+
+persistence:
+  size: 10Gi
+  storageClass: ""            # "" = cluster default (k3s local-path)
+
+uid: 10000
+gid: 10000
+
+quota:                        # per-namespace fair share
+  enabled: true
+  cpu: "2"
+  memory: 3Gi
+  pods: "10"
+
+networkPolicy:
+  enabled: true               # deny traffic from other namespaces

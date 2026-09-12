@@ -1,0 +1,40 @@
+{{- if .Values.dashboard.enabled }}
+# The image runs the dashboard as an s6 service inside the gateway pod when
+# NUNMAI_DASHBOARD=1 (see docker/s6-rc.d/dashboard). A non-loopback bind
+# requires an auth provider: basic-auth creds come from dashboard.authSecret.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nunmai.name" . }}-dashboard
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    nunmai.in/component: gateway
+  ports: [{ name: http, port: 80, targetPort: {{ .Values.dashboard.port }} }]
+{{- if .Values.dashboard.host }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "nunmai.name" . }}-dashboard
+  labels: {{- include "nunmai.labels" . | nindent 4 }}
+  {{- with .Values.dashboard.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.dashboard.ingress.className }}
+  tls:
+    - hosts: [{{ .Values.dashboard.host | quote }}]   # served by the platform wildcard default cert
+  rules:
+    - host: {{ .Values.dashboard.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "nunmai.name" . }}-dashboard
+                port: { name: http }
+{{- end }}
+{{- end }}
