@@ -132,7 +132,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
     CommandDef("plan", "Write a markdown implementation plan to .nunmai/plans/ without executing anything", "Session",
                args_hint="[task]"),
     CommandDef("moa", "Run one prompt through the default Nunmai Agent preset, then restore your model", "Session",
-               args_hint="<prompt>", busy_policy="reject", busy_handler="moa"),
+               aliases=("nunmai",), args_hint="<prompt>", busy_policy="reject", busy_handler="moa"),
     CommandDef("subgoal", "Add or manage extra criteria on the active goal", "Session",
                args_hint="[text | remove N | clear]", busy_policy="dispatch"),
     CommandDef("status", "Show session, model, token, and context info", "Session",
