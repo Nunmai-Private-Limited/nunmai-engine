@@ -162,6 +162,11 @@ def _new_backend(permission_mode: str) -> ComputerUseBackend:
     if backend_name in {"cua", "cua-driver", ""}:
         from tools.computer_use.cua_backend import CuaDriverBackend
         return CuaDriverBackend(permission_mode=permission_mode)
+    if backend_name == "nunmai-desktop":
+        # A desktop owned by another service (the Nunmai Platform's per-agent desktops), driven over HTTP
+        # rather than by a local driver.
+        from tools.computer_use.nunmai_desktop_backend import NunmaiDesktopBackend
+        return NunmaiDesktopBackend(permission_mode=permission_mode)
     if backend_name != "noop":
         raise RuntimeError(f"Unknown NUNMAI_COMPUTER_USE_BACKEND={backend_name!r}")
     return _NoopBackend()  # pragma: no cover
@@ -890,6 +895,11 @@ def check_computer_use_requirements() -> bool:
     """macOS/Windows/Linux + cua-driver binary (or env override). `nunmai computer-use doctor` names blocked checks."""
     if sys.platform not in ("darwin", "win32", "linux"):
         return False
+    # The nunmai-desktop backend drives a desktop owned by another service over HTTP, so the local
+    # cua-driver binary is irrelevant to whether it can run.
+    if os.environ.get("NUNMAI_COMPUTER_USE_BACKEND", "").lower() == "nunmai-desktop":
+        from tools.computer_use.nunmai_desktop_backend import nunmai_desktop_configured
+        return nunmai_desktop_configured()
     from tools.computer_use.cua_backend_driver import cua_driver_binary_available
     return cua_driver_binary_available()
 

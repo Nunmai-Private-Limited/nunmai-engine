@@ -1,0 +1,44 @@
+{
+  "name": "nunmai",
+  "version": "0.1.7",
+  "description": "Nunmai Engine \u2014 `npm i -g nunmai` installs the launcher; run `nunmai` to install the engine (all features and dependencies) and start it.",
+  "license": "MIT",
+  "homepage": "https://nunmai.in",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nunmai-Private-Limited/nunmai-engine.git",
+    "directory": "deploy/npm-bootstrap"
+  },
+  "bugs": "https://github.com/Nunmai-Private-Limited/nunmai-engine/issues",
+  "keywords": [
+    "nunmai",
+    "ai",
+    "agent",
+    "assistant",
+    "cli",
+    "claude",
+    "chatgpt",
+    "gemini",
+    "whatsapp",
+    "telegram"
+  ],
+  "bin": {
+    "nunmai": "bin/nunmai.js"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32",
+    "android"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

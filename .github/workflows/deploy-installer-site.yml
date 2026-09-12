@@ -1,0 +1,85 @@
+# Deploys the installer host (nunmai-engine.nunmai.in) whenever the canonical
+# installers or the site itself change on main. Without this, fixes to
+# scripts/install.ps1 / install.sh reached users only after a manual
+# `npm run deploy` from deploy/installer-site — deploy-site.yml only watches
+# website/**.
+#
+# Secrets (repo settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   — token with "Workers Scripts: Edit" (+ "Account
+#                            Settings: Read"); create at
+#                            https://dash.cloudflare.com/profile/api-tokens
+#                            using the "Edit Cloudflare Workers" template.
+#   CLOUDFLARE_ACCOUNT_ID  — the account that owns the nunmai.in zone.
+name: Deploy installer site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/install.sh'
+      - 'scripts/install.ps1'
+      - 'deploy/installer-site/**'
+      - '.github/workflows/deploy-installer-site.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-installer-site
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build (copy canonical installers into the site)
+        working-directory: deploy/installer-site
+        run: bash build.sh
+
+      - name: Deploy to Cloudflare
+        working-directory: deploy/installer-site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN secret is not set — cannot deploy the installer site." >&2
+            exit 1
+          fi
+          npx --yes wrangler@4 deploy
+
+      # The site sets Cache-Control max-age=300, so the edge can serve the
+      # previous version for up to 5 minutes after a deploy: poll until the
+      # live bytes match the checkout (which has the same CRLF/LF endings the
+      # deploy uploaded). Cloudflare bot protection returns 403 to bare curl
+      # from GitHub's datacenter IPs, so send a browser UA and, if it still
+      # refuses, warn instead of failing — the deploy step already succeeded.
+      - name: Verify the live installers match the repo
+        run: |
+          UA="Mozilla/5.0 (X11; Linux x86_64) nunmai-installer-site-verify"
+          for f in install.sh install.ps1; do
+            ok=0
+            for attempt in $(seq 1 13); do
+              code=$(curl -sSL -A "$UA" -H "Cache-Control: no-cache" -o "/tmp/$f" -w "%{http_code}" "https://nunmai-engine.nunmai.in/$f" || echo 000)
+              if [ "$code" = "403" ]; then
+                echo "::warning::Cloudflare returned 403 to the verifier for $f; live check skipped (deploy itself succeeded)."
+                ok=1; break
+              fi
+              if [ "$code" = "200" ] && cmp -s "/tmp/$f" "scripts/$f"; then
+                echo "$f: live matches repo (attempt $attempt)"; ok=1; break
+              fi
+              echo "$f: not yet live (HTTP $code, attempt $attempt/13); waiting 30s for the edge cache..."
+              sleep 30
+            done
+            if [ "$ok" != "1" ]; then
+              echo "::error::Live $f still does not match scripts/$f 6 minutes after deploy" >&2
+              exit 1
+            fi
+          done
