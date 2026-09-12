@@ -564,6 +564,12 @@ class OpenAICompatRoutesMixin:
         if err_msg:
             err_msg = _redact_api_error_text(err_msg)
         finish_reason = _finish_reason(completed, is_partial, is_failed, err_msg)
+        # Per-turn routing (model-router) can move a turn to another brain, so the response must name
+        # the model that ANSWERED, not the one that was asked for — metering and "answered by" both
+        # read this field.
+        answered_runtime = self._result_runtime(result, usage) or {}
+        if isinstance(answered_runtime.get("model"), str) and answered_runtime["model"]:
+            model_name = answered_runtime["model"]
         # Same #13437 identity contract as the SSE path: an explicit-header client is echoed
         # the stable id it sent; a fingerprint-derived (header-less) turn keeps reporting the
         # id the agent actually resolved, so headerless clients still learn where the turn went.
@@ -591,6 +597,8 @@ class OpenAICompatRoutesMixin:
         if is_partial or is_failed or not completed:
             response_data["nunmai"] = _nunmai_extras(
                 completed, is_partial, is_failed, err_msg, finish_reason)
+        if answered_runtime:
+            response_data["nunmai"] = {**(response_data.get("nunmai") or {}), "runtime": answered_runtime}
             response_headers["X-Nunmai-Completed"] = "false"
             response_headers["X-Nunmai-Partial"] = "true" if is_partial else "false"
             if err_msg:
@@ -674,13 +682,21 @@ class OpenAICompatRoutesMixin:
                 err_msg = err_msg or str(agent_error)
             finish_reason = _finish_reason(completed, is_partial, is_failed, err_msg, agent_error)
             finish_chunk = _chunk({}, finish_reason, usage=_chat_usage_payload(usage))
+            # Same contract as the non-streaming path: the finish chunk names the model that ANSWERED,
+            # which per-turn routing can change mid-flight, and carries the runtime that proves it.
+            answered_runtime = self._result_runtime(result, usage) or {}
+            if isinstance(answered_runtime.get("model"), str) and answered_runtime["model"]:
+                finish_chunk["model"] = answered_runtime["model"]
+            if answered_runtime:
+                finish_chunk["nunmai"] = {**(finish_chunk.get("nunmai") or {}), "runtime": answered_runtime}
             if finish_reason != "stop":
                 if err_msg:
                     finish_chunk["error"] = {
                         "message": err_msg,
                         "type": type(agent_error).__name__ if agent_error else "agent_error"}
-                finish_chunk["nunmai"] = _nunmai_extras(
-                    completed, is_partial, is_failed, err_msg, finish_reason)
+                finish_chunk["nunmai"] = {
+                    **(finish_chunk.get("nunmai") or {}),
+                    **_nunmai_extras(completed, is_partial, is_failed, err_msg, finish_reason)}
             await response.write(_sse_frame(finish_chunk))
             await response.write(b"data: [DONE]\n\n")
         except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, OSError):

@@ -2232,11 +2232,15 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         # Per-turn model routing (resolve_turn_model hook / model-router plugin) — the same seam the
         # native gateway applies in _resolve_turn_agent_config. Only when the caller passed the user's
         # message (chat/responses via the executor hop), and never against a confirmed runtime lock.
+        _pre_turn_model, _pre_turn_provider = model, runtime_kwargs.get("provider")
+        _turn_routed = False
         if user_message is not None and not confirmed_runtime_lock:
             model, runtime_kwargs = self._apply_resolve_turn_model_hook(
                 user_message, model, runtime_kwargs,
                 session_key=gateway_session_key or session_id or "",
                 has_session_override=bool(session_override))
+            _turn_routed = (model != _pre_turn_model) or (
+                (runtime_kwargs.get("provider") or "") != (_pre_turn_provider or ""))
         user_config = _load_gateway_config()
         enabled_toolsets = sorted(_get_platform_tools(user_config, "api_server"))
         max_iterations = _current_max_iterations()
@@ -2279,6 +2283,14 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             "provider": runtime_kwargs.get("provider") or getattr(agent, "provider", "") or "",
             "model": getattr(agent, "model", None) or model,
             "route_source": route_source}
+        if _turn_routed:
+            # The resolve_turn_model hook moved this turn to another brain. Say so, and keep what the
+            # caller asked for, so metering and "answered by" can both be truthful.
+            agent._nunmai_api_runtime["routed"] = True
+            agent._nunmai_api_runtime["requested"] = {
+                "provider": self._clean_runtime_id(request_provider or _pre_turn_provider or "", max_len=80),
+                "model": self._clean_runtime_id(request_model or _pre_turn_model or ""),
+            }
         return agent
 
     # -- HTTP handlers ----------------------------------------------------------------
