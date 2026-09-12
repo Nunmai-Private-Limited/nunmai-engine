@@ -45,6 +45,46 @@ def _prefix_names_served_profile(profile: str) -> bool:
 # Per-request /p/<profile>/ selection: set by the profile-prefix middleware, read by handlers.
 _api_request_profile: ContextVar[Optional[str]] = ContextVar(
     "api_server_request_profile", default=None)
+
+# MCP toolsets requested for the current request (header ``X-Nunmai-Toolsets``, comma-separated ``mcp-<server>``
+# names). ``None`` = header absent = the platform's configured toolsets, unchanged. Set by the profile-prefix
+# middleware; captured before the executor hop and handed to _create_agent explicitly, because ContextVars do
+# not follow run_in_executor threads.
+_api_request_toolsets: ContextVar[Optional[List[str]]] = ContextVar(
+    "api_server_request_toolsets", default=None
+)
+
+
+def _parse_toolsets_header(request: Any) -> Optional[List[str]]:
+    try:
+        raw = request.headers.get("X-Nunmai-Toolsets")
+    except Exception:
+        return None
+    if raw is None:
+        return None
+    return [t.strip() for t in str(raw).split(",") if t.strip()][:200]
+
+
+def _apply_request_toolsets(
+    enabled: List[str], requested: List[str], profile: Optional[str]
+) -> List[str]:
+    """Per-request MCP toolset selection (the Nunmai Platform's per-agent tool picker and personal connectors).
+    Non-MCP toolsets are untouched. An ``mcp-*`` toolset is honoured when it is already enabled for this platform,
+    or when it belongs to the request's own profile namespace (``mcp-<profile>__...``) — how the platform names an
+    organisation's servers, including one person's own connectors (``mcp-<profile>__<system>__u<id>``). Anything
+    else is dropped, so a caller can never reach another profile's servers. An empty list means "no MCP tools
+    this turn"."""
+    keep = [t for t in enabled if not str(t).startswith("mcp-")]
+    own_prefix = f"mcp-{profile}__" if profile else None
+    allowed = set()
+    for t in requested:
+        t = str(t)
+        if not t.startswith("mcp-"):
+            continue
+        if t in enabled or (own_prefix and t.startswith(own_prefix)):
+            allowed.add(t)
+    return sorted(set(keep) | allowed)
+
 _api_request_browser_control_principal: ContextVar[str] = ContextVar(
     "api_server_browser_control_principal", default="")
 _api_request_browser_control_transport_family: ContextVar[str] = ContextVar(
@@ -1496,6 +1536,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             if profile is _PROFILE_REJECTED:
                 return web.json_response({"error": "Unknown or unconfigured profile"}, status=404)
             token = _api_request_profile.set(profile)
+            toolsets_token = _api_request_toolsets.set(_parse_toolsets_header(request))
             try:
                 with self._profile_scope(profile):
                     resolved_profile = profile or "default"
@@ -1510,6 +1551,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                         _api_request_browser_control_principal.reset(principal_token)
             finally:
                 _api_request_profile.reset(token)
+                _api_request_toolsets.reset(toolsets_token)
         return profile_prefix_middleware
 
     def _http_route_table(self) -> List[tuple]:
@@ -2113,7 +2155,9 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         model_options: Optional[Dict[str, Any]] = None, route: Optional[Dict[str, Any]] = None,
         session_model: Optional[str] = None, confirmed_runtime_lock: bool = False,
         room_dispatch: Optional[Dict[str, Any]] = None,
-        room_execution_policy: Optional[Dict[str, Any]] = None) -> Any:
+        room_execution_policy: Optional[Dict[str, Any]] = None,
+        request_toolsets: Optional[List[str]] = None,
+        request_profile: Optional[str] = None) -> Any:
         """Create an AIAgent from the gateway runtime config + platform toolsets.
         ``gateway_session_key`` persists across transcripts (memory scope), unlike ``session_id``;
         ``route`` / ``session_model`` are mutually exclusive; ``confirmed_runtime_lock`` beats the
@@ -2147,6 +2191,10 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             policy = RoomExecutionPolicy.from_mapping(room_execution_policy or {})
             enabled_toolsets = list(policy.enabled_toolsets)
             max_iterations = policy.max_iterations
+        if request_toolsets is not None:
+            enabled_toolsets = _apply_request_toolsets(
+                enabled_toolsets, request_toolsets, request_profile
+            )
         # Reasoning resolves against the model that actually runs (per-model overrides), so only
         # after the precedence chain settles; an explicit request wins.
         if request_reasoning_config is None:
@@ -3668,6 +3716,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         loop = asyncio.get_running_loop()
         # ContextVars do not follow run_in_executor threads: capture here, re-enter in _run().
         request_profile = _api_request_profile.get()
+        request_toolsets = _api_request_toolsets.get()
         request_browser_control_principal = _api_request_browser_control_principal.get()
         request_browser_control_transport_family = _api_request_browser_control_transport_family.get()
 
@@ -3688,7 +3737,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                         tool_start_callback=tool_start_callback, tool_complete_callback=tool_complete_callback,
                         gateway_session_key=gateway_session_key, requested_model=requested_model,
                         requested_provider=requested_provider, model_options=model_options, route=route,
-                        session_model=session_model, confirmed_runtime_lock=confirmed_runtime_lock)
+                        session_model=session_model, confirmed_runtime_lock=confirmed_runtime_lock,
+                        request_toolsets=request_toolsets, request_profile=request_profile)
                     if agent_ref is not None:
                         agent_ref[0] = agent
                     if active_run_id:
