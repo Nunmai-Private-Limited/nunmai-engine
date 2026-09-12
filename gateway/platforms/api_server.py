@@ -2234,6 +2234,43 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         model = self._recover_or_record_model(model, runtime_kwargs, gateway_session_key)
         return model, session_override, request_model, request_provider
 
+    @staticmethod
+    def _apply_resolve_turn_model_hook(
+        user_message: Any, model: str, runtime_kwargs: Dict[str, Any], *,
+        session_key: str = "", has_session_override: bool = False,
+    ) -> tuple:
+        """Let a ``resolve_turn_model`` plugin pick this request's model/runtime. First valid result wins."""
+        try:
+            from nunmai_cli.lifecycle import has_hook, invoke_hook
+
+            if not has_hook("resolve_turn_model"):
+                return model, runtime_kwargs
+            text = user_message
+            if isinstance(text, list):
+                text = "\n".join(
+                    str(p.get("text") or "") for p in text
+                    if isinstance(p, dict) and p.get("type") == "text"
+                )
+            results = invoke_hook(
+                "resolve_turn_model", surface="gateway", text=text, model=model,
+                runtime={k: runtime_kwargs.get(k) for k in ("provider", "api_key", "base_url", "api_mode")},
+                session_key=session_key, has_session_override=has_session_override,
+            )
+            for res in results or []:
+                if not isinstance(res, dict) or not res.get("model"):
+                    continue
+                rt = res.get("runtime") or {}
+                new_provider = rt.get("provider") or runtime_kwargs.get("provider")
+                model = str(res["model"])
+                for key in ("provider", "api_key", "base_url", "api_mode"):
+                    if rt.get(key) is not None:
+                        runtime_kwargs[key] = rt[key]
+                runtime_kwargs["requested_provider"] = new_provider
+                break
+        except Exception:
+            logger.debug("resolve_turn_model hook failed (api_server)", exc_info=True)
+        return model, runtime_kwargs
+
     def _create_agent(
         self, ephemeral_system_prompt: Optional[str] = None, session_id: Optional[str] = None,
         stream_delta_callback=None, tool_progress_callback=None, tool_start_callback=None,
@@ -2245,7 +2282,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         room_dispatch: Optional[Dict[str, Any]] = None,
         room_execution_policy: Optional[Dict[str, Any]] = None,
         request_toolsets: Optional[List[str]] = None,
-        request_profile: Optional[str] = None) -> Any:
+        request_profile: Optional[str] = None,
+        user_message: Optional[Any] = None) -> Any:
         """Create an AIAgent from the gateway runtime config + platform toolsets.
         ``gateway_session_key`` persists across transcripts (memory scope), unlike ``session_id``;
         ``route`` / ``session_model`` are mutually exclusive; ``confirmed_runtime_lock`` beats the
@@ -2272,6 +2310,14 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             requested_model=requested_model, requested_provider=requested_provider, route=route,
             session_model=session_model, confirmed_runtime_lock=confirmed_runtime_lock,
             gateway_session_key=gateway_session_key, session_id=session_id)
+        # Per-turn model routing (resolve_turn_model hook / model-router plugin) — the same seam the
+        # native gateway applies in _resolve_turn_agent_config. Only when the caller passed the user's
+        # message (chat/responses via the executor hop), and never against a confirmed runtime lock.
+        if user_message is not None and not confirmed_runtime_lock:
+            model, runtime_kwargs = self._apply_resolve_turn_model_hook(
+                user_message, model, runtime_kwargs,
+                session_key=gateway_session_key or session_id or "",
+                has_session_override=bool(session_override))
         user_config = _load_gateway_config()
         enabled_toolsets = sorted(_get_platform_tools(user_config, "api_server"))
         # Same gate the messaging gateway and TUI apply: ``display.interim_assistant_messages``
@@ -4073,7 +4119,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                         gateway_session_key=gateway_session_key, requested_model=requested_model,
                         requested_provider=requested_provider, model_options=model_options, route=route,
                         session_model=session_model, confirmed_runtime_lock=confirmed_runtime_lock,
-                        request_toolsets=request_toolsets, request_profile=request_profile)
+                        request_toolsets=request_toolsets, request_profile=request_profile,
+                        user_message=user_message)
                     if agent_ref is not None:
                         agent_ref[0] = agent
                     if resume_unanswered_turn:
