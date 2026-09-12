@@ -830,7 +830,7 @@ _API_KEY_PROVIDER_AUX_MODELS_FALLBACK: Dict[str, str] = {
 _API_KEY_PROVIDER_AUX_MODELS: Dict[str, str] = _API_KEY_PROVIDER_AUX_MODELS_FALLBACK
 
 # Tasks that may opt into ``auxiliary.<task>.prefer_fast_model``.
-_FAST_MODEL_TASKS: frozenset = frozenset({"title_generation"})
+_FAST_MODEL_TASKS: frozenset = frozenset({"title_generation", "model_router"})
 
 
 def _task_prefers_fast_model(task: Optional[str]) -> bool:
@@ -4488,14 +4488,6 @@ def _main_route_target(runtime: Dict[str, Any], task: Optional[str]) -> Tuple[st
     runtime_base_url = str(runtime.get("base_url") or "")
     runtime_api_key = runtime.get("api_key", "")
     runtime_api_mode = str(runtime.get("api_mode") or "")
-    # Latency-critical tasks (titling only) opt in to the provider's fast model. Opt-in only:
-    # every settings surface defines "auto" as the main model.
-    if _task_prefers_fast_model(task) and main_provider and main_provider not in {"auto", ""}:
-        fast_model = _get_aux_model_for_provider(main_provider, prefer_fast=True)
-        if fast_model and fast_model != main_model:
-            logger.debug("Auxiliary task %s: preferring fast model %s over main model %s",
-                         task, fast_model, main_model)
-            main_model = fast_model
     # MoA virtual provider: the preset name is not a wire model; run aux on the aggregator and drop
     # the facade's "moa://local" base_url / placeholder key so it uses its own credentials.
     if main_provider == "moa":
@@ -4503,6 +4495,16 @@ def _main_route_target(runtime: Dict[str, Any], task: Optional[str]) -> Tuple[st
         if _agg_provider and _agg_model:
             main_provider, main_model = _agg_provider, _agg_model
             runtime_base_url = runtime_api_key = runtime_api_mode = ""
+    # Latency-critical tasks (titling, the model-router classifier) opt in to the provider's fast model.
+    # AFTER the MoA unwrap above: while main_provider was still "moa" this test never fired, so a MoA
+    # main model ran the classifier on the aggregator's frontier model and paid seconds for a one-word
+    # answer. Opt-in only — every settings surface defines "auto" as the main model.
+    if _task_prefers_fast_model(task) and main_provider and main_provider not in {"auto", "", "moa"}:
+        fast_model = _get_aux_model_for_provider(main_provider, prefer_fast=True)
+        if fast_model and fast_model != main_model:
+            logger.debug("Auxiliary task %s: preferring fast model %s over main model %s",
+                         task, fast_model, main_model)
+            main_model = fast_model
     return main_provider, main_model, runtime_base_url, runtime_api_key, runtime_api_mode
 
 
