@@ -2253,7 +2253,10 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                 )
             results = invoke_hook(
                 "resolve_turn_model", surface="gateway", text=text, model=model,
-                runtime={k: runtime_kwargs.get(k) for k in ("provider", "api_key", "base_url", "api_mode")},
+                runtime={k: runtime_kwargs.get(k) for k in (
+                    "provider", "api_key", "base_url", "api_mode",
+                    # the name the caller asked for (a user-configured provider resolves to provider="custom")
+                    "requested_provider")},
                 session_key=session_key, has_session_override=has_session_override,
             )
             for res in results or []:
@@ -2266,6 +2269,11 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                     if rt.get(key) is not None:
                         runtime_kwargs[key] = rt[key]
                 runtime_kwargs["requested_provider"] = new_provider
+                try:
+                    from gateway.run import _credential_pool_for_provider
+                    runtime_kwargs["credential_pool"] = _credential_pool_for_provider(new_provider)
+                except Exception:
+                    pass
                 break
         except Exception:
             logger.debug("resolve_turn_model hook failed (api_server)", exc_info=True)
