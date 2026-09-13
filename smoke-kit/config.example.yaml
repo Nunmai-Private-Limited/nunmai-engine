@@ -1,0 +1,38 @@
+model:
+  provider: custom
+  default: stub-main
+  base_url: http://127.0.0.1:8931/v1
+  api_mode: chat_completions
+providers:
+  custom:
+    api_key: stub-key
+    base_url: http://127.0.0.1:8931/v1
+  fastlane:
+    api_key: stub-key
+    base_url: http://127.0.0.1:8933/v1
+    api_mode: chat_completions
+platforms:
+  api_server:
+    enabled: true
+    host: 127.0.0.1
+    port: 8932
+    api_key: smoke-key
+security:
+  allow_lazy_installs: false
+plugins:
+  enabled:
+    - model-router
+  entries:
+    model-router:
+      settings:
+        mode: auto
+        tiers:
+          simple:
+            provider: fastlane
+            model: stub-fast
+          normal:
+            provider: fastlane
+            model: stub-fast
+          complex:
+            provider: custom
+            model: stub-main
