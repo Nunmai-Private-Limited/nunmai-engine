@@ -58,7 +58,7 @@ nunmai honcho setup
 # select "local", enter base URL (e.g. http://localhost:8000)
 ```
 
-参见：https://docs.honcho.dev/v3/guides/integrations/hermes#running-honcho-locally-with-hermes
+参见：https://docs.honcho.dev/v3/guides/integrations/nunmai#running-honcho-locally-with-nunmai
 
 ### 验证
 

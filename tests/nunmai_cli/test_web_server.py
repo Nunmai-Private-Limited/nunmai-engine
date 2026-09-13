@@ -1624,8 +1624,8 @@ class TestWebServerEndpoints:
                     "pairing_id": "pair-restart-fails",
                     "poll_token": "poll-secret",
                     "suggested_username": "nunmai_pair_restart_fails_bot",
-                    "deep_link": "https://t.me/newbot/HermesSetupBot/hermes_pair_restart_fails_bot",
-                    "qr_payload": "https://t.me/newbot/HermesSetupBot/hermes_pair_restart_fails_bot",
+                    "deep_link": "https://t.me/newbot/NunmaiSetupBot/nunmai_pair_restart_fails_bot",
+                    "qr_payload": "https://t.me/newbot/NunmaiSetupBot/nunmai_pair_restart_fails_bot",
                     "expires_at": "2027-05-18T00:00:00.000Z",
                 }
             assert method == "GET"

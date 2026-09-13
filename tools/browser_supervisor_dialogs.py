@@ -69,7 +69,7 @@ _DIALOG_BRIDGE_SCRIPT = r"""
 (() => {
   if (window.__nunmaiDialogBridgeInstalled) return;
   window.__nunmaiDialogBridgeInstalled = true;
-  const ENDPOINT = "http://hermes-dialog-bridge.invalid/";
+  const ENDPOINT = "http://nunmai-dialog-bridge.invalid/";
   function ask(kind, message, defaultPrompt) {
     try {
       const xhr = new XMLHttpRequest();

@@ -149,7 +149,7 @@ nunmai setup --portal
 
 ## دستاویزات (Documentation)
 
-تمام دستاویزات **[hermes-agent.nousresearch.com/docs](https://nunmai.in/docs/)** پر موجود ہیں:
+تمام دستاویزات **[nunmai-engine.nousresearch.com/docs](https://nunmai.in/docs/)** پر موجود ہیں:
 
 <div dir="ltr">
 

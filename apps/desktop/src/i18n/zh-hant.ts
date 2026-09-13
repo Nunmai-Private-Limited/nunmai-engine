@@ -2645,7 +2645,7 @@ export const zhHant = defineLocale({
     remoteSetupDesc: '輸入閘道 URL。Nunmai Desktop 會偵測需要權杖還是瀏覽器登入。',
     remoteUrlTitle: '閘道 URL',
     remoteUrlDesc: '使用 Nunmai 閘道的基礎 URL；遠端位址請包含 https://。',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlPlaceholder: 'https://gateway.example.com/nunmai',
     probing: '正在偵測閘道驗證方式...',
     probeError: '無法連線到該 Nunmai 閘道。',
     identityProvider: '您的身分提供者',

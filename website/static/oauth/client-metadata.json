@@ -1,8 +1,8 @@
 {
-  "client_id": "https://nousresearch.github.io/hermes-agent/docs/oauth/client-metadata.json",
+  "client_id": "https://nousresearch.github.io/nunmai-engine/docs/oauth/client-metadata.json",
   "client_name": "Nunmai Engine",
   "client_uri": "https://nunmai.in",
-  "logo_uri": "https://nousresearch.github.io/hermes-agent/docs/img/logo.png",
+  "logo_uri": "https://nousresearch.github.io/nunmai-engine/docs/img/logo.png",
   "application_type": "native",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],

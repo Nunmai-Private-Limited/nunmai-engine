@@ -126,7 +126,7 @@ Para las listas de comandos completas, consulta la [guía de CLI](https://nunmai
 
 ## Documentación
 
-Toda la documentación está en **[hermes-agent.nousresearch.com/docs](https://nunmai.in/docs/)**:
+Toda la documentación está en **[nunmai-engine.nousresearch.com/docs](https://nunmai.in/docs/)**:
 
 | Sección                                                                                             | Contenido                                                    |
 | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |

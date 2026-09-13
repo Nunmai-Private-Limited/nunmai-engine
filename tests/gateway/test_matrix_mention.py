@@ -95,7 +95,7 @@ class TestIsBotMentioned:
 
 
     def test_matrix_pill_in_formatted_body(self):
-        html = '<a href="https://matrix.to/#/@hermes:example.org">Nunmai</a> help'
+        html = '<a href="https://matrix.to/#/@nunmai:example.org">Nunmai</a> help'
         assert self.adapter._is_bot_mentioned("Nunmai help", html)
 
 

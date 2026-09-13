@@ -50,7 +50,7 @@ class TestDiscordToolPreviewFormatting:
 
         adapter = _make_discord_adapter()
         url = "https://nunmai.in/docs/gateway/discord/tool-progress"
-        visible = "https://hermes-agent.nousresearch..."
+        visible = "https://nunmai-engine.nousresearch..."
 
         out = adapter.format_tool_preview(ToolPreview(visible, truncated=True, url=url))
 

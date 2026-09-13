@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 _DEFAULT_CONTAINER_TAG = "nunmai"
 _VALID_SEARCH_MODES = ("hybrid", "memories", "documents")
 _DEFAULT_BASE_URL = "https://api.supermemory.ai"
-_API_KEY_URL = "http://app.supermemory.ai/integrations?connect=hermes"
+_API_KEY_URL = "http://app.supermemory.ai/integrations?connect=nunmai"
 # Strips injected <supermemory-context> / <supermemory-containers> blocks before capture.
 _INJECTED_BLOCK_RE = re.compile(r"<supermemory-(context|containers)>[\s\S]*?</supermemory-\1>\s*", re.DOTALL)
 _DEFAULT_ENTITY_CONTEXT = (

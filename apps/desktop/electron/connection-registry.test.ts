@@ -1111,7 +1111,7 @@ test('token only persists on token-auth remotes; oauth/cloud drop it', () => {
   assert.equal(oauth.token, undefined)
 
   const cloud = normalizeConnectionInput(
-    { kind: 'cloud', label: 'C', url: 'https://c.hermes.cloud', authMode: 'oauth', token: { enc: 'x' } },
+    { kind: 'cloud', label: 'C', url: 'https://c.nunmai.cloud', authMode: 'oauth', token: { enc: 'x' } },
     registry
   )
 
@@ -1295,7 +1295,7 @@ test('remote input normalizes URL and auth mode; cloud keeps org', () => {
   assert.equal(remote.authMode, 'token')
 
   const cloud = normalizeConnectionInput(
-    { kind: 'cloud', label: 'Cloud', url: 'https://foo.hermes.cloud', authMode: 'oauth', org: 'nous' },
+    { kind: 'cloud', label: 'Cloud', url: 'https://foo.nunmai.cloud', authMode: 'oauth', org: 'nous' },
     registry
   )
 
@@ -1378,7 +1378,7 @@ test('normalizeRegistry round-trips a valid registry unchanged in shape', () => 
         id: 'cloud-1',
         kind: 'cloud',
         label: 'Nunmai Cloud',
-        url: 'https://a.hermes.cloud',
+        url: 'https://a.nunmai.cloud',
         authMode: 'oauth',
         org: 'nous'
       },
@@ -1482,7 +1482,7 @@ test('migrate: v1 global remote becomes a labeled entry and the primary', () => 
 test('migrate: v1 cloud keeps cloud provenance + org', () => {
   const registry = migrateV1ToRegistry({
     mode: 'cloud',
-    remote: { url: 'https://a.hermes.cloud', authMode: 'oauth', org: 'nous' }
+    remote: { url: 'https://a.nunmai.cloud', authMode: 'oauth', org: 'nous' }
   })
 
   const cloud = registry.connections.find(c => c.kind === 'cloud')

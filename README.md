@@ -162,7 +162,7 @@ For the full command lists, see the [CLI guide](https://nunmai.in/docs/user-guid
 
 ## Documentation
 
-All documentation lives at **[hermes-agent.nousresearch.com/docs](https://nunmai.in/docs/)**:
+All documentation lives at **[nunmai-engine.nousresearch.com/docs](https://nunmai.in/docs/)**:
 
 | Section                                                                                             | What's Covered                                             |
 | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |

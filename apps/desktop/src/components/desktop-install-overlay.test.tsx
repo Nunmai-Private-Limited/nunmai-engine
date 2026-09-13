@@ -240,14 +240,14 @@ describe('DesktopInstallOverlay first-run setup', () => {
 
     desktop.probeConnectionConfig.mockResolvedValue({
       authMode: 'token',
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       error: null,
       providers: [],
       reachable: true,
       version: '0.17.0'
     })
     desktop.testConnectionConfig.mockResolvedValue({
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       ok: true,
       version: '0.17.0'
     })
@@ -260,8 +260,8 @@ describe('DesktopInstallOverlay first-run setup', () => {
     render(<DesktopInstallOverlay />)
 
     fireEvent.click(await screen.findByText('Connect to existing Nunmai'))
-    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/hermes'), {
-      target: { value: 'https://gateway.example.com/hermes' }
+    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/nunmai'), {
+      target: { value: 'https://gateway.example.com/nunmai' }
     })
 
     const apply = screen.getByText('Apply and reconnect').closest('button') as HTMLButtonElement
@@ -281,11 +281,11 @@ describe('DesktopInstallOverlay first-run setup', () => {
         mode: 'remote',
         remoteAuthMode: 'token',
         remoteToken: 'session-secret',
-        remoteUrl: 'https://gateway.example.com/hermes'
+        remoteUrl: 'https://gateway.example.com/nunmai'
       })
     })
 
-    await screen.findByText('Connected to https://gateway.example.com/hermes (0.17.0).')
+    await screen.findByText('Connected to https://gateway.example.com/nunmai (0.17.0).')
     expect(apply.disabled).toBe(false)
 
     fireEvent.click(screen.getByText('Apply and reconnect'))
@@ -295,7 +295,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
         mode: 'remote',
         remoteAuthMode: 'token',
         remoteToken: 'session-secret',
-        remoteUrl: 'https://gateway.example.com/hermes'
+        remoteUrl: 'https://gateway.example.com/nunmai'
       })
     })
     await waitFor(() => expect(screen.queryByText('Gateway URL')).toBeNull())
@@ -319,8 +319,8 @@ describe('DesktopInstallOverlay first-run setup', () => {
     render(<DesktopInstallOverlay />)
 
     fireEvent.click(await screen.findByText('Connect to existing Nunmai'))
-    const urlInput = await screen.findByPlaceholderText('https://gateway.example.com/hermes')
-    fireEvent.change(urlInput, { target: { value: 'https://gateway.example.com/hermes' } })
+    const urlInput = await screen.findByPlaceholderText('https://gateway.example.com/nunmai')
+    fireEvent.change(urlInput, { target: { value: 'https://gateway.example.com/nunmai' } })
 
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 550))
@@ -331,7 +331,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
     await act(async () => {
       resolveProbe?.({
         authMode: 'token',
-        baseUrl: 'https://gateway.example.com/hermes',
+        baseUrl: 'https://gateway.example.com/nunmai',
         error: null,
         providers: [],
         reachable: true,
@@ -354,7 +354,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
 
     desktop.probeConnectionConfig.mockResolvedValue({
       authMode: 'token',
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       error: null,
       providers: [],
       reachable: true,
@@ -372,8 +372,8 @@ describe('DesktopInstallOverlay first-run setup', () => {
     render(<DesktopInstallOverlay />)
 
     fireEvent.click(await screen.findByText('Connect to existing Nunmai'))
-    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/hermes'), {
-      target: { value: 'https://gateway.example.com/hermes' }
+    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/nunmai'), {
+      target: { value: 'https://gateway.example.com/nunmai' }
     })
 
     await act(async () => {
@@ -390,11 +390,11 @@ describe('DesktopInstallOverlay first-run setup', () => {
     fireEvent.change(tokenInput, { target: { value: 'token-b' } })
 
     await act(async () => {
-      resolveTest?.({ baseUrl: 'https://gateway.example.com/hermes', ok: true, version: '0.17.0' })
+      resolveTest?.({ baseUrl: 'https://gateway.example.com/nunmai', ok: true, version: '0.17.0' })
       await pendingTest
     })
 
-    expect(screen.queryByText('Connected to https://gateway.example.com/hermes (0.17.0).')).toBeNull()
+    expect(screen.queryByText('Connected to https://gateway.example.com/nunmai (0.17.0).')).toBeNull()
     expect(apply.disabled).toBe(true)
   })
 
@@ -407,14 +407,14 @@ describe('DesktopInstallOverlay first-run setup', () => {
 
     desktop.probeConnectionConfig.mockResolvedValue({
       authMode: 'token',
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       error: null,
       providers: [],
       reachable: true,
       version: '0.17.0'
     })
     desktop.testConnectionConfig.mockResolvedValue({
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       ok: true,
       version: '0.17.0'
     })
@@ -423,8 +423,8 @@ describe('DesktopInstallOverlay first-run setup', () => {
     render(<DesktopInstallOverlay />)
 
     fireEvent.click(await screen.findByText('Connect to existing Nunmai'))
-    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/hermes'), {
-      target: { value: 'https://gateway.example.com/hermes' }
+    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/nunmai'), {
+      target: { value: 'https://gateway.example.com/nunmai' }
     })
 
     await act(async () => {
@@ -435,7 +435,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
       target: { value: 'session-secret' }
     })
     fireEvent.click(screen.getByText('Test connection'))
-    await screen.findByText('Connected to https://gateway.example.com/hermes (0.17.0).')
+    await screen.findByText('Connected to https://gateway.example.com/nunmai (0.17.0).')
 
     const apply = screen.getByText('Apply and reconnect').closest('button') as HTMLButtonElement
     fireEvent.click(apply)
@@ -454,19 +454,19 @@ describe('DesktopInstallOverlay first-run setup', () => {
 
     desktop.probeConnectionConfig.mockResolvedValue({
       authMode: 'oauth',
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       error: null,
       providers: [{ displayName: 'Username & Password', name: 'password', supportsPassword: true }],
       reachable: true,
       version: '0.17.0'
     })
     desktop.oauthLoginConnectionConfig.mockResolvedValue({
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       connected: true,
       ok: true
     })
     desktop.testConnectionConfig.mockResolvedValue({
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       ok: true,
       version: null
     })
@@ -475,8 +475,8 @@ describe('DesktopInstallOverlay first-run setup', () => {
     render(<DesktopInstallOverlay />)
 
     fireEvent.click(await screen.findByText('Connect to existing Nunmai'))
-    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/hermes'), {
-      target: { value: 'https://gateway.example.com/hermes' }
+    fireEvent.change(await screen.findByPlaceholderText('https://gateway.example.com/nunmai'), {
+      target: { value: 'https://gateway.example.com/nunmai' }
     })
 
     await act(async () => {
@@ -487,7 +487,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
     fireEvent.click(await screen.findByText('Sign in'))
 
     await waitFor(() => {
-      expect(desktop.oauthLoginConnectionConfig).toHaveBeenCalledWith('https://gateway.example.com/hermes')
+      expect(desktop.oauthLoginConnectionConfig).toHaveBeenCalledWith('https://gateway.example.com/nunmai')
     })
 
     fireEvent.click(screen.getByText('Test connection'))
@@ -497,11 +497,11 @@ describe('DesktopInstallOverlay first-run setup', () => {
         mode: 'remote',
         remoteAuthMode: 'oauth',
         remoteToken: undefined,
-        remoteUrl: 'https://gateway.example.com/hermes'
+        remoteUrl: 'https://gateway.example.com/nunmai'
       })
     })
 
-    await screen.findByText('Connected to https://gateway.example.com/hermes.')
+    await screen.findByText('Connected to https://gateway.example.com/nunmai.')
     const apply = screen.getByText('Apply and reconnect').closest('button') as HTMLButtonElement
     expect(apply.disabled).toBe(false)
     fireEvent.click(apply)
@@ -511,7 +511,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
         mode: 'remote',
         remoteAuthMode: 'oauth',
         remoteToken: undefined,
-        remoteUrl: 'https://gateway.example.com/hermes'
+        remoteUrl: 'https://gateway.example.com/nunmai'
       })
     })
   })
@@ -538,14 +538,14 @@ describe('DesktopInstallOverlay first-run setup', () => {
 
     desktop.probeConnectionConfig.mockResolvedValue({
       authMode: 'token',
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       error: null,
       providers: [],
       reachable: true,
       version: '0.17.0'
     })
     desktop.testConnectionConfig.mockResolvedValue({
-      baseUrl: 'https://gateway.example.com/hermes',
+      baseUrl: 'https://gateway.example.com/nunmai',
       ok: true,
       version: '0.17.0'
     })
@@ -555,8 +555,8 @@ describe('DesktopInstallOverlay first-run setup', () => {
       return { mode: 'remote' }
     })
 
-    fireEvent.change(screen.getByPlaceholderText('https://gateway.example.com/hermes'), {
-      target: { value: 'https://gateway.example.com/hermes' }
+    fireEvent.change(screen.getByPlaceholderText('https://gateway.example.com/nunmai'), {
+      target: { value: 'https://gateway.example.com/nunmai' }
     })
 
     await act(async () => {
@@ -567,7 +567,7 @@ describe('DesktopInstallOverlay first-run setup', () => {
       target: { value: 'session-secret' }
     })
     fireEvent.click(screen.getByText('Test connection'))
-    await screen.findByText('Connected to https://gateway.example.com/hermes (0.17.0).')
+    await screen.findByText('Connected to https://gateway.example.com/nunmai (0.17.0).')
     fireEvent.click(screen.getByText('Apply and reconnect'))
 
     await waitFor(() => expect(screen.queryByText('Gateway URL')).toBeNull())

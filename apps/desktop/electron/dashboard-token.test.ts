@@ -35,7 +35,7 @@ test('extractInjectedDashboardToken returns null for missing or malformed values
 
 test('dashboardIndexUrl preserves dashboard path prefixes', () => {
   assert.equal(dashboardIndexUrl('http://127.0.0.1:9120'), 'http://127.0.0.1:9120/')
-  assert.equal(dashboardIndexUrl('https://host.example/hermes/'), 'https://host.example/hermes/')
+  assert.equal(dashboardIndexUrl('https://host.example/nunmai/'), 'https://host.example/nunmai/')
 })
 
 test('resolveServedDashboardToken uses the served token and logs when it differs', async () => {

@@ -103,7 +103,7 @@ class TestSubstringFalsePositivesAreRejected:
     def test_substring_inside_url_without_entity(self):
         """@handle inside a URL produces a URL entity, not a MENTION entity."""
         adapter = _make_adapter()
-        msg = _message(text="see https://example.com/@hermes_bot for details")
+        msg = _message(text="see https://example.com/@nunmai_bot for details")
         assert adapter._message_mentions_bot(msg) is False
 
 

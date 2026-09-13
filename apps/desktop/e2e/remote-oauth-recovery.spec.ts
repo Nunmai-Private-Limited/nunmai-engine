@@ -77,7 +77,7 @@ for (const status of [401, 403]) {
       await page.getByRole('button', { name: /gateway settings/i }).click()
       const back = page.getByRole('button', { name: /^back$/i })
       await expect(back).toBeVisible()
-      const gatewayUrl = page.getByPlaceholder('https://gateway.example.com/hermes')
+      const gatewayUrl = page.getByPlaceholder('https://gateway.example.com/nunmai')
       await expect(gatewayUrl).toHaveValue(url)
       // Concurrent IPC readers must reuse the terminal failure, not republish
       // startup progress and unmount the settings form.

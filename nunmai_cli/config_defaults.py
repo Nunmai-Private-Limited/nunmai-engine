@@ -979,7 +979,7 @@ DEFAULT_CONFIG = {
         # (fail-closed). scope = capability label; min_secret_chars in url-safe-b64 chars.
         "drain_auth": {"scope": "drain", "min_secret_chars": 43},
         # Public URL (env NUNMAI_DASHBOARD_PUBLIC_URL): full authority (scheme + host + optional
-        # prefix, e.g. https://example.com/hermes) for the OAuth redirect_uri; its hostname is
+        # prefix, e.g. https://example.com/nunmai) for the OAuth redirect_uri; its hostname is
         # trusted by Host/Origin guards and engages the auth gate when non-loopback. For proxies
         # that don't forward X-Forwarded-Host/-Proto/-Prefix; X-Forwarded-Prefix is then IGNORED on
         # the OAuth path. Empty or malformed (no http(s):// + host, or quote/angle/whitespace chars)

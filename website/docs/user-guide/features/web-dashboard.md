@@ -819,7 +819,7 @@ dashboard:
   oauth:
     provider: self-hosted
     self_hosted:
-      issuer: https://auth.example.com/application/o/hermes/   # required
+      issuer: https://auth.example.com/application/o/nunmai/   # required
       client_id: nunmai-dashboard                              # required
       scopes: "openid profile email"                           # optional (this is the default)
 ```
@@ -900,14 +900,14 @@ docker run --rm -p 8080:8080 \
 ```
 
 Once it's up, the realm advertises standard OIDC discovery at
-`http://localhost:8080/realms/hermes/.well-known/openid-configuration` (issuer
-`http://localhost:8080/realms/hermes`). The admin console is at
+`http://localhost:8080/realms/nunmai/.well-known/openid-configuration` (issuer
+`http://localhost:8080/realms/nunmai`). The admin console is at
 `http://localhost:8080/` (`admin` / `admin`).
 
 **2. Point the dashboard at it.** The self-hosted plugin permits a loopback `http://` issuer (HTTPS is required for any non-loopback issuer), so the local Keycloak works as-is:
 
 ```bash
-export NUNMAI_DASHBOARD_OIDC_ISSUER="http://localhost:8080/realms/hermes"
+export NUNMAI_DASHBOARD_OIDC_ISSUER="http://localhost:8080/realms/nunmai"
 export NUNMAI_DASHBOARD_OIDC_CLIENT_ID="nunmai-dashboard"
 export NUNMAI_DASHBOARD_PUBLIC_URL="http://localhost:9119"
 nunmai dashboard --host 0.0.0.0 --port 9119 --no-open
@@ -934,7 +934,7 @@ For deploys behind reverse proxies that don't reliably forward those headers (ma
 
 ```yaml
 dashboard:
-  public_url: "https://dashboard.example.com/hermes"
+  public_url: "https://dashboard.example.com/nunmai"
   trusted_proxies:
     - "172.20.0.5"
 ```
@@ -959,7 +959,7 @@ add a bounded CIDR for a dedicated proxy network when the address is dynamic:
 
 ```yaml
 dashboard:
-  public_url: "https://dashboard.example.com/hermes"
+  public_url: "https://dashboard.example.com/nunmai"
   trusted_proxies:
     - "172.20.0.0/24"
 ```

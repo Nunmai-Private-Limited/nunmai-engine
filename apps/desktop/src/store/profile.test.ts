@@ -62,7 +62,7 @@ const profile = (name: string, isDefault = false): ProfileInfo => ({
 })
 
 const remoteConn = (over: Partial<NunmaiConnection> = {}): NunmaiConnection =>
-  ({ baseUrl: 'https://hermes-roy.tail.ts.net', mode: 'remote', profile: 'vps-remote', ...over }) as NunmaiConnection
+  ({ baseUrl: 'https://nunmai-roy.tail.ts.net', mode: 'remote', profile: 'vps-remote', ...over }) as NunmaiConnection
 
 const localConn = (over: Partial<NunmaiConnection> = {}): NunmaiConnection =>
   ({ baseUrl: '', mode: 'local', profile: 'default', ...over }) as NunmaiConnection

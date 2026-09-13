@@ -364,7 +364,7 @@ test('an encrypt that returns null is refused rather than blanking the stored en
 // userinfo, so a configured gateway URL can carry `user:password@` into this
 // store. It must stay intact as the store KEY and never reach a log line.
 
-const CRED_GATEWAY = 'https://alice:supersecret@gw.example.com/hermes'
+const CRED_GATEWAY = 'https://alice:supersecret@gw.example.com/nunmai'
 
 test('a decryption failure logs the gateway host and path but not its credentials', () => {
   const first = createFakeDisk()
@@ -404,7 +404,7 @@ test('the credential-bearing base URL stays the exact store key', () => {
   // The original key still round-trips a full set after a restart.
   assert.deepEqual(loadNativeTokenSet(CRED_GATEWAY, createFakeDisk(first.fileText()).io), TOKENS)
   // The redacted form is a log string, never a lookup key.
-  assert.equal(loadNativeTokenSet('https://gw.example.com/hermes', createFakeDisk(first.fileText()).io), null)
+  assert.equal(loadNativeTokenSet('https://gw.example.com/nunmai', createFakeDisk(first.fileText()).io), null)
 })
 
 test('an unparseable gateway URL logs a fixed placeholder rather than the raw value', () => {

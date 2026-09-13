@@ -102,22 +102,22 @@ def test_room_link_endpoint_reads_supported_config_with_env_override(
     home = tmp_path / ".nunmai"
     home.mkdir()
     (home / "config.yaml").write_text(
-        "gateway:\n  room_link_url: https://configured.example.test/hermes\n",
+        "gateway:\n  room_link_url: https://configured.example.test/nunmai\n",
         encoding="utf-8",
     )
     monkeypatch.setenv("NUNMAI_HOME", str(home))
     monkeypatch.delenv("NUNMAI_ROOM_LINK_URL", raising=False)
     assert local_room_link_endpoint() == {
         "available": True,
-        "url": "https://configured.example.test/hermes",
+        "url": "https://configured.example.test/nunmai",
         "transport_security": "tls",
     }
 
     monkeypatch.setenv(
-        "NUNMAI_ROOM_LINK_URL", "https://override.example.test/hermes"
+        "NUNMAI_ROOM_LINK_URL", "https://override.example.test/nunmai"
     )
     assert local_room_link_endpoint()["url"] == (
-        "https://override.example.test/hermes"
+        "https://override.example.test/nunmai"
     )
 
 
@@ -126,7 +126,7 @@ def test_named_profile_inherits_gateway_room_link_endpoint(tmp_path, monkeypatch
     profile = root / "profiles" / "reviewer"
     profile.mkdir(parents=True)
     (root / "config.yaml").write_text(
-        "gateway:\n  room_link_url: https://gateway.example.test/hermes\n",
+        "gateway:\n  room_link_url: https://gateway.example.test/nunmai\n",
         encoding="utf-8",
     )
     (profile / "config.yaml").write_text("gateway: {}\n", encoding="utf-8")
@@ -137,7 +137,7 @@ def test_named_profile_inherits_gateway_room_link_endpoint(tmp_path, monkeypatch
     try:
         assert local_room_link_endpoint() == {
             "available": True,
-            "url": "https://gateway.example.test/hermes",
+            "url": "https://gateway.example.test/nunmai",
             "transport_security": "tls",
         }
     finally:
@@ -151,11 +151,11 @@ def test_named_profile_room_link_override_wins_over_gateway_root(
     profile = root / "profiles" / "reviewer"
     profile.mkdir(parents=True)
     (root / "config.yaml").write_text(
-        "gateway:\n  room_link_url: https://gateway.example.test/hermes\n",
+        "gateway:\n  room_link_url: https://gateway.example.test/nunmai\n",
         encoding="utf-8",
     )
     (profile / "config.yaml").write_text(
-        "gateway:\n  room_link_url: https://profile.example.test/hermes\n",
+        "gateway:\n  room_link_url: https://profile.example.test/nunmai\n",
         encoding="utf-8",
     )
     monkeypatch.setenv("NUNMAI_HOME", str(root))
@@ -164,7 +164,7 @@ def test_named_profile_room_link_override_wins_over_gateway_root(
     token = set_nunmai_home_override(profile)
     try:
         assert local_room_link_endpoint()["url"] == (
-            "https://profile.example.test/hermes"
+            "https://profile.example.test/nunmai"
         )
     finally:
         reset_nunmai_home_override(token)

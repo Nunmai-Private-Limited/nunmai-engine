@@ -180,7 +180,7 @@ events:
 # ~/.nunmai/hooks/session-webhook/handler.py
 import httpx
 
-WEBHOOK_URL = "https://your-service.example.com/hermes-events"
+WEBHOOK_URL = "https://your-service.example.com/nunmai-events"
 
 async def handle(event_type: str, context: dict):
     async with httpx.AsyncClient() as client:
@@ -1861,13 +1861,13 @@ Add a `hooks.outbound:` list to `~/.nunmai/config.yaml`:
 hooks:
   outbound:
     - name: ci-notify                       # optional label for logs
-      url: https://ci.example.com/hermes-events
+      url: https://ci.example.com/nunmai-events
       events: [on_session_end, subagent_stop]
       secret_env: NUNMAI_OUTBOUND_WEBHOOK_SECRET   # env var holding the HMAC secret
       timeout: 10                           # per-attempt seconds (1–60)
 
     - name: tool-monitor
-      url: https://metrics.example.com/hooks/hermes
+      url: https://metrics.example.com/hooks/nunmai
       events: [post_tool_call]
       matcher: "terminal|delegate_task"     # regex, tool-scoped events only
 ```

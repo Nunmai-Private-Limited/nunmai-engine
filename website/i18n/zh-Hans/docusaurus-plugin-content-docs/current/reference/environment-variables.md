@@ -41,7 +41,7 @@ description: "Nunmai Engine 使用的所有环境变量完整参考"
 | `GMI_API_KEY` | GMI Cloud API 密钥（[gmicloud.ai](https://www.gmicloud.ai/)） |
 | `GMI_BASE_URL` | 覆盖 GMI Cloud base URL（默认：`https://api.gmi-serving.com/v1`） |
 | `MINIMAX_API_KEY` | MiniMax API 密钥——全球端点（[minimax.io](https://www.minimax.io)）。**`minimax-oauth` 不使用此变量**（OAuth 路径通过浏览器登录）。 |
-| `MINIMAX_BASE_URL` | 覆盖 MiniMax base URL（默认：`https://api.minimax.io/anthropic`——Hermes 使用 MiniMax 的 Anthropic Messages 兼容端点）。**`minimax-oauth` 不使用此变量**。 |
+| `MINIMAX_BASE_URL` | 覆盖 MiniMax base URL（默认：`https://api.minimax.io/anthropic`——Nunmai 使用 MiniMax 的 Anthropic Messages 兼容端点）。**`minimax-oauth` 不使用此变量**。 |
 | `MINIMAX_CN_API_KEY` | MiniMax API 密钥——中国区端点（[minimaxi.com](https://www.minimaxi.com)）。**`minimax-oauth` 不使用此变量**（OAuth 路径通过浏览器登录）。 |
 | `MINIMAX_CN_BASE_URL` | 覆盖 MiniMax 中国区 base URL（默认：`https://api.minimaxi.com/anthropic`）。**`minimax-oauth` 不使用此变量**。 |
 | `KILOCODE_API_KEY` | Kilo Code API 密钥（[kilo.ai](https://kilo.ai)） |

@@ -315,5 +315,5 @@ The CLI uses argparse, so `--help` is a good first probe for "did my new flag re
 - User-facing setup + troubleshooting: [Egress proxy](https://nunmai.in/docs/user-guide/egress/iron-proxy)
 - Docker backend internals: [Docker](https://nunmai.in/docs/user-guide/docker)
 - Bitwarden Secrets Manager integration: [`nunmai secrets bitwarden`](https://nunmai.in/docs/user-guide/secrets/bitwarden)
-- CLI command reference: [`nunmai egress`](https://nunmai.in/docs/reference/cli-commands#hermes-egress)
+- CLI command reference: [`nunmai egress`](https://nunmai.in/docs/reference/cli-commands#nunmai-egress)
 - Sandbox-injected environment variables: [Egress proxy (sandbox-injected)](https://nunmai.in/docs/reference/environment-variables#egress-proxy-sandbox-injected)

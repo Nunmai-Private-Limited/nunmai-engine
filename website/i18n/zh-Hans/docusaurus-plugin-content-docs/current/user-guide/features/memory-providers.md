@@ -68,7 +68,7 @@ nunmai memory setup        # 选择 "honcho" — 运行 Honcho 专属的安装�
 
 旧版 `nunmai honcho setup` 命令仍然有效（现在会重定向到 `nunmai memory setup`），但只有在 Honcho 被选为激活记忆提供者后才会注册。
 
-**配置：** `$NUNMAI_HOME/honcho.json`（profile 本地）或 `~/.honcho/config.json`（全局）。解析顺序：`$NUNMAI_HOME/honcho.json` > `~/.nunmai/honcho.json` > `~/.honcho/config.json`。参见[配置参考](https://github.com/hermes-ai/hermes-agent/blob/main/plugins/memory/honcho/README.md)和 [Honcho 集成指南](https://docs.honcho.dev/v3/guides/integrations/hermes)。
+**配置：** `$NUNMAI_HOME/honcho.json`（profile 本地）或 `~/.honcho/config.json`（全局）。解析顺序：`$NUNMAI_HOME/honcho.json` > `~/.nunmai/honcho.json` > `~/.honcho/config.json`。参见[配置参考](https://github.com/hermes-ai/hermes-agent/blob/main/plugins/memory/honcho/README.md)和 [Honcho 集成指南](https://docs.honcho.dev/v3/guides/integrations/nunmai)。
 
 <details>
 <summary>完整配置参考</summary>
@@ -255,7 +255,7 @@ nunmai honcho sync
 
 </details>
 
-参见[配置参考](https://github.com/hermes-ai/hermes-agent/blob/main/plugins/memory/honcho/README.md)和 [Honcho 集成指南](https://docs.honcho.dev/v3/guides/integrations/hermes)。
+参见[配置参考](https://github.com/hermes-ai/hermes-agent/blob/main/plugins/memory/honcho/README.md)和 [Honcho 集成指南](https://docs.honcho.dev/v3/guides/integrations/nunmai)。
 
 
 ---
@@ -467,7 +467,7 @@ nunmai config set memory.provider byterover
 | | |
 |---|---|
 | **适合场景** | 带用户 profile 和会话级图谱构建的语义召回 |
-| **依赖** | `pip install supermemory` + [云端 API key](http://app.supermemory.ai/integrations?connect=hermes)，或[自托管服务器](https://supermemory.ai/docs/self-hosting/overview) |
+| **依赖** | `pip install supermemory` + [云端 API key](http://app.supermemory.ai/integrations?connect=nunmai)，或[自托管服务器](https://supermemory.ai/docs/self-hosting/overview) |
 | **数据存储** | Supermemory 云端或自托管 |
 | **费用** | 云端按 Supermemory 定价 / 自托管免费 |
 

@@ -26,9 +26,12 @@ SKIP_PATH_PREFIXES = ("contributors/",)
 # Patterns to protect (case-insensitive). Each match is swapped for a sentinel
 # before the brand replace and restored afterwards.
 PROTECT = [
-    r"https?://[^\s\"'<>)\]{}$]*hermes[^\s\"'<>)\]{}$]*",           # any URL containing hermes
+    # Only URLs on hosts that actually WORK are protected. Protecting "any URL containing hermes" also
+    # froze placeholder hosts in tests and docs (gateway.example.com/hermes,
+    # auth.example.com/application/o/hermes/, c.hermes.cloud), so example configuration a customer reads
+    # and copies still carried the old name.
+    r"https?://[^\s\"'<>)\]{}$]*(?:nousresearch\.com|github\.com|githubusercontent\.com|hermes-agent\.org)[^\s\"'<>)\]{}$]*",
     r"nousresearch/hermes[\w.\-]*",                             # GitHub/HF repo slugs
-    r"hermes-agent\.nousresearch\.com",
     r"hermes-agent\.org",
     r"hermes[-_ ]?[34](?:[-_.][\w]+)*",                         # model ids: hermes-4-405b, Hermes 3, hermes_4
     r"hermes\[-_ \]\?\[34\]",                                # the regex SOURCE that matches those ids (model_switch.py)
@@ -65,6 +68,10 @@ POST_REPLACEMENTS = [
     (re.compile(r'"github\.com/nousresearch/hermes-agent"'), '"github.com/nunmai-private-limited/nunmai-engine"'),
     (re.compile(r"https://github\.com/NousResearch/hermes-agent/releases"), "https://github.com/Nunmai-Private-Limited/nunmai-engine/releases"),
     # One-line installer host
+    # The docs link is written as bare text in every README ("all documentation lives at
+    # hermes-agent.nousresearch.com/docs") while the href already points at nunmai.in, so the label
+    # contradicted the link. The skills-index path stays: it is a functional endpoint.
+    (re.compile(r"\bhermes-agent\.nousresearch\.com(?!/docs/api/skills-index\.json)"), "nunmai.in"),
     (re.compile(r"https://nunmai\.in/install\.(sh|ps1)"), r"https://nunmai-engine.nunmai.in/install.\1"),
     # --- added 2026-09-12 while rebranding upstream 0.21.2; these classes did not exist in 0.20.6 ---
     # Every bundled plugin manifest declares its author, and that string reaches the plugin listing.

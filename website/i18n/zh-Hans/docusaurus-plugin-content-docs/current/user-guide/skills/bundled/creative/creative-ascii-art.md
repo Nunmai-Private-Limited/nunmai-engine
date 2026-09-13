@@ -174,7 +174,7 @@ boxes -l                                       # List all 70+ designs
 ```bash
 python3 -m pyfiglet "NUNMAI" -f slant | boxes -d stone
 # Or without pyfiglet installed:
-curl -s "https://asciified.thelicato.io/api/v2/ascii?text=HERMES&font=Slant" | boxes -d stone
+curl -s "https://asciified.thelicato.io/api/v2/ascii?text=NUNMAI&font=Slant" | boxes -d stone
 ```
 
 ## 工具 5：TOIlet（彩色文字艺术）

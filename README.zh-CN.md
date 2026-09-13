@@ -113,7 +113,7 @@ Nunmai 有两种入口：用 `nunmai` 启动终端 UI，或运行网关从 Teleg
 
 ## 文档
 
-所有文档位于 **[hermes-agent.nousresearch.com/docs](https://nunmai.in/docs/)**：
+所有文档位于 **[nunmai-engine.nousresearch.com/docs](https://nunmai.in/docs/)**：
 
 | 章节 | 内容 |
 |------|------|

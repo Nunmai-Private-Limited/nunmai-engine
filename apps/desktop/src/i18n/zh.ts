@@ -3336,7 +3336,7 @@ export const zh: Translations = {
     remoteSetupDesc: '输入网关 URL。Nunmai Desktop 会检测需要令牌还是浏览器登录。',
     remoteUrlTitle: '网关 URL',
     remoteUrlDesc: '使用 Nunmai 网关的基础 URL；远程地址请包含 https://。',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlPlaceholder: 'https://gateway.example.com/nunmai',
     probing: '正在检测网关认证方式...',
     probeError: '无法连接到该 Nunmai 网关。',
     identityProvider: '你的身份提供方',

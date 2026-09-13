@@ -379,7 +379,7 @@ test('falls back to a CLOUD registry primary when the v1 mode is local', () => {
         id: 'cloud-1',
         kind: 'cloud',
         label: 'Nunmai Cloud',
-        url: 'https://agent.hermes.cloud',
+        url: 'https://agent.nunmai.cloud',
         authMode: 'oauth',
         org: 'nous'
       }

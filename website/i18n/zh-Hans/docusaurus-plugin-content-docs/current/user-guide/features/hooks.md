@@ -173,7 +173,7 @@ events:
 # ~/.nunmai/hooks/session-webhook/handler.py
 import httpx
 
-WEBHOOK_URL = "https://your-service.example.com/hermes-events"
+WEBHOOK_URL = "https://your-service.example.com/nunmai-events"
 
 async def handle(event_type: str, context: dict):
     async with httpx.AsyncClient() as client:
@@ -1380,7 +1380,7 @@ Python 插件 hook 和 shell hook 都流经同一个 `invoke_hook()` 分发器�
 ```yaml
 hooks:
   outbound:
-    - url: "https://example.com/hermes-events"
+    - url: "https://example.com/nunmai-events"
       events: [post_tool_call, on_session_end]
       secret_env: NUNMAI_WEBHOOK_SECRET
 ```

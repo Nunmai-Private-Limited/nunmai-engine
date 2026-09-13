@@ -45,8 +45,8 @@ class TestCreatePairing:
             "pairing_id": "abcdefghijklmnop",
             "poll_token": "secret-token",
             "suggested_username": "nunmai_abcdefghijklmnop_bot",
-            "deep_link": "https://t.me/newbot/HermesSetupBot/hermes_abcdefghijklmnop_bot?name=Hermes+Agent",
-            "qr_payload": "https://t.me/newbot/HermesSetupBot/hermes_abcdefghijklmnop_bot?name=Hermes+Agent",
+            "deep_link": "https://t.me/newbot/NunmaiSetupBot/nunmai_abcdefghijklmnop_bot?name=Nunmai+Agent",
+            "qr_payload": "https://t.me/newbot/NunmaiSetupBot/nunmai_abcdefghijklmnop_bot?name=Nunmai+Agent",
             "expires_at": "2026-05-18T00:00:00.000Z",
         }
 
@@ -59,8 +59,8 @@ class TestCreatePairing:
             pairing_id="abcdefghijklmnop",
             poll_token="secret-token",
             suggested_username="nunmai_abcdefghijklmnop_bot",
-            deep_link="https://t.me/newbot/HermesSetupBot/hermes_abcdefghijklmnop_bot?name=Hermes+Agent",
-            qr_payload="https://t.me/newbot/HermesSetupBot/hermes_abcdefghijklmnop_bot?name=Hermes+Agent",
+            deep_link="https://t.me/newbot/NunmaiSetupBot/nunmai_abcdefghijklmnop_bot?name=Nunmai+Agent",
+            qr_payload="https://t.me/newbot/NunmaiSetupBot/nunmai_abcdefghijklmnop_bot?name=Nunmai+Agent",
             expires_at="2026-05-18T00:00:00.000Z",
         )
         post.assert_called_once_with(
@@ -95,8 +95,8 @@ class TestPollForToken:
             pairing_id="abcdefghijklmnop",
             poll_token="secret-token",
             suggested_username="nunmai_abcdefghijklmnop_bot",
-            deep_link="https://t.me/newbot/HermesSetupBot/hermes_abcdefghijklmnop_bot",
-            qr_payload="https://t.me/newbot/HermesSetupBot/hermes_abcdefghijklmnop_bot",
+            deep_link="https://t.me/newbot/NunmaiSetupBot/nunmai_abcdefghijklmnop_bot",
+            qr_payload="https://t.me/newbot/NunmaiSetupBot/nunmai_abcdefghijklmnop_bot",
         )
 
     def test_immediate_success(self):

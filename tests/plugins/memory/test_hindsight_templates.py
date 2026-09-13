@@ -39,7 +39,7 @@ def test_fetch_manifest_resolves_relative_url(monkeypatch):
         {"manifest_file": "templates/nunmai-gateway-bot.json"},
         "https://raw.example/data/templates.json",
     )
-    assert seen["url"] == "https://raw.example/data/templates/hermes-gateway-bot.json"
+    assert seen["url"] == "https://raw.example/data/templates/nunmai-gateway-bot.json"
 
 
 def test_apply_template_posts_to_import_endpoint(monkeypatch):
@@ -61,7 +61,7 @@ def test_apply_template_posts_to_import_endpoint(monkeypatch):
     monkeypatch.setattr(tpl, "open_credentialed_url", _fake_open)
     tpl.apply_template("https://api.hindsight.vectorize.io/", "nunmai", "hsk_abc", {"version": "1"})
 
-    assert captured["url"] == "https://api.hindsight.vectorize.io/v1/default/banks/hermes/import"
+    assert captured["url"] == "https://api.hindsight.vectorize.io/v1/default/banks/nunmai/import"
     assert captured["method"] == "POST"
     assert captured["auth"] == "Bearer hsk_abc"
     assert captured["body"] == {"version": "1"}

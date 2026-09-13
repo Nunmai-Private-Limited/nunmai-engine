@@ -2743,7 +2743,7 @@ export const ja = defineLocale({
       'ゲートウェイ URL を入力してください。Nunmai Desktop がトークンとブラウザーサインインのどちらが必要かを検出します。',
     remoteUrlTitle: 'ゲートウェイ URL',
     remoteUrlDesc: 'Nunmai ゲートウェイのベース URL を使用します。リモートの場合は https:// を含めてください。',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlPlaceholder: 'https://gateway.example.com/nunmai',
     probing: 'ゲートウェイ認証方式を検出中...',
     probeError: 'その Nunmai ゲートウェイに到達できませんでした。',
     identityProvider: 'ID プロバイダー',

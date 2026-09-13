@@ -3050,7 +3050,7 @@ export const ru = defineLocale({
     remoteSetupDesc: 'Введите URL вашего шлюза. Nunmai Desktop определит, нужен токен или вход через браузер.',
     remoteUrlTitle: 'URL шлюза',
     remoteUrlDesc: 'Используйте базовый URL шлюза Nunmai, включая https:// для удалённых.',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlPlaceholder: 'https://gateway.example.com/nunmai',
     probing: 'Определяем аутентификацию шлюза...',
     probeError: 'Не удалось подключиться к этому шлюзу Nunmai.',
     identityProvider: 'ваш провайдер аутентификации',

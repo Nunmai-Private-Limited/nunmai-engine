@@ -40,7 +40,7 @@ from nunmai_cli.dashboard_auth import (
     assert_protocol_compliance,
 )
 
-_ISSUER = "https://auth.example.com/application/o/hermes"
+_ISSUER = "https://auth.example.com/application/o/nunmai"
 _CLIENT_ID = "nunmai-dashboard"
 
 _DISCOVERY_DOC = {

@@ -403,7 +403,7 @@ def slack_native_slashes() -> list[tuple[str, str, str]]:
 
 
 def slack_app_manifest(
-    request_url: str = "https://hermes-agent.local/slack/commands") -> dict[str, Any]:
+    request_url: str = "https://nunmai-engine.local/slack/commands") -> dict[str, Any]:
     """``features.slash_commands`` manifest portion only (decoupled from the rest of the manifest
     users configure in the Slack UI); ``request_url`` is schema-required, ignored in Socket Mode."""
     slashes = []

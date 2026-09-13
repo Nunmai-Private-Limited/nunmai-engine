@@ -3190,7 +3190,7 @@ export const en: Translations = {
     remoteSetupDesc: 'Enter your gateway URL. Nunmai Desktop will detect whether it needs a token or browser sign-in.',
     remoteUrlTitle: 'Gateway URL',
     remoteUrlDesc: 'Use the base URL of the Nunmai gateway, including https:// when remote.',
-    remoteUrlPlaceholder: 'https://gateway.example.com/hermes',
+    remoteUrlPlaceholder: 'https://gateway.example.com/nunmai',
     probing: 'Detecting gateway authentication...',
     probeError: 'Could not reach that Nunmai gateway.',
     identityProvider: 'your identity provider',
