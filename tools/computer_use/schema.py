@@ -32,6 +32,8 @@ _PROPERTIES: Dict[str, Any] = {
             "list_apps",
             "list_windows",
             "focus_app",
+            "record_start",
+            "record_stop",
         ],
         "description": (
             "Which action to perform. `capture` is free (no side effects). All other actions "
@@ -147,7 +149,7 @@ _PROPERTIES: Dict[str, Any] = {
             "Key combo, e.g. 'cmd+s', 'ctrl+alt+t', 'return', 'escape', 'tab'. Use '+' to combine."
         ),
     },
-    "seconds": {"type": "number", "description": "wait: seconds to pause (max 30)."},
+    "seconds": {"type": "number", "description": "wait: seconds to pause (max 30). record_start: longest the recording may run before it stops by itself (default 60, max 180)."},
     "raise_window": {
         "type": "boolean",
         "description": (
@@ -198,7 +200,9 @@ COMPUTER_USE_SCHEMA: Dict[str, Any] = {
         "action='capture' (mode='som' gives numbered element overlays), then click by `element` "
         "index; re-capture after state-changing actions (or pass capture_after=true). Image "
         "captures include a shareable `screenshot_path`; deliver it via the platform's MEDIA "
-        "syntax when the user asks to see it — not for captures used only for control."
+        "syntax when the user asks to see it — not for captures used only for control. Screen recording "
+        "(desktops that support it): `record_start` records the whole screen, do the steps, then `record_stop` "
+        "returns a `recording_path` (.mp4); deliver it with MEDIA:<recording_path> when the user asked for a recording."
     ),
     "parameters": {"type": "object", "properties": _PROPERTIES, "required": ["action"]},
 }

@@ -469,6 +469,16 @@ _ActionSpec = namedtuple("_ActionSpec", "handler input destructive summarize",
                          defaults=(False, False, lambda a, args, fg: a + fg))
 _input = partial(_ActionSpec, input=True, destructive=True)
 
+def _do_record_stop(backend: ComputerUseBackend, action: str, args: Dict[str, Any], **_: Any) -> str:
+    res = backend.record_stop()
+    if res.ok and (res.meta or {}).get("recording_path"):
+        payload = _action_payload(res)
+        payload["recording_path"] = res.meta["recording_path"]
+        payload["hint"] = ("recording saved; to send it to the user put "
+                           f"MEDIA:{res.meta['recording_path']} on its own line in your reply")
+        return json.dumps(payload)
+    return _text_response(res)
+
 _ACTIONS: Dict[str, _ActionSpec] = {
     "click": _input(_do_click, summarize=_summarize_click),
     "double_click": _input(partial(_do_click, count=2), summarize=_summarize_click),
@@ -490,6 +500,9 @@ _ACTIONS: Dict[str, _ActionSpec] = {
         summarize=lambda a, args, fg: f"focus {args.get('app', '')!r}" + (" (raise)" if args.get("raise_window") else "")),
     "capture": _ActionSpec(_do_capture),
     "wait": _ActionSpec(lambda backend, action, args, **_: _text_response(backend.wait(float(args.get("seconds", 1.0))))),
+    "record_start": _ActionSpec(lambda backend, action, args, **_: _text_response(
+        backend.record_start(seconds=max(5, min(int(args.get("seconds") or 60), 180))))),
+    "record_stop": _ActionSpec(_do_record_stop),
     "list_apps": _ActionSpec(partial(_do_listing, key="apps")),
     "list_windows": _ActionSpec(partial(_do_listing, key="windows")),
 }

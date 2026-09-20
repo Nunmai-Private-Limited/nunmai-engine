@@ -169,6 +169,13 @@ class ComputerUseBackend(ABC):
     @abstractmethod
     def set_value(self, value: str, element: Optional[int] = None) -> ActionResult: ...  # e.g. AXPopUpButton selection
 
+    # Screen recording is optional: backends without a recorder report `unsupported` and the model is told so.
+    def record_start(self, seconds: int = 60) -> ActionResult:
+        return ActionResult(ok=False, action="record_start", message="screen recording is not available on this desktop", code="unsupported")
+
+    def record_stop(self) -> ActionResult:  # on success meta['recording_path'] is the file
+        return ActionResult(ok=False, action="record_stop", message="screen recording is not available on this desktop", code="unsupported")
+
     def wait(self, seconds: float) -> ActionResult:  # default implementation
         time.sleep(max(0.0, min(seconds, 30.0)))
         return ActionResult(ok=True, action="wait", message=f"waited {seconds:.2f}s")
