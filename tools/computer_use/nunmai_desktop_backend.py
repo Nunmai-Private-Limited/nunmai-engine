@@ -72,13 +72,16 @@ class NunmaiDesktopBackend(ComputerUseBackend):
 
     # ---- capture ----
     def capture(self, mode: str = "som", app: Optional[str] = None, pid: Optional[int] = None, window_id: Optional[int] = None) -> CaptureResult:
-        r = self._call("capture")
+        r = self._call("capture", **({"app": app} if app and app not in ("screen", "desktop") else {}))
         if not r.get("ok"):
             raise RuntimeError(r.get("error") or "capture failed")
+        note = "No element list on this desktop: read the picture and act by coordinates in it (click/drag/scroll with coordinate=[x,y])."
+        if r.get("window_only"):
+            note = ("This is one window only (maximised for the picture), meant for sending to the person as MEDIA:. "
+                    "Its coordinates are not screen coordinates: capture again without `app` before clicking.")
         return CaptureResult(mode="vision", width=int(r.get("width") or 0), height=int(r.get("height") or 0), png_b64=r.get("image_b64"),
                              elements=[], app=str(r.get("app") or ""), window_title=str(r.get("window_title") or ""),
-                             png_bytes_len=int(r.get("bytes") or 0), image_mime_type=r.get("mime") or "image/jpeg",
-                             note="No element list on this desktop: read the picture and act by coordinates in it (click/drag/scroll with coordinate=[x,y]).")
+                             png_bytes_len=int(r.get("bytes") or 0), image_mime_type=r.get("mime") or "image/jpeg", note=note)
 
     # ---- pointer ----
     def click(self, *, element=None, x=None, y=None, button="left", click_count=1, modifiers=None, delivery_mode=None, bring_to_front=False) -> ActionResult:
@@ -116,3 +119,10 @@ class NunmaiDesktopBackend(ComputerUseBackend):
 
     def set_value(self, value: str, element: Optional[int] = None) -> ActionResult:
         return ActionResult(ok=False, action="set_value", message="not supported on this desktop; click the field and type instead", code="unsupported")
+
+    # ---- screen recording (ffmpeg on the desktop's X display, run by the desktop service) ----
+    def record_start(self, seconds: int = 60) -> ActionResult:
+        return self._result("record_start", self._call("record_start", seconds=int(seconds or 60)))
+
+    def record_stop(self) -> ActionResult:
+        return self._result("record_stop", self._call("record_stop"))
