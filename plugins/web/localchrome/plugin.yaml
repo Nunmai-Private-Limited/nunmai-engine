@@ -1,0 +1,7 @@
+name: web-localchrome
+version: 1.0.0
+description: "Local Chrome page reader — extract-only. Opens each URL in a headless Chromium on this machine (agent-browser CLI), so pages that load their content with JavaScript (shop prices, offers) come back as text. No key, no vendor."
+author: Nunmai Research
+kind: backend
+provides_web_providers:
+  - localchrome
