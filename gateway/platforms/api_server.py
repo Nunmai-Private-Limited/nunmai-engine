@@ -73,8 +73,13 @@ def _apply_request_toolsets(
     or when it belongs to the request's own profile namespace (``mcp-<profile>__...``) — how the platform names an
     organisation's servers, including one person's own connectors (``mcp-<profile>__<system>__u<id>``). Anything
     else is dropped, so a caller can never reach another profile's servers. An empty list means "no MCP tools
-    this turn"."""
-    keep = [t for t in enabled if not str(t).startswith("mcp-")]
+    this turn".
+
+    A ``-<toolset>`` entry switches an enabled built-in toolset off for this request only (``-terminal,-memory``):
+    the platform's owner-guarded agents take the terminal, files, browser, memory and skills away from a person who
+    is not the agent's owner. It can only remove; nothing is ever added this way."""
+    drop = {str(t)[1:] for t in requested if str(t).startswith("-")}
+    keep = [t for t in enabled if not str(t).startswith("mcp-") and str(t) not in drop]
     own_prefix = f"mcp-{profile}__" if profile else None
     allowed = set()
     for t in requested:
