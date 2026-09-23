@@ -1378,6 +1378,48 @@ def build_api_kwargs(agent, api_messages: list, tools_for_api: list | None = Non
     )
 
 
+def _scope_extra_body_to_provider(agent, request_overrides: dict) -> dict:
+    """Drop ``extra_body`` keys another configured provider contributed. A session that started on a custom
+    provider (e.g. a local vLLM with ``chat_template_kwargs``) and is then switched to a hosted one (openai-codex)
+    kept that provider's body fields and got HTTP 400 "Unsupported parameter: chat_template_kwargs" on every turn.
+    KEY-SCOPED like ``_rescope_fallback_extra_body``: a key goes only when its value is exactly what another
+    provider's config injects and the current provider does not inject it itself; caller-set values survive."""
+    extra = request_overrides.get("extra_body")
+    custom_providers = getattr(agent, "_custom_providers", None) or []
+    if not isinstance(extra, dict) or not extra or not custom_providers:
+        return request_overrides
+    try:
+        from agent.agent_init import _custom_provider_extra_body_for_agent
+        own = _custom_provider_extra_body_for_agent(
+            provider=getattr(agent, "provider", "") or "", model=getattr(agent, "model", "") or "",
+            base_url=getattr(agent, "base_url", "") or "", custom_providers=custom_providers) or {}
+    except Exception:
+        return request_overrides
+    here = str(getattr(agent, "base_url", "") or "").strip().rstrip("/")
+    foreign: dict = {}
+    for entry in custom_providers:
+        eb = entry.get("extra_body") if isinstance(entry, dict) else None
+        if not isinstance(eb, dict):
+            continue
+        if here and str(entry.get("base_url") or "").strip().rstrip("/") == here:
+            own = {**eb, **own}          # the endpoint this agent is talking to: its fields are its own
+            continue
+        for k, v in eb.items():
+            foreign.setdefault(k, []).append(v)
+    foreign = {k: v for k, v in foreign.items() if k not in own}
+    scrubbed = {k: v for k, v in extra.items() if not (k in foreign and v in foreign[k])}
+    if scrubbed == extra:
+        return request_overrides
+    dropped = sorted(set(extra) - set(scrubbed))
+    logger.info("request extra_body: dropped %s (configured for another provider, not %s)", dropped, getattr(agent, "provider", ""))
+    out = dict(request_overrides)
+    if scrubbed:
+        out["extra_body"] = scrubbed
+    else:
+        out.pop("extra_body", None)
+    return out
+
+
 def _build_api_kwargs_for_mode(agent, api_messages: list, tools_for_api: list | None = None) -> dict:
     # One-shot continuation override — consumed exactly once, on the FIRST
     # request this call builds (only one api_mode branch runs per invocation).
@@ -1386,7 +1428,7 @@ def _build_api_kwargs_for_mode(agent, api_messages: list, tools_for_api: list | 
         tools_for_api = agent.tools
     # The one place request_overrides are consumed: static /fast values are already pinned
     # in agent.request_overrides; auto/cold windows layer the fast override per request.
-    request_overrides = effective_request_overrides(agent)
+    request_overrides = _scope_extra_body_to_provider(agent, effective_request_overrides(agent))
     if agent.api_mode == "anthropic_messages":
         return _build_anthropic_kwargs(agent, api_messages, tools_for_api, reasoning_config, request_overrides)
     if agent.api_mode == "bedrock_converse":
