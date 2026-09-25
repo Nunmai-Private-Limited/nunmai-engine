@@ -538,6 +538,56 @@ class OpenAICompatRoutesMixin:
             requested_provider=overrides.get("requested_provider"), route=route)
         return route, overrides, (_error_response(err, 400) if err else None)
 
+    def _request_model_lock(self, body: Dict[str, Any], route: Optional[Dict[str, Any]]) -> tuple:
+        """Return one-turn lock kwargs for OpenAI-compatible requests, without persisting a session lock."""
+        from gateway.platforms.api_server import _coerce_request_bool, _error_response
+
+        if not _coerce_request_bool(body.get("require_model_lock"), default=False):
+            return {}, None
+        raw_model = self._clean_runtime_id(body.get("model"))
+        provider = self._clean_runtime_id(body.get("provider"), max_len=80)
+        if not raw_model or (raw_model == self._model_name and not route):
+            return {}, _error_response(
+                "require_model_lock needs an explicit model", 400, code="missing_model")
+        if body.get("provider") is not None and not provider:
+            return {}, _error_response(
+                "require_model_lock received an invalid provider", 400, code="invalid_provider")
+
+        if route is not None:
+            locked_route = dict(route)
+            model = self._clean_runtime_id(locked_route.get("model"))
+            route_provider = self._clean_runtime_id(locked_route.get("provider"), max_len=80)
+            if not model:
+                return {}, _error_response(
+                    "Requested model route cannot be locked", 409, code="model_lock_unavailable")
+            if provider and route_provider and provider != route_provider:
+                return {}, _error_response(
+                    f"Model route '{raw_model}' is pinned to provider '{route_provider}'", 400)
+            if provider and not route_provider and (locked_route.get("api_key") or locked_route.get("base_url")):
+                return {}, _error_response(
+                    f"Model route '{raw_model}' pins route credentials/base_url; remove 'provider'", 400)
+            if provider:
+                locked_route["provider"] = provider
+            route_source = "model_routes"
+        else:
+            # An explicit lock makes a bare model id intentional even when generic clients'
+            # bare model passthrough is disabled by default.
+            model = raw_model
+            locked_route = {"model": model}
+            if provider:
+                locked_route["provider"] = provider
+            route_source = "raw_request"
+
+        effective_provider = provider or self._clean_runtime_id(locked_route.get("provider"), max_len=80)
+        return {
+            "route": locked_route,
+            "requested_model": model,
+            "requested_provider": effective_provider,
+            "requested_runtime": {"model": model, "provider": effective_provider},
+            "route_source": route_source,
+            "confirmed_runtime_lock": True,
+        }, None
+
     def _spawn_stream_agent(self, stream_q, **run_kwargs) -> tuple:
         """Start ``_run_agent`` for an SSE writer -> ``(agent_task, agent_ref)``. ``agent_ref[0]``
         lets the writer interrupt on disconnect; the EOS sentinel is enqueued from the task's done
@@ -661,6 +711,9 @@ class OpenAICompatRoutesMixin:
             model_alias=model_name)
         if selection_error is not None:
             return selection_error
+        lock_kwargs, lock_error = self._request_model_lock(body, route)
+        if lock_error is not None:
+            return lock_error
         run_kwargs = dict(
             user_message=user_message, conversation_history=history,
             ephemeral_system_prompt=system_prompt, session_id=session_id,
@@ -676,6 +729,7 @@ class OpenAICompatRoutesMixin:
         # above still applies; it grants no internal ingress or control authority.
         if provided_session_id and body.get("nunmai_notification_category") == "diagnostic":
             run_kwargs["notification_category"] = "diagnostic"
+        run_kwargs.update(lock_kwargs)
         if stream:
             _stream_q = ThreadSafeAsyncQueue()
             # tool_call_ids with an emitted "running": a "completed" without one (internal/
@@ -719,7 +773,7 @@ class OpenAICompatRoutesMixin:
             return await self._run_agent(**run_kwargs)
         outcome, err = await self._run_idempotent(
             request, body, _compute_completion, log_label="chat completions",
-            fingerprint_keys=["model", "provider", "model_options", "messages", "tools", "tool_choice", "stream",
+            fingerprint_keys=["model", "provider", "model_options", "require_model_lock", "messages", "tools", "tool_choice", "stream",
                               "nunmai_notification_category"],
             route="chat_completions",
         )
@@ -1060,11 +1114,15 @@ class OpenAICompatRoutesMixin:
             model_alias=body.get("model"))
         if selection_error is not None:
             return selection_error
+        lock_kwargs, lock_error = self._request_model_lock(body, route)
+        if lock_error is not None:
+            return lock_error
         run_kwargs = dict(
             user_message=user_message, conversation_history=conversation_history,
             ephemeral_system_prompt=instructions, session_id=session_id,
             gateway_session_key=gateway_session_key, bind_declared_conversation=_declared_selected,
             **agent_overrides, route=route, relay_metadata=relay_metadata)
+        run_kwargs.update(lock_kwargs)
         if stream:
             _stream_q = ThreadSafeAsyncQueue()
 
@@ -1102,7 +1160,7 @@ class OpenAICompatRoutesMixin:
             return await self._run_agent(**run_kwargs)
         outcome, err = await self._run_idempotent(
             request, body, _compute_response, log_label="responses",
-            fingerprint_keys=["input", "instructions", "previous_response_id", "conversation", "model", "provider", "model_options", "tools"],
+            fingerprint_keys=["input", "instructions", "previous_response_id", "conversation", "model", "provider", "model_options", "require_model_lock", "tools"],
             route="responses",
         )
         if err is not None:
