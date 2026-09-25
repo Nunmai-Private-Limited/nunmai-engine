@@ -55,6 +55,23 @@ _api_request_toolsets: ContextVar[Optional[List[str]]] = ContextVar(
 )
 
 
+# Per-request cap on agent iterations (header ``X-Nunmai-Max-Iterations``): the platform sends a small number for a turn
+# that must stay short (a colleague status question, a relay), so a model can never spend hundreds of tool calls on it.
+# Absent = the platform's configured max_iterations. Only ever lowers the cap.
+_api_request_max_iterations: ContextVar[Optional[int]] = ContextVar(
+    "api_server_request_max_iterations", default=None
+)
+
+
+def _parse_max_iterations_header(request: Any) -> Optional[int]:
+    try:
+        raw = request.headers.get("X-Nunmai-Max-Iterations")
+        n = int(str(raw).strip()) if raw is not None else None
+    except Exception:
+        return None
+    return n if n and n > 0 else None
+
+
 def _parse_toolsets_header(request: Any) -> Optional[List[str]]:
     try:
         raw = request.headers.get("X-Nunmai-Toolsets")
@@ -353,16 +370,17 @@ def _apply_runtime_agent_overrides(
 def _resolve_request_runtime_agent_kwargs(provider: str, target_model: Optional[str] = None) -> Dict[str, Any]:
     """gateway.run._resolve_runtime_agent_kwargs() for an explicit provider/model, so an API
     caller uses the same authenticated provider catalog without mutating config.yaml."""
-    from nunmai_cli.runtime_provider import resolve_runtime_provider, format_runtime_provider_error, _get_model_config
+    from gateway.run import _runtime_agent_kwargs
+    from nunmai_cli.runtime_provider import resolve_runtime_provider, format_runtime_provider_error
     try:
         runtime = resolve_runtime_provider(requested=provider, target_model=target_model)
     except Exception as exc:
         raise RuntimeError(format_runtime_provider_error(exc)) from exc
-
-    return {
-        **{k: runtime.get(k) for k in ("api_key", "base_url", "provider", "api_mode", "command")},
-        "args": list(runtime.get("args") or []),
-        "credential_pool": runtime.get("credential_pool")}
+    capabilities = runtime.get("capabilities")
+    capabilities = (
+        {k: v for k, v in capabilities.items() if isinstance(k, str) and isinstance(v, bool)}
+        if isinstance(capabilities, dict) else {})
+    return {**_runtime_agent_kwargs(runtime), "capabilities": capabilities}
 
 
 def _request_agent_overrides(
@@ -1542,6 +1560,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                 return web.json_response({"error": "Unknown or unconfigured profile"}, status=404)
             token = _api_request_profile.set(profile)
             toolsets_token = _api_request_toolsets.set(_parse_toolsets_header(request))
+            maxit_token = _api_request_max_iterations.set(_parse_max_iterations_header(request))
             try:
                 with self._profile_scope(profile):
                     resolved_profile = profile or "default"
@@ -1557,6 +1576,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             finally:
                 _api_request_profile.reset(token)
                 _api_request_toolsets.reset(toolsets_token)
+                _api_request_max_iterations.reset(maxit_token)
         return profile_prefix_middleware
 
     def _http_route_table(self) -> List[tuple]:
@@ -2208,7 +2228,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         room_execution_policy: Optional[Dict[str, Any]] = None,
         request_toolsets: Optional[List[str]] = None,
         request_profile: Optional[str] = None,
-        user_message: Optional[Any] = None) -> Any:
+        user_message: Optional[Any] = None,
+        request_max_iterations: Optional[int] = None) -> Any:
         """Create an AIAgent from the gateway runtime config + platform toolsets.
         ``gateway_session_key`` persists across transcripts (memory scope), unlike ``session_id``;
         ``route`` / ``session_model`` are mutually exclusive; ``confirmed_runtime_lock`` beats the
@@ -2218,10 +2239,20 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             _checkpoint_agent_kwargs, _current_max_iterations, _resolve_runtime_agent_kwargs,
             _resolve_gateway_model, _load_gateway_config, GatewayRunner)
         from nunmai_cli.tools_config import _get_platform_tools
+        # A confirmed request lock must resolve its own provider before the global default. The
+        # global provider may have no credentials (for example, a stale Kimi default while this
+        # turn explicitly locks Codex); resolving it first would reject the turn before the lock
+        # ever reaches _select_agent_runtime.
+        lock_route = route if isinstance(route, dict) else {}
+        lock_provider = _clean_request_string(requested_provider or lock_route.get("provider"))
+        lock_model = _clean_request_string(lock_route.get("model") or requested_model)
         # RuntimeError is caught ONLY here (sole provider-auth raiser); the typed subclass keeps
         # run_conversation() errors distinct.
         try:
-            runtime_kwargs = _resolve_runtime_agent_kwargs()
+            runtime_kwargs = (
+                _resolve_request_runtime_agent_kwargs(lock_provider, target_model=lock_model or None)
+                if confirmed_runtime_lock and lock_provider
+                else _resolve_runtime_agent_kwargs())
         except RuntimeError as exc:
             raise _ProviderAuthResolutionError(str(exc)) from exc
         # A fallback-provider runtime carries its own ``model``: pop it (overrides config, and
@@ -2258,6 +2289,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             enabled_toolsets = _apply_request_toolsets(
                 enabled_toolsets, request_toolsets, request_profile
             )
+        if request_max_iterations:
+            max_iterations = min(int(max_iterations or request_max_iterations), int(request_max_iterations))
         # Reasoning resolves against the model that actually runs (per-model overrides), so only
         # after the precedence chain settles; an explicit request wins.
         if request_reasoning_config is None:
@@ -3793,6 +3826,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         # ContextVars do not follow run_in_executor threads: capture here, re-enter in _run().
         request_profile = _api_request_profile.get()
         request_toolsets = _api_request_toolsets.get()
+        request_max_iterations = _api_request_max_iterations.get()
         request_browser_control_principal = _api_request_browser_control_principal.get()
         request_browser_control_transport_family = _api_request_browser_control_transport_family.get()
 
@@ -3815,7 +3849,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                         requested_provider=requested_provider, model_options=model_options, route=route,
                         session_model=session_model, confirmed_runtime_lock=confirmed_runtime_lock,
                         request_toolsets=request_toolsets, request_profile=request_profile,
-                        user_message=user_message)
+                        user_message=user_message, request_max_iterations=request_max_iterations)
                     if agent_ref is not None:
                         agent_ref[0] = agent
                     if active_run_id:

@@ -2580,7 +2580,182 @@ class TestModelRoutesHandlers:
                 }
 
 
+class TestOpenAIRequestModelLock:
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("path,payload", [
+        ("/v1/chat/completions", {"messages": [{"role": "user", "content": "hello"}]}),
+        ("/v1/responses", {"input": "hello", "store": False}),
+    ])
+    @pytest.mark.parametrize("stream", [False, True])
+    async def test_lock_reaches_agent_for_one_turn_only(self, auth_adapter, path, payload, stream):
+        """The shared OpenAI routes honor the lock on both execution paths without storing it."""
+        adapter = auth_adapter
+        app = _create_app(adapter)
+        headers = {
+            "Authorization": "Bearer sk-secret",
+            "X-Nunmai-Session-Key": "platform:agent:42",
+        }
+        if path == "/v1/chat/completions":
+            headers["X-Nunmai-Session-Id"] = "lock-session-42"
+        else:
+            payload = {**payload, "store": True, "conversation": "lock-session-42"}
+        answer = (
+            {"final_response": "ok", "messages": [], "api_calls": 1},
+            {"input_tokens": 1, "output_tokens": 1, "total_tokens": 2},
+        )
+        async with TestClient(TestServer(app)) as cli:
+            with (
+                patch.object(adapter, "_run_agent", new_callable=AsyncMock) as run,
+                patch.object(adapter, "_persist_session_runtime_lock", side_effect=AssertionError("persisted")),
+            ):
+                run.return_value = answer
+                locked = await cli.post(path, headers=headers, json={
+                    **payload, "model": "gpt-5.5", "provider": "openai-codex",
+                    "require_model_lock": True, "stream": stream,
+                })
+                assert locked.status == 200
+                await locked.read()
+                unlocked = await cli.post(path, headers=headers, json={
+                    **payload, "model": "nunmai-engine", "stream": stream,
+                })
+                assert unlocked.status == 200
+                await unlocked.read()
+
+        locked_kwargs, unlocked_kwargs = [call.kwargs for call in run.call_args_list]
+        assert locked_kwargs["gateway_session_key"] == unlocked_kwargs["gateway_session_key"]
+        assert locked_kwargs["session_id"] == unlocked_kwargs["session_id"]
+        assert locked_kwargs["confirmed_runtime_lock"] is True
+        assert locked_kwargs["requested_runtime"] == {
+            "model": "gpt-5.5", "provider": "openai-codex"}
+        assert locked_kwargs["route"] == {"model": "gpt-5.5", "provider": "openai-codex"}
+        assert not unlocked_kwargs.get("confirmed_runtime_lock")
+        assert unlocked_kwargs["route"] is None
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("path,payload", [
+        ("/v1/chat/completions", {"messages": [{"role": "user", "content": "hello"}]}),
+        ("/v1/responses", {"input": "hello"}),
+    ])
+    async def test_lock_without_real_model_fails_before_agent(self, adapter, path, payload):
+        app = _create_app(adapter)
+        async with TestClient(TestServer(app)) as cli:
+            with patch.object(adapter, "_run_agent", new_callable=AsyncMock) as run:
+                resp = await cli.post(path, json={
+                    **payload, "model": "nunmai-engine", "provider": "openai-codex",
+                    "require_model_lock": True,
+                })
+                data = await resp.json()
+        assert resp.status == 400
+        assert data["error"]["code"] == "missing_model"
+        run.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_lock_resolves_configured_alias_and_rejects_provider_conflict(self):
+        adapter = _make_routing_adapter({
+            "paid-gpt": {"model": "gpt-5.5", "provider": "openai-codex"}})
+        app = _create_app(adapter)
+        async with TestClient(TestServer(app)) as cli:
+            with patch.object(adapter, "_run_agent", new_callable=AsyncMock) as run:
+                run.return_value = (
+                    {"final_response": "ok", "messages": [], "api_calls": 1},
+                    {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+                )
+                good = await cli.post("/v1/chat/completions", json={
+                    "model": "paid-gpt", "require_model_lock": True,
+                    "messages": [{"role": "user", "content": "hello"}],
+                })
+                assert good.status == 200
+                locked = run.call_args.kwargs
+                bad = await cli.post("/v1/chat/completions", json={
+                    "model": "paid-gpt", "provider": "openrouter", "require_model_lock": True,
+                    "messages": [{"role": "user", "content": "hello"}],
+                })
+        assert locked["requested_runtime"] == {"model": "gpt-5.5", "provider": "openai-codex"}
+        assert locked["route_source"] == "model_routes"
+        assert bad.status == 400
+        assert run.call_count == 1
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("path,payload", [
+        ("/v1/chat/completions", {"messages": [{"role": "user", "content": "hello"}]}),
+        ("/v1/responses", {"input": "hello", "store": False}),
+    ])
+    async def test_idempotency_does_not_replay_an_unlocked_turn_for_a_lock(self, adapter, path, payload):
+        app = _create_app(adapter)
+        headers = {"Idempotency-Key": f"lock-{uuid.uuid4().hex}"}
+        body = {**payload, "model": "gpt-5.5", "provider": "openai-codex"}
+        async with TestClient(TestServer(app)) as cli:
+            with patch.object(adapter, "_run_agent", new_callable=AsyncMock) as run:
+                run.return_value = (
+                    {"final_response": "ok", "messages": [], "api_calls": 1},
+                    {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+                )
+                first = await cli.post(path, headers=headers, json=body)
+                second = await cli.post(path, headers=headers, json={
+                    **body, "require_model_lock": True})
+        assert first.status == second.status == 200
+        assert run.call_count == 2
+        assert not run.call_args_list[0].kwargs.get("confirmed_runtime_lock")
+        assert run.call_args_list[1].kwargs["confirmed_runtime_lock"] is True
+
+
 class TestModelRoutesAgentCreation:
+
+    def test_confirmed_request_lock_bypasses_missing_global_provider_and_router(self, monkeypatch):
+        captured = {}
+
+        class FakeAgent:
+            def __init__(self, **kwargs):
+                captured.update(kwargs)
+                self.model = kwargs["model"]
+                self.provider = kwargs["provider"]
+
+        _patch_create_agent_runtime(monkeypatch, captured, FakeAgent)
+        global_runtime = MagicMock(side_effect=RuntimeError(
+            "No usable credentials found for provider kimi-coding"))
+        monkeypatch.setattr("gateway.run._resolve_runtime_agent_kwargs", global_runtime)
+        resolved_requests = []
+
+        def _codex_runtime(*, requested=None, target_model=None):
+            resolved_requests.append((requested, target_model))
+            return {
+                "provider": "openai-codex", "requested_provider": requested,
+                "api_key": "codex-token", "base_url": "https://chatgpt.com",
+                "api_mode": "codex_responses", "request_overrides": {"temperature": 0.2},
+                "capabilities": {"supports_vision": True},
+            }
+
+        monkeypatch.setattr("nunmai_cli.runtime_provider.resolve_runtime_provider", _codex_runtime)
+        monkeypatch.setattr(
+            "gateway.run.GatewayRunner._load_fallback_model",
+            staticmethod(lambda: {"provider": "openrouter", "model": "fallback/model"}),
+        )
+        adapter = _make_routing_adapter({})
+        monkeypatch.setattr(adapter, "_ensure_session_db", lambda: None)
+        monkeypatch.setattr(
+            adapter, "_session_model_override_for",
+            lambda *_: pytest.fail("a request lock must bypass the session override"),
+        )
+        monkeypatch.setattr(
+            adapter, "_apply_resolve_turn_model_hook",
+            lambda *_args, **_kwargs: pytest.fail("a request lock must bypass router selection"),
+        )
+
+        adapter._create_agent(
+            session_id="s1", requested_model="gpt-5.5", requested_provider="openai-codex",
+            route={"model": "gpt-5.5", "provider": "openai-codex"},
+            confirmed_runtime_lock=True, user_message="hello",
+        )
+
+        assert captured["model"] == "gpt-5.5"
+        assert captured["provider"] == "openai-codex"
+        assert captured["fallback_model"] is None
+        assert captured["api_key"] == "codex-token"
+        assert captured["request_overrides"] == {"temperature": 0.2}
+        assert captured["capabilities"] == {"supports_vision": True}
+        assert resolved_requests and all(
+            request == ("openai-codex", "gpt-5.5") for request in resolved_requests)
+        global_runtime.assert_not_called()
 
     def test_route_provider_resolves_provider_credentials(self, monkeypatch):
         captured = {}
