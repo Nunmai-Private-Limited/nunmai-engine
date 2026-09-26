@@ -1,0 +1,7 @@
+name: openai
+version: 1.0.0
+description: "OpenAI image generation backend (GPT Image 2 and GPT Image 2.5 Flare/Sunburst). Saves generated images to $NUNMAI_HOME/cache/images/."
+author: Nunmai Research
+kind: backend
+requires_env:
+  - OPENAI_API_KEY

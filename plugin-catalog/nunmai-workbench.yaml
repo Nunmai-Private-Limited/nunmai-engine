@@ -1,0 +1,20 @@
+name: nunmai-workbench
+repo: https://github.com/sxuff/hermes-workbench
+sha: f07fb5c90e24c1a396604758feb0fd4ae077760b
+description: The Nunmai desktop app in your browser. `nunmai workbench` serves the desktop interface through the Nunmai dashboard, for headless servers, VPSes and tablets. Disclosure — community plugin, not a Nunmai product. On the first `nunmai workbench` run and again after each Nunmai update it runs `npm install --ignore-scripts` (guided by Nunmai's lockfile) and Vite against your Nunmai checkout's desktop sources, writing only under ~/.nunmai/nunmai-workbench and its own plugin dir (the checkout is only read), and starts `nunmai dashboard` on loopback when none is running.
+maintainer: sxuff
+tier: community
+category: desktop
+requires_nunmai: ">=0.21"
+docs_url: https://github.com/sxuff/hermes-workbench#readme
+version: "0.2.1"
+image: https://raw.githubusercontent.com/sxuff/hermes-workbench/f07fb5c90e24c1a396604758feb0fd4ae077760b/docs/media/banner.png
+screenshots:
+  - https://raw.githubusercontent.com/sxuff/hermes-workbench/f07fb5c90e24c1a396604758feb0fd4ae077760b/docs/media/session.png
+  - https://raw.githubusercontent.com/sxuff/hermes-workbench/f07fb5c90e24c1a396604758feb0fd4ae077760b/docs/media/slash-commands.png
+  - https://raw.githubusercontent.com/sxuff/hermes-workbench/f07fb5c90e24c1a396604758feb0fd4ae077760b/docs/media/model-picker.png
+capabilities:
+  provides_tools: []
+  provides_hooks: []
+  provides_middleware: []
+  requires_env: []
