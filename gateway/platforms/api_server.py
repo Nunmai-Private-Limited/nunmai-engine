@@ -4095,6 +4095,12 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             runtime=runtime, requested_runtime=requested_runtime or None, route_source=route_source or "global",
             model_lock=("confirmed" if confirmed_runtime_lock else ""))
 
+    @staticmethod
+    def _routed_flag(agent: Any) -> bool:
+        """True only when the resolve_turn_model hook recorded a real move on this agent."""
+        rt = getattr(agent, "_nunmai_api_runtime", None)
+        return isinstance(rt, dict) and bool(rt.get("routed"))
+
     def _finish_turn_result(
         self, agent: Any, result: Any, session_id: Optional[str], *, route, requested_runtime, route_source,
         confirmed_runtime_lock: bool) -> tuple:
@@ -4117,7 +4123,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         # the requested model while a different one actually answered.
         if (requested_runtime or route or confirmed_runtime_lock
                 or (route_source and route_source != "global")
-                or (getattr(agent, "_nunmai_api_runtime", {}) or {}).get("routed")):
+                or self._routed_flag(agent)):
             runtime = self._turn_runtime_metadata(
                 agent, route=route, requested_runtime=requested_runtime,
                 route_source=route_source, confirmed_runtime_lock=confirmed_runtime_lock)
