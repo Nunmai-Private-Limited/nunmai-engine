@@ -2337,10 +2337,18 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         # RuntimeError is caught ONLY here (sole provider-auth raiser); the typed subclass keeps
         # run_conversation() errors distinct.
         try:
-            runtime_kwargs = (
-                _resolve_request_runtime_agent_kwargs(lock_provider, target_model=lock_model or None)
-                if confirmed_runtime_lock and lock_provider
-                else _resolve_runtime_agent_kwargs())
+            runtime_kwargs = None
+            if confirmed_runtime_lock and lock_provider:
+                try:
+                    runtime_kwargs = _resolve_request_runtime_agent_kwargs(
+                        lock_provider, target_model=lock_model or None)
+                except RuntimeError:
+                    # The lock's provider has no credentials of its own here; the global default
+                    # and _select_agent_runtime decide the turn exactly as before this shortcut.
+                    logger.debug("lock provider %s did not resolve; using the global runtime",
+                                 lock_provider, exc_info=True)
+            if runtime_kwargs is None:
+                runtime_kwargs = _resolve_runtime_agent_kwargs()
         except RuntimeError as exc:
             raise _ProviderAuthResolutionError(str(exc)) from exc
         # A fallback-provider runtime carries its own ``model``: pop it (overrides config, and
