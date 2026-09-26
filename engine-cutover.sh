@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Nunmai Engine: move Node 1 from 0.20.6 to 0.21.2 — and back, in seconds, if anything looks wrong.
+# Nunmai Engine: move Node 1 from 0.21.2 to 0.21.5 — and back, in seconds, if anything looks wrong.
 #
 #   sudo bash /root/engine-cutover.sh --status     # what is where right now
 #   sudo bash /root/engine-cutover.sh --stage      # build the new venv. NO client impact.
 #   sudo bash /root/engine-cutover.sh --flip       # the swap. A few seconds of downtime.
-#   sudo bash /root/engine-cutover.sh --rollback   # back to 0.20.6, same few seconds.
+#   sudo bash /root/engine-cutover.sh --rollback   # back to 0.21.2, same few seconds.
 #
 # WHY IT IS SHAPED LIKE THIS. The gateway unit hardcodes
 # /usr/local/lib/nunmai-engine/venv/bin/python, so the version swap is done by turning that path into a
 # SYMLINK to a versioned directory. Flipping is then one `ln -sfn`, and rolling back is the same command
-# pointing the other way. The 0.20.6 tree is renamed, never deleted.
+# pointing the other way. The 0.21.2 tree is renamed, never deleted.
 #
 # WHAT IS AFFECTED. /usr/local/lib/nunmai-engine is the engine the PLATFORM runs: root's user services
 # nunmai-gateway-default (the multiplexer that serves every organisation at /p/<slug>/) and
@@ -17,8 +17,8 @@
 # ~ikhan/.nunmai is separate and is not touched.
 set -euo pipefail
 
-OLD=/usr/local/lib/nunmai-engine-0.20.6
-NEW=/usr/local/lib/nunmai-engine-0.21.2
+OLD=/usr/local/lib/nunmai-engine-0.21.2
+NEW=/usr/local/lib/nunmai-engine-0.21.5
 LINK=/usr/local/lib/nunmai-engine
 export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/0}
 
@@ -54,7 +54,7 @@ case "${1:-}" in
   ;;
 
 --stage)
-  # Everything here happens while 0.20.6 keeps serving. Nothing is swapped, nothing restarts.
+  # Everything here happens while 0.21.2 keeps serving. Nothing is swapped, nothing restarts.
   [ -d "$NEW" ] || { echo "$NEW is missing — rsync the tree up first (step 1)" >&2; exit 1; }
 
   # The unit puts <engine>/node_modules/.bin on PATH, so the new tree needs one. Copying the existing
@@ -64,13 +64,13 @@ case "${1:-}" in
     cp -a "$LINK/node_modules" "$NEW/node_modules"
   fi
 
-  echo "building the venv for 0.21.2 (the running engine is untouched)..."
+  echo "building the venv for 0.21.5 (the running engine is untouched)..."
   # Build it from the RUNNING venv's own interpreter. That pins the new venv to the same base Python
   # without guessing a binary name — python3.11 is not on root's PATH over ssh.
   [ -x "$NEW/venv/bin/python" ] || "$LINK/venv/bin/python" -m venv "$NEW/venv"
   "$NEW/venv/bin/python" -m pip install --upgrade pip setuptools wheel
 
-  # The EXTRAS matter as much as the base install. 0.20.6's venv carries 58 packages that a bare
+  # The EXTRAS matter as much as the base install. 0.21.2's venv carries 58 packages that a bare
   # `pip install -e .` does not pull, and they are not decorative: mcp is every client connector,
   # google is Workspace and Meet, tts-premium is the agent voice, voice is local transcription.
   # Flipping without these would leave the gateway importing half a platform.
@@ -82,7 +82,7 @@ case "${1:-}" in
   echo "checking the new engine can start and names itself correctly..."
   NUNMAI_HOME=/root/.nunmai "$NEW/venv/bin/python" -m nunmai_cli.main --version
   echo
-  echo "STAGED. 0.20.6 is still serving every organisation — nothing has changed for any client."
+  echo "STAGED. 0.21.2 is still serving every organisation — nothing has changed for any client."
   echo "Next:  sudo bash $0 --flip"
   ;;
 
@@ -95,7 +95,7 @@ case "${1:-}" in
   norm "$LINK" > /tmp/eng-old.txt
   norm "$NEW"  > /tmp/eng-new.txt
   echo "packages: running=$(wc -l < /tmp/eng-old.txt)  staged=$(wc -l < /tmp/eng-new.txt)"
-  # Known-benign absences. importlib-metadata (and its dep zipp) are the stdlib backport: 0.20.6 pulled
+  # Known-benign absences. importlib-metadata (and its dep zipp) are the stdlib backport: 0.21.2 pulled
   # them in through an older opentelemetry pin, and nothing in the engine imports them — every call site
   # uses stdlib importlib.metadata, which Python 3.11 ships. Verified by grep across the tree.
   BENIGN='^(importlib-metadata|zipp)$'
@@ -103,7 +103,7 @@ case "${1:-}" in
   DROPPED=$(comm -23 /tmp/eng-old.txt /tmp/eng-new.txt | grep -E "$BENIGN" || true)
   [ -n "$DROPPED" ] && { echo "dropped, known-benign (stdlib backport, unused):"; echo "$DROPPED" | sed 's/^/  /'; }
   if [ -n "$MISSING" ]; then
-    echo "STILL MISSING in 0.21.2 — do NOT flip yet:"; echo "$MISSING" | sed 's/^/  /'
+    echo "STILL MISSING in 0.21.5 — do NOT flip yet:"; echo "$MISSING" | sed 's/^/  /'
     exit 1
   fi
   echo "OK — the staged engine has everything the running one has."
@@ -141,7 +141,7 @@ case "${1:-}" in
   ;;
 
 --rollback)
-  [ -d "$OLD" ] || { echo "no 0.20.6 tree at $OLD — nothing to roll back to" >&2; exit 1; }
+  [ -d "$OLD" ] || { echo "no 0.21.2 tree at $OLD — nothing to roll back to" >&2; exit 1; }
   mapfile -t RUN < <(running_units)
   for u in ${RUN[@]+"${RUN[@]}"}; do systemctl --user stop "$u" || true; done
   ln -sfn "$OLD" "$LINK"
